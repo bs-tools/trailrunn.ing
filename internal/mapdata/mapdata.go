@@ -10,8 +10,10 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/http/httptrace"
 	"regexp"
 	"strings"
+	"sync/atomic"
 	"time"
 
 	"github.com/bs-tools/trailrunn.ing/internal/elevation"
@@ -65,22 +67,73 @@ func New(conf Config) *Client {
 	}
 }
 
+const (
+	// connectAttempts is how many times a request is tried when no
+	// connection to the service could be made.
+	connectAttempts = 3
+	// connectTimeout bounds making a connection, so that the attempts
+	// together take about as long as the 10 seconds a single TLS handshake
+	// may by default. A handshake that works takes well under a second.
+	connectTimeout = 4 * time.Second
+)
+
 // do performs a request and decodes a JSON response into out.
+//
+// The services are free and shared, and Open-Meteo at times leaves a new
+// connection's TLS handshake unanswered, which fails the first requests
+// after a start, before there's a connection to reuse. Such a request never
+// reached the service, so it's tried again on a new connection. Requests
+// that did reach it aren't: an error it answers with is its answer.
 func (c *Client) do(req *http.Request, out any) error {
 	req.Header.Set("User-Agent", UserAgent)
-	resp, err := c.conf.HTTPClient.Do(req)
+	var err error
+	for range connectAttempts {
+		var connected bool
+		connected, err = c.attempt(req, out)
+		if err == nil || connected || req.Context().Err() != nil {
+			return err
+		}
+	}
+	return err
+}
+
+// attempt performs a request once, and reports whether it got a connection
+// to send the request on.
+func (c *Client) attempt(req *http.Request, out any) (connected bool, err error) {
+	// Canceled when connecting takes too long, and once the response is
+	// read.
+	ctx, cancel := context.WithCancel(req.Context())
+	defer cancel()
+	var gotConn, timedOut atomic.Bool
+	timer := time.AfterFunc(connectTimeout, func() {
+		timedOut.Store(true)
+		cancel()
+	})
+	defer timer.Stop()
+	ctx = httptrace.WithClientTrace(ctx, &httptrace.ClientTrace{
+		GotConn: func(httptrace.GotConnInfo) {
+			// Not connected in time if the timer already fired.
+			if timer.Stop() {
+				gotConn.Store(true)
+			}
+		},
+	})
+	resp, err := c.conf.HTTPClient.Do(req.WithContext(ctx))
 	if err != nil {
-		return err
+		if timedOut.Load() && !gotConn.Load() {
+			return false, fmt.Errorf("connecting to %s took longer than %s", req.URL.Host, connectTimeout)
+		}
+		return gotConn.Load(), err
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(io.LimitReader(resp.Body, 4096))
-		return &StatusError{StatusCode: resp.StatusCode, Body: plainText(string(body))}
+		return true, &StatusError{StatusCode: resp.StatusCode, Body: plainText(string(body))}
 	}
 	if err := json.NewDecoder(resp.Body).Decode(out); err != nil {
-		return fmt.Errorf("failed to decode response: %w", err)
+		return true, fmt.Errorf("failed to decode response: %w", err)
 	}
-	return nil
+	return true, nil
 }
 
 // htmlTag matches HTML and XML tags.

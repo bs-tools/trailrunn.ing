@@ -2,12 +2,15 @@ package mapdata_test
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"math"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"strings"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -231,5 +234,53 @@ func TestHourlyForecastDaylightSavingTime(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+// TestRetriesFailedConnections checks that a request that got no
+// connection is tried again, and one the service answered isn't.
+func TestRetriesFailedConnections(t *testing.T) {
+	t.Parallel()
+	var requests atomic.Int32
+	status := http.StatusOK
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		requests.Add(1)
+		w.WriteHeader(status)
+		fmt.Fprint(w, "[]")
+	}))
+	t.Cleanup(srv.Close)
+
+	// The first two connections fail, as when a TLS handshake times out.
+	var dials atomic.Int32
+	transport := &http.Transport{
+		DisableKeepAlives: true,
+		DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
+			if dials.Add(1) <= 2 {
+				return nil, errors.New("handshake timeout")
+			}
+			return (&net.Dialer{}).DialContext(ctx, network, addr)
+		},
+	}
+	client := mapdata.New(mapdata.Config{NominatimURL: srv.URL, HTTPClient: &http.Client{Transport: transport}})
+	if _, err := client.Search(context.Background(), "Squamish", 1); err != nil {
+		t.Fatalf("Search: %v", err)
+	}
+	if dials.Load() != 3 || requests.Load() != 1 {
+		t.Errorf("got %d connections and %d requests, want the third connection to send the one request", dials.Load(), requests.Load())
+	}
+
+	// Three failed connections are an error.
+	dials.Store(-1)
+	if _, err := client.Search(context.Background(), "Squamish", 1); err == nil || dials.Load() != 2 {
+		t.Errorf("got error %v after %d more connections, want an error after 3", err, dials.Load()+1)
+	}
+
+	// An error the service answers with isn't tried again.
+	dials.Store(2)
+	requests.Store(0)
+	status = http.StatusServiceUnavailable
+	var statusErr *mapdata.StatusError
+	if _, err := client.Search(context.Background(), "Squamish", 1); !errors.As(err, &statusErr) || requests.Load() != 1 {
+		t.Errorf("got error %v after %d requests, want a StatusError after 1", err, requests.Load())
 	}
 }
