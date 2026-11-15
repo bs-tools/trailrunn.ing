@@ -598,6 +598,23 @@ The first plan imports the existing repository, and shows what changes
 before anything is applied. Commit the `infra/github/.terraform.lock.hcl`
 that the first run creates.
 
+One setting is added by hand, as its value is a secret: the
+`REGENERATE_PUSH_TOKEN` Dependabot secret. CI regenerates code like the web
+app's bundle on Dependabot's pull requests, and pushes it with this token,
+because a push with the workflow's own token doesn't start the checks the
+ruleset requires. Without it, updates that need regenerated code aren't
+merged. Create a
+[fine-grained personal access token](https://github.com/settings/personal-access-tokens/new)
+with the organization as its resource owner, for this repository only, with
+read and write access to Contents and nothing else, and add it:
+
+```sh
+$ gh secret set REGENERATE_PUSH_TOKEN --app dependabot --repo bs-tools/trailrunn.ing
+```
+
+When the token has expired, the "Commit regenerated code" job fails: create
+a new one and set the secret again.
+
 ### Custom domain
 
 The app is served on `trailrunn.ing`, set as `domain` in
