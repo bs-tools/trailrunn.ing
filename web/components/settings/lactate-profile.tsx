@@ -3,6 +3,7 @@ import Card from "@components/ui/card";
 import { TextField } from "@components/ui/fields";
 import QueryError, { ErrorText } from "@components/ui/query-error";
 import { primaryButton } from "@components/ui/styles";
+import type { ConnectError } from "@connectrpc/connect";
 import { useMutation, useQuery } from "@connectrpc/connect-query";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -16,22 +17,30 @@ import React, { useState } from "react";
 
 interface FormProps {
   profile: LactateProfile | undefined;
+  /*
+   * Saving is the card's, as the form starts over when the stored threshold
+   * changes, also by its own save.
+   */
+  saving: boolean;
+  saved: boolean;
+  error: ConnectError | null;
+  onSave: (heartRateBpm: number | undefined) => void;
 }
 
 // Form edits the lactate profile, starting from the stored one.
-const Form: React.FC<FormProps> = ({ profile }) => {
-  const queryClient = useQueryClient();
+const Form: React.FC<FormProps> = ({
+  profile,
+  saving,
+  saved,
+  error,
+  onSave,
+}) => {
   const [threshold, setThreshold] = useState(
     profile?.aerobicThresholdHeartRateBpm === undefined
       ? ""
       : String(profile.aerobicThresholdHeartRateBpm)
   );
   const [invalid, setInvalid] = useState(false);
-  const save = useMutation(setLactateProfile, {
-    onSuccess: async () => {
-      await invalidateServices(queryClient, [LactateTestService]);
-    },
-  });
   return (
     <form
       className="flex flex-col gap-3"
@@ -44,11 +53,7 @@ const Form: React.FC<FormProps> = ({ profile }) => {
           return;
         }
         setInvalid(false);
-        save.mutate({
-          profile: {
-            aerobicThresholdHeartRateBpm: empty ? undefined : parsed,
-          },
-        });
+        onSave(empty ? undefined : parsed);
       }}
     >
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -66,18 +71,12 @@ const Form: React.FC<FormProps> = ({ profile }) => {
           Enter a heart rate as a whole number, or leave the field empty.
         </p>
       )}
-      <ErrorText error={save.error} />
+      <ErrorText error={error} />
       <div className="flex items-center gap-3">
-        <button
-          type="submit"
-          className={primaryButton}
-          disabled={save.isPending}
-        >
-          {save.isPending ? "Saving…" : "Save"}
+        <button type="submit" className={primaryButton} disabled={saving}>
+          {saving ? "Saving…" : "Save"}
         </button>
-        {save.isSuccess && (
-          <span className="text-sm text-gray-600">Saved.</span>
-        )}
+        {saved && <span className="text-sm text-gray-600">Saved.</span>}
       </div>
     </form>
   );
@@ -89,8 +88,14 @@ const Form: React.FC<FormProps> = ({ profile }) => {
  * watch have closer stages around.
  */
 const LactateProfileCard: React.FC = () => {
+  const queryClient = useQueryClient();
   const { isPending, isError, data, error, refetch } =
     useQuery(getLactateProfile);
+  const save = useMutation(setLactateProfile, {
+    onSuccess: async () => {
+      await invalidateServices(queryClient, [LactateTestService]);
+    },
+  });
   let content: React.ReactNode = <Loading />;
   if (isError) {
     content = (
@@ -107,6 +112,14 @@ const LactateProfileCard: React.FC = () => {
         // A test may have set it since the form was filled in.
         key={data.profile?.aerobicThresholdHeartRateBpm}
         profile={data.profile}
+        saving={save.isPending}
+        saved={save.isSuccess}
+        error={save.error}
+        onSave={(heartRateBpm) => {
+          save.mutate({
+            profile: { aerobicThresholdHeartRateBpm: heartRateBpm },
+          });
+        }}
       />
     );
   }
