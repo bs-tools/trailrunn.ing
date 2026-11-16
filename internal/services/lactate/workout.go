@@ -32,6 +32,9 @@ var (
 	endParam     = workoutParam{"end", int(plans.DefaultLactateTestStages.EndBPM), 60, 220}
 	minutesParam = workoutParam{"minutes", int(plans.DefaultLactateTestStages.StageMinutes), 1, 20}
 	rangeParam   = workoutParam{"range", int(plans.DefaultLactateTestStages.RangeBPM), 1, 15}
+	// The expected aerobic threshold, around which the stages are closer
+	// together. 0, the default, is none.
+	thresholdParam = workoutParam{"threshold", 0, 0, 220}
 )
 
 // get returns the parameter's value in the query, or its default if unset.
@@ -51,25 +54,29 @@ func (p workoutParam) get(r *http.Request) (int, error) {
 // watches guide stage by stage, alerting when the heart rate leaves each
 // stage's range, and waiting for the lap button while the user samples. The
 // query sets the stages like the guided test: the start heart rate, the step
-// between stages, the end heart rate, the minutes of each stage, and the
-// range, how far the heart rate may stray from each stage's.
+// between stages, the end heart rate, the minutes of each stage, the range,
+// how far the heart rate may stray from each stage's, and the expected
+// aerobic threshold, around which the stages are closer together.
 func (s *Service) WorkoutHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		values := make([]int, 5)
-		for i, p := range []workoutParam{startParam, stepParam, endParam, minutesParam, rangeParam} {
+		values := make([]int32, 6)
+		for i, p := range []workoutParam{startParam, stepParam, endParam, minutesParam, rangeParam, thresholdParam} {
 			v, err := p.get(r)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusBadRequest)
 				return
 			}
-			values[i] = v
+			values[i] = int32(v)
 		}
-		start, step, end, minutes, spread := values[0], values[1], values[2], values[3], values[4]
-		if end < start {
+		stages := plans.LactateTestStages{
+			StartBPM: values[0], StepBPM: values[1], EndBPM: values[2],
+			StageMinutes: values[3], RangeBPM: values[4], ThresholdBPM: values[5],
+		}
+		if stages.EndBPM < stages.StartBPM {
 			http.Error(w, "end must be at least start", http.StatusBadRequest)
 			return
 		}
-		workout := testWorkout(start, step, end, time.Duration(minutes)*time.Minute, spread)
+		workout := testWorkout(stages)
 		if len(workout.Steps) > fit.MaxWorkoutSteps {
 			http.Error(w, fmt.Sprintf("too many stages for a watch: at most %d; raise the step or narrow the heart rates", (fit.MaxWorkoutSteps-2)/2), http.StatusBadRequest)
 			return
@@ -89,21 +96,22 @@ func (s *Service) WorkoutHandler() http.Handler {
 // testWorkout returns the steps of a lactate test: a warm-up, then each
 // stage, held in its heart rate range, followed by an open step to sample
 // lactate in, ending at the lap button, and a cool-down.
-func testWorkout(start, step, end int, stage time.Duration, spread int) *fit.Workout {
+func testWorkout(stages plans.LactateTestStages) *fit.Workout {
 	steps := []fit.WorkoutStep{{
 		Name:      "Warm up",
-		Notes:     fmt.Sprintf("Very easy, below %d bpm", start),
+		Notes:     fmt.Sprintf("Very easy, below %d bpm", stages.StartBPM),
 		Duration:  workoutWarmUp,
 		Intensity: fit.IntensityWarmUp,
 	}}
-	for heartRate := start; heartRate <= end; heartRate += step {
+	for _, stage := range stages.Stages() {
+		low, high := int(stage.BPM-stage.RangeBPM), int(stage.BPM+stage.RangeBPM)
 		steps = append(steps,
 			fit.WorkoutStep{
-				Name:            fmt.Sprintf("%d bpm", heartRate),
-				Notes:           fmt.Sprintf("Hold %d-%d bpm, then take a sample", heartRate-spread, heartRate+spread),
-				Duration:        stage,
-				MinHeartRateBPM: heartRate - spread,
-				MaxHeartRateBPM: heartRate + spread,
+				Name:            fmt.Sprintf("%d bpm", stage.BPM),
+				Notes:           fmt.Sprintf("Hold %d-%d bpm, then take a sample", low, high),
+				Duration:        time.Duration(stages.StageMinutes) * time.Minute,
+				MinHeartRateBPM: low,
+				MaxHeartRateBPM: high,
 				Intensity:       fit.IntensityActive,
 			},
 			fit.WorkoutStep{

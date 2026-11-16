@@ -284,10 +284,10 @@ func trainingWorkout(w *plans.Workout, t thresholds) (*garmin.Workout, bool) {
 			steps = runSteps(w.RunBlocks, t)
 			break
 		}
-		// A lactate test is run in its stages, starting where the last test
-		// did, so the two are comparable.
+		// A lactate test is run in its stages, closer together around the
+		// last test's aerobic threshold.
 		if w.LactateTest {
-			steps = runSteps(plans.LactateTestStagesFrom(t.lactateStart).Blocks(), t)
+			steps = runSteps(plans.LactateTestStagesFrom(t.lactateStart, t.aerobic).Blocks(), t)
 			break
 		}
 		step := garmin.WorkoutStep{Type: "WorkoutStep", StepOrder: 1, Intensity: "ACTIVE", DurationType: "OPEN", TargetType: "OPEN"}

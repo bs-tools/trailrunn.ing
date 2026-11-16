@@ -7,8 +7,13 @@ import {
   DEFAULT_START_HEART_RATE,
   DEFAULT_STEP_BPM,
   formatMmol,
+  endAboveThreshold,
+  FINE_STEP_BPM,
+  FINE_WINDOW_BPM,
   nextHeartRate,
   pastThreshold,
+  stageHeartRates,
+  startBelowThreshold,
   WARM_UP_MINUTES,
 } from "@components/lactate/lactate-utils";
 import Loading from "@components/loading";
@@ -61,6 +66,11 @@ const SETTINGS_KEY = "trail-tools.lactate-test";
 interface Settings {
   startHeartRate: number;
   stepBpm: number;
+  /*
+   * The expected aerobic threshold, around which the stages are closer
+   * together, or 0 for even steps.
+   */
+  thresholdHeartRate: number;
   stageMinutes: number;
   // The heart rate of the Garmin workout's last stage.
   endHeartRate: number;
@@ -74,6 +84,7 @@ const DEFAULT_SETTINGS: Settings = {
   stageMinutes: DEFAULT_STAGE_MINUTES,
   startHeartRate: DEFAULT_START_HEART_RATE,
   stepBpm: DEFAULT_STEP_BPM,
+  thresholdHeartRate: 0,
 };
 
 // ReadSettings reads the settings of the last guided test, if there was one.
@@ -99,6 +110,7 @@ const readSettings = (): Settings | undefined => {
       stageMinutes: field("stageMinutes"),
       startHeartRate: field("startHeartRate"),
       stepBpm: field("stepBpm"),
+      thresholdHeartRate: field("thresholdHeartRate"),
     };
   } catch {
     return undefined;
@@ -113,6 +125,7 @@ const workoutURL = (settings: Settings): string => {
     range: String(settings.rangeBpm),
     start: String(settings.startHeartRate),
     step: String(settings.stepBpm),
+    threshold: String(settings.thresholdHeartRate),
   });
   return `/lactate-tests/workout.fit?${query.toString()}`;
 };
@@ -136,18 +149,12 @@ interface PrepareProps {
 }
 
 /**
- * THRESHOLD_MARGIN_STAGES is how many stages below the last aerobic
- * threshold a test can start, to approach it from below.
- */
-const THRESHOLD_MARGIN_STAGES = 2;
-
-/**
- * StartOptions returns the first stages to suggest from the previous test:
- * where it started, and a couple of stages below its aerobic threshold.
+ * StartOptions returns the first stages to suggest: where the previous test
+ * started, and a few stages below the expected threshold.
  */
 const startOptions = (
   previous: LactateTest | undefined,
-  stepBpm: number
+  thresholdHeartRate: number
 ): { label: string; heartRate: number }[] => {
   const options: { label: string; heartRate: number }[] = [];
   const start = previous?.stages[0]?.heartRateBpm;
@@ -157,20 +164,23 @@ const startOptions = (
       label: `Where your last test started: ${start} bpm`,
     });
   }
-  const threshold = previous?.aerobicThresholdHeartRateBpm ?? 0;
-  if (threshold > 0) {
-    // Rounded down to 5 bpm, a heart rate that's easy to hold.
-    const below =
-      Math.floor((threshold - THRESHOLD_MARGIN_STAGES * stepBpm) / 5) * 5;
+  if (thresholdHeartRate > 0) {
+    const below = startBelowThreshold(thresholdHeartRate);
     if (below !== start) {
       options.push({
         heartRate: below,
-        label: `Below your last threshold of ${threshold} bpm: ${below} bpm`,
+        label: `Below your expected threshold: ${below} bpm`,
       });
     }
   }
   return options;
 };
+
+/**
+ * MAX_STAGES_SHOWN is the most stages listed before the test: more are from
+ * a step or first stage still being typed.
+ */
+const MAX_STAGES_SHOWN = 20;
 
 // Prepare goes through the checklist and the test's settings.
 const Prepare: React.FC<PrepareProps> = ({
@@ -190,12 +200,18 @@ const Prepare: React.FC<PrepareProps> = ({
     previousBaseline > 0 ? String(previousBaseline) : ""
   );
   const knownValue = Number(known.replace(",", "."));
+  const stages = stageHeartRates(settings, settings.endHeartRate);
   const field = (key: keyof Settings, label: string, hint: string) => (
     <TextField
       label={label}
       hint={hint}
       inputMode="numeric"
-      value={String(settings[key])}
+      // No expected threshold is an empty field.
+      value={
+        key === "thresholdHeartRate" && settings[key] === 0
+          ? ""
+          : String(settings[key])
+      }
       onChange={(value) => {
         const parsed = Number(value);
         if (Number.isInteger(parsed) && parsed >= 0) {
@@ -239,11 +255,16 @@ const Prepare: React.FC<PrepareProps> = ({
         </details>
       </Card>
       <Card title="Stages">
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {field(
+            "thresholdHeartRate",
+            "Expected aerobic threshold (bpm)",
+            `From your last test, if you had one. Stages within ${FINE_WINDOW_BPM} bpm of it are ${FINE_STEP_BPM} bpm apart, to find it more precisely. Leave empty for even steps.`
+          )}
           {field(
             "startHeartRate",
             "First stage (bpm)",
-            "Lower than you think you need."
+            "Well below your threshold: the first stages find your baseline."
           )}
           {field("stepBpm", "Step (bpm)", "How much higher each stage is.")}
           {field(
@@ -252,20 +273,28 @@ const Prepare: React.FC<PrepareProps> = ({
             "At least 3, so lactate settles."
           )}
         </div>
-        {startOptions(previous, settings.stepBpm).length > 0 && (
+        {stages.length > 0 && stages.length <= MAX_STAGES_SHOWN && (
+          <p className="mt-3 text-sm text-gray-700 tabular-nums">
+            Stages: {stages.join(", ")} bpm, until your lactate is past the
+            threshold.
+          </p>
+        )}
+        {startOptions(previous, settings.thresholdHeartRate).length > 0 && (
           <div className="mt-3 flex flex-wrap gap-2">
-            {startOptions(previous, settings.stepBpm).map((option) => (
-              <button
-                key={option.label}
-                type="button"
-                className={secondaryButton}
-                onClick={() => {
-                  onChange({ ...settings, startHeartRate: option.heartRate });
-                }}
-              >
-                {option.label}
-              </button>
-            ))}
+            {startOptions(previous, settings.thresholdHeartRate).map(
+              (option) => (
+                <button
+                  key={option.label}
+                  type="button"
+                  className={secondaryButton}
+                  onClick={() => {
+                    onChange({ ...settings, startHeartRate: option.heartRate });
+                  }}
+                >
+                  {option.label}
+                </button>
+              )
+            )}
           </div>
         )}
       </Card>
@@ -365,6 +394,8 @@ const Prepare: React.FC<PrepareProps> = ({
           settings.startHeartRate < 40 ||
           settings.stepBpm < 1 ||
           settings.stageMinutes < 1 ||
+          (settings.thresholdHeartRate !== 0 &&
+            settings.thresholdHeartRate < 40) ||
           (mode === "known" && !(knownValue > 0))
         }
         onClick={() => {
@@ -492,6 +523,39 @@ const Entry: React.FC<EntryProps> = ({
   );
 };
 
+/**
+ * InitialSettings returns the settings a new test starts with: those of the
+ * last guided test, around the previous test's aerobic threshold if it
+ * found one, starting a few stages below it. Without a threshold, a test
+ * starts where the previous one did, so the two are comparable.
+ */
+const initialSettings = (
+  stored: Settings | undefined,
+  previous: LactateTest | undefined
+): Settings => {
+  const settings = stored ?? DEFAULT_SETTINGS;
+  const threshold = previous?.aerobicThresholdHeartRateBpm ?? 0;
+  if (threshold > 0) {
+    return {
+      ...settings,
+      endHeartRate: Math.max(
+        settings.endHeartRate,
+        endAboveThreshold(threshold, settings.stepBpm)
+      ),
+      startHeartRate: startBelowThreshold(threshold),
+      thresholdHeartRate: threshold,
+    };
+  }
+  if (stored !== undefined) {
+    return stored;
+  }
+  return {
+    ...settings,
+    startHeartRate:
+      previous?.stages[0]?.heartRateBpm ?? settings.startHeartRate,
+  };
+};
+
 // Phase is the step of a guided test.
 type Phase = "prepare" | "resting" | "stage";
 
@@ -522,17 +586,15 @@ export const GuidedTest: React.FC<GuidedTestProps> = ({
   saveStages: save,
   onFinish,
 }) => {
-  // The settings the user chose, now or for the last guided test.
-  const [chosen, setChosen] = useState(readSettings);
-  /**
-   * Without settings of their own, guided tests start where the last test
-   * started, so tests are comparable.
-   */
-  const lastStart = previous?.stages[0]?.heartRateBpm;
-  const settings = chosen ?? {
-    ...DEFAULT_SETTINGS,
-    startHeartRate: lastStart ?? DEFAULT_SETTINGS.startHeartRate,
-  };
+  // The settings of the last guided test, and the ones chosen for this one.
+  const [stored] = useState(readSettings);
+  const [chosen, setChosen] = useState<Settings>();
+  const settings =
+    chosen ??
+    // A continued test keeps the settings it started with.
+    (loaded !== undefined && stored !== undefined
+      ? stored
+      : initialSettings(stored, previous));
   // A continued test goes straight to its next stage.
   const [chosenPhase, setPhase] = useState<Phase | undefined>(
     loaded === undefined ? "prepare" : undefined
@@ -599,11 +661,7 @@ export const GuidedTest: React.FC<GuidedTestProps> = ({
         mmolPerLiter: loaded.restingLactateMmolPerLiter,
       };
     }
-    const targetBpm = nextHeartRate(
-      loaded.stages,
-      settings.startHeartRate,
-      settings.stepBpm
-    );
+    const targetBpm = nextHeartRate(loaded.stages, settings);
     const saveStages = (stages: LactateStage[]): void => {
       save(loaded, stages).catch(() => {
         // The error is shown below, and the reading can be saved again.

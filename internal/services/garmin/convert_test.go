@@ -223,7 +223,7 @@ func TestLactateTestSteps(t *testing.T) {
 	w := &plans.Workout{Type: plans.WorkoutTypeBase, Title: "Lactate test", LactateTest: true}
 	for _, tc := range []struct {
 		name              string
-		start             int32
+		start, threshold  int32
 		firstBPM, lastBPM float64
 		wantStages        int
 	}{
@@ -231,8 +231,11 @@ func TestLactateTestSteps(t *testing.T) {
 		// A later test starts where the last did, with enough stages to get
 		// past the threshold.
 		{name: "from the last test", start: 150, firstBPM: 150, lastBPM: 190, wantStages: 5},
+		// With a threshold from the last test, it starts 30 bpm below it:
+		// 115, 125, 135, 140, 145, 150, 155, 165 and 175.
+		{name: "around the last threshold", start: 100, threshold: 143, firstBPM: 115, lastBPM: 175, wantStages: 9},
 	} {
-		gw, ok := trainingWorkout(w, thresholds{lactateStart: tc.start})
+		gw, ok := trainingWorkout(w, thresholds{lactateStart: tc.start, aerobic: tc.threshold})
 		if !ok {
 			t.Fatalf("%s: not a Garmin workout", tc.name)
 		}
