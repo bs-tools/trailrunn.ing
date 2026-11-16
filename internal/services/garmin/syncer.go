@@ -150,11 +150,13 @@ func NewSyncer(log *slog.Logger, report *errreport.Reporter, client Client, acti
 // of planned lactate tests.
 type ThresholdRepository interface {
 	ListTests(ctx context.Context, userID pgtype.UUID) ([]*lactate.Test, error)
+	GetProfile(ctx context.Context, userID pgtype.UUID) (*lactate.Profile, error)
 }
 
 // userThresholds returns the heart rates of the user's aerobic and
 // anaerobic thresholds, from their latest lactate tests that found them, 0
-// if unknown, and the first stage of their latest test with stages.
+// if unknown, the first stage of their latest test with stages, and where
+// their next test expects the aerobic threshold.
 func (s *Syncer) userThresholds(ctx context.Context, userID pgtype.UUID) (thresholds, error) {
 	var t thresholds
 	if s.thresholds == nil {
@@ -175,6 +177,16 @@ func (s *Syncer) userThresholds(ctx context.Context, userID pgtype.UUID) (thresh
 		if t.lactateStart == 0 && len(test.Stages) > 0 {
 			t.lactateStart = test.Stages[0].HeartRateBPM
 		}
+	}
+	// The next test is run around the threshold the user's profile expects,
+	// which is the latest test's until the profile is set.
+	t.lactateThreshold = t.aerobic
+	profile, err := s.thresholds.GetProfile(ctx, userID)
+	if err != nil {
+		return t, err
+	}
+	if profile != nil {
+		t.lactateThreshold = profile.AerobicThresholdHeartRateBPM
 	}
 	return t, nil
 }

@@ -219,7 +219,8 @@ func (r *Repository) checkWorkout(ctx context.Context, userID, workoutID pgtype.
 	return nil
 }
 
-// CreateTest stores a new test.
+// CreateTest stores a new test. If it found the aerobic threshold and is the
+// user's latest test, their profile expects the threshold there from now on.
 func (r *Repository) CreateTest(ctx context.Context, test *Test) (*Test, error) {
 	if err := r.checkWorkout(ctx, test.UserID, test.WorkoutID); err != nil {
 		return nil, err
@@ -237,7 +238,11 @@ func (r *Repository) CreateTest(ctx context.Context, test *Test) (*Test, error) 
 	if err != nil {
 		return nil, fmt.Errorf("failed to create lactate test: %w", err)
 	}
-	return testFromDB(dbTest), nil
+	created := testFromDB(dbTest)
+	if err := r.setProfileFromTest(ctx, created); err != nil {
+		return nil, err
+	}
+	return created, nil
 }
 
 // GetTest gets one of the user's tests.
@@ -265,7 +270,7 @@ func (r *Repository) ListTests(ctx context.Context, userID pgtype.UUID) ([]*Test
 	return tests, nil
 }
 
-// UpdateTest replaces a test.
+// UpdateTest replaces a test, and sets the user's profile like CreateTest.
 func (r *Repository) UpdateTest(ctx context.Context, test *Test) (*Test, error) {
 	if err := r.checkWorkout(ctx, test.UserID, test.WorkoutID); err != nil {
 		return nil, err
@@ -287,7 +292,11 @@ func (r *Repository) UpdateTest(ctx context.Context, test *Test) (*Test, error) 
 		}
 		return nil, fmt.Errorf("failed to update lactate test: %w", err)
 	}
-	return testFromDB(dbTest), nil
+	updated := testFromDB(dbTest)
+	if err := r.setProfileFromTest(ctx, updated); err != nil {
+		return nil, err
+	}
+	return updated, nil
 }
 
 // DeleteTest deletes one of the user's tests.

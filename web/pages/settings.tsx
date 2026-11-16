@@ -4,6 +4,7 @@ import AvatarCard from "@components/settings/avatar-card";
 import CalendarFeedCard from "@components/settings/calendar-feed";
 import Connections from "@components/settings/connections";
 import Invitations from "@components/settings/invitations";
+import LactateProfileCard from "@components/settings/lactate-profile";
 import Passkeys from "@components/settings/passkeys";
 import PrivacyZonesCard from "@components/settings/privacy-zones";
 import PublicProfileCard from "@components/settings/public-profile";
@@ -269,6 +270,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ user }) => (
       <div className="flex flex-col gap-4">
         <PublicProfileCard />
         <SweatProfileCard />
+        <LactateProfileCard />
         <TouringLimitsCard />
         <PrivacyZonesCard />
         <CalendarFeedCard />

@@ -235,7 +235,7 @@ func TestLactateTestSteps(t *testing.T) {
 		// 115, 125, 135, 140, 145, 150, 155, 165 and 175.
 		{name: "around the last threshold", start: 100, threshold: 143, firstBPM: 115, lastBPM: 175, wantStages: 9},
 	} {
-		gw, ok := trainingWorkout(w, thresholds{lactateStart: tc.start, aerobic: tc.threshold})
+		gw, ok := trainingWorkout(w, thresholds{lactateStart: tc.start, lactateThreshold: tc.threshold})
 		if !ok {
 			t.Fatalf("%s: not a Garmin workout", tc.name)
 		}

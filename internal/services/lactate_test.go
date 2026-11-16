@@ -16,6 +16,7 @@ import (
 	plansv1 "github.com/bs-tools/trailrunn.ing/internal/gen/plans/v1"
 	usersv1 "github.com/bs-tools/trailrunn.ing/internal/gen/users/v1"
 	lactatesvc "github.com/bs-tools/trailrunn.ing/internal/services/lactate"
+	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/fieldmaskpb"
 )
 
@@ -411,5 +412,87 @@ func TestLactateTestForWorkout(t *testing.T) {
 	got, err := e.lactate.GetLactateTest(ctx, lactatev1.GetLactateTestRequest_builder{Id: own.GetTest().GetId()}.Build())
 	if err != nil || got.GetTest().GetWorkoutId() != "" {
 		t.Errorf("after deleting the workout got test %v (%v), want it without a workout", got.GetTest(), err)
+	}
+}
+
+func TestLactateProfile(t *testing.T) {
+	t.Parallel()
+	e := newEnv(t)
+	ctx := context.Background()
+
+	threshold := func() *lactatev1.LactateProfile {
+		t.Helper()
+		got, err := e.lactate.GetLactateProfile(ctx, &lactatev1.GetLactateProfileRequest{})
+		if err != nil {
+			t.Fatalf("GetLactateProfile: %v", err)
+		}
+		return got.GetProfile()
+	}
+	if got := threshold(); got.HasAerobicThresholdHeartRateBpm() || got.HasUpdateTime() {
+		t.Errorf("got profile %v before any test, want none", got)
+	}
+
+	// A test that finds the threshold sets it: 2 mmol/L is halfway from
+	// 1.6 at 140 bpm to 2.4 at 150 bpm.
+	create := func(date string, heartRates []int32, lactates []float64) *lactatev1.LactateTest {
+		t.Helper()
+		created, err := e.lactate.CreateLactateTest(ctx, lactatev1.CreateLactateTestRequest_builder{
+			Test: lactatev1.LactateTest_builder{Date: date, Stages: stages(heartRates, lactates)}.Build(),
+		}.Build())
+		if err != nil {
+			t.Fatalf("CreateLactateTest: %v", err)
+		}
+		return created.GetTest()
+	}
+	latest := create("2026-10-10", []int32{130, 140, 150}, []float64{1.1, 1.6, 2.4})
+	if got := threshold(); got.GetAerobicThresholdHeartRateBpm() != 145 || !got.HasUpdateTime() {
+		t.Errorf("got profile %v after a test, want its threshold of 145", got)
+	}
+
+	// The user can set it, within the heart rates of stages.
+	set, err := e.lactate.SetLactateProfile(ctx, lactatev1.SetLactateProfileRequest_builder{
+		Profile: lactatev1.LactateProfile_builder{AerobicThresholdHeartRateBpm: proto.Int32(152)}.Build(),
+	}.Build())
+	if err != nil || set.GetProfile().GetAerobicThresholdHeartRateBpm() != 152 {
+		t.Fatalf("SetLactateProfile: got %v, %v, want 152", set.GetProfile(), err)
+	}
+	_, err = e.lactate.SetLactateProfile(ctx, lactatev1.SetLactateProfileRequest_builder{
+		Profile: lactatev1.LactateProfile_builder{AerobicThresholdHeartRateBpm: proto.Int32(300)}.Build(),
+	}.Build())
+	wantCode(t, err, connect.CodeInvalidArgument)
+
+	// An older test doesn't say where the threshold is now, and neither
+	// does a test that didn't reach it.
+	create("2026-09-01", []int32{120, 130, 140}, []float64{1.2, 1.8, 2.6})
+	if got := threshold(); got.GetAerobicThresholdHeartRateBpm() != 152 {
+		t.Errorf("got a threshold of %v after an older test, want it kept at 152", got.GetAerobicThresholdHeartRateBpm())
+	}
+	if _, err := e.lactate.UpdateLactateTest(ctx, lactatev1.UpdateLactateTestRequest_builder{
+		Test:       lactatev1.LactateTest_builder{Id: latest.GetId(), Stages: stages([]int32{130, 140}, []float64{1.1, 1.6})}.Build(),
+		UpdateMask: &fieldmaskpb.FieldMask{Paths: []string{"stages"}},
+	}.Build()); err != nil {
+		t.Fatalf("UpdateLactateTest: %v", err)
+	}
+	if got := threshold(); got.GetAerobicThresholdHeartRateBpm() != 152 {
+		t.Errorf("got a threshold of %v after a test without one, want it kept at 152", got.GetAerobicThresholdHeartRateBpm())
+	}
+
+	// The latest test sets it again as its readings come in.
+	if _, err := e.lactate.UpdateLactateTest(ctx, lactatev1.UpdateLactateTestRequest_builder{
+		Test:       lactatev1.LactateTest_builder{Id: latest.GetId(), Stages: stages([]int32{130, 140, 150, 160}, []float64{1.1, 1.4, 1.6, 2.6})}.Build(),
+		UpdateMask: &fieldmaskpb.FieldMask{Paths: []string{"stages"}},
+	}.Build()); err != nil {
+		t.Fatalf("UpdateLactateTest: %v", err)
+	}
+	if got := threshold(); got.GetAerobicThresholdHeartRateBpm() != 154 {
+		t.Errorf("got a threshold of %v, want the latest test's 154", got.GetAerobicThresholdHeartRateBpm())
+	}
+
+	// Cleared, the next test has even steps, whatever earlier tests found.
+	if _, err := e.lactate.SetLactateProfile(ctx, &lactatev1.SetLactateProfileRequest{}); err != nil {
+		t.Fatalf("SetLactateProfile: %v", err)
+	}
+	if got := threshold(); got.HasAerobicThresholdHeartRateBpm() {
+		t.Errorf("got a threshold of %v after clearing it, want none", got.GetAerobicThresholdHeartRateBpm())
 	}
 }

@@ -13,7 +13,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file lactate/v1/lactate.proto.
  */
 export const file_lactate_v1_lactate: GenFile = /*@__PURE__*/
-  fileDesc("ChhsYWN0YXRlL3YxL2xhY3RhdGUucHJvdG8SCmxhY3RhdGUudjEitQQKC0xhY3RhdGVUZXN0EgoKAmlkGAEgASgJEgwKBGRhdGUYAiABKAkSDQoFbm90ZXMYAyABKAkSJgoecmVzdGluZ19sYWN0YXRlX21tb2xfcGVyX2xpdGVyGAQgASgBEigKBnN0YWdlcxgFIAMoCzIYLmxhY3RhdGUudjEuTGFjdGF0ZVN0YWdlEi0KHWxvd2VzdF9sYWN0YXRlX21tb2xfcGVyX2xpdGVyGAYgASgBQgaqnxkCCAESMAogYWVyb2JpY190aHJlc2hvbGRfaGVhcnRfcmF0ZV9icG0YByABKAVCBqqfGQIIARJCChN0aHJlc2hvbGRfZXN0aW1hdGVzGAggAygLMh0ubGFjdGF0ZS52MS5UaHJlc2hvbGRFc3RpbWF0ZUIGqp8ZAggBEjIKImFuYWVyb2JpY190aHJlc2hvbGRfaGVhcnRfcmF0ZV9icG0YCyABKAVCBqqfGQIIARJMCh1hbmFlcm9iaWNfdGhyZXNob2xkX2VzdGltYXRlcxgMIAMoCzIdLmxhY3RhdGUudjEuVGhyZXNob2xkRXN0aW1hdGVCBqqfGQIIARISCgp3b3Jrb3V0X2lkGA0gASgJEjcKC2NyZWF0ZV90aW1lGAkgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcEIGqp8ZAggBEjcKC3VwZGF0ZV90aW1lGAogASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcEIGqp8ZAggBIoABChFUaHJlc2hvbGRFc3RpbWF0ZRIzCgpkZWZpbml0aW9uGAEgASgOMh8ubGFjdGF0ZS52MS5UaHJlc2hvbGREZWZpbml0aW9uEh4KFmxhY3RhdGVfbW1vbF9wZXJfbGl0ZXIYAiABKAESFgoOaGVhcnRfcmF0ZV9icG0YAyABKAUiRgoMTGFjdGF0ZVN0YWdlEhYKDmhlYXJ0X3JhdGVfYnBtGAEgASgFEh4KFmxhY3RhdGVfbW1vbF9wZXJfbGl0ZXIYAiABKAEiQQoYQ3JlYXRlTGFjdGF0ZVRlc3RSZXF1ZXN0EiUKBHRlc3QYASABKAsyFy5sYWN0YXRlLnYxLkxhY3RhdGVUZXN0IkIKGUNyZWF0ZUxhY3RhdGVUZXN0UmVzcG9uc2USJQoEdGVzdBgBIAEoCzIXLmxhY3RhdGUudjEuTGFjdGF0ZVRlc3QiIwoVR2V0TGFjdGF0ZVRlc3RSZXF1ZXN0EgoKAmlkGAEgASgJIj8KFkdldExhY3RhdGVUZXN0UmVzcG9uc2USJQoEdGVzdBgBIAEoCzIXLmxhY3RhdGUudjEuTGFjdGF0ZVRlc3QiGQoXTGlzdExhY3RhdGVUZXN0c1JlcXVlc3QiQgoYTGlzdExhY3RhdGVUZXN0c1Jlc3BvbnNlEiYKBXRlc3RzGAEgAygLMhcubGFjdGF0ZS52MS5MYWN0YXRlVGVzdCJyChhVcGRhdGVMYWN0YXRlVGVzdFJlcXVlc3QSJQoEdGVzdBgBIAEoCzIXLmxhY3RhdGUudjEuTGFjdGF0ZVRlc3QSLwoLdXBkYXRlX21hc2sYAiABKAsyGi5nb29nbGUucHJvdG9idWYuRmllbGRNYXNrIkIKGVVwZGF0ZUxhY3RhdGVUZXN0UmVzcG9uc2USJQoEdGVzdBgBIAEoCzIXLmxhY3RhdGUudjEuTGFjdGF0ZVRlc3QiJgoYRGVsZXRlTGFjdGF0ZVRlc3RSZXF1ZXN0EgoKAmlkGAEgASgJIhsKGURlbGV0ZUxhY3RhdGVUZXN0UmVzcG9uc2Ui+gEKEExhY3RhdGVUZXN0U2hhcmUSEgoCaWQYASABKAlCBqqfGQIIARITCgN1cmwYAiABKAlCBqqfGQIIARIWCgZvcGVuZWQYAyABKAhCBqqfGQIIARIXCgd0ZXN0X2lkGAQgASgJQgaqnxkCCAESNwoLZXhwaXJlX3RpbWUYBSABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wQgaqnxkCCAESNwoLY3JlYXRlX3RpbWUYBiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wQgaqnxkCCAESGgoKd29ya291dF9pZBgHIAEoCUIGqp8ZAggBIjMKHUNyZWF0ZUxhY3RhdGVUZXN0U2hhcmVSZXF1ZXN0EhIKCndvcmtvdXRfaWQYASABKAkiTQoeQ3JlYXRlTGFjdGF0ZVRlc3RTaGFyZVJlc3BvbnNlEisKBXNoYXJlGAEgASgLMhwubGFjdGF0ZS52MS5MYWN0YXRlVGVzdFNoYXJlIh4KHExpc3RMYWN0YXRlVGVzdFNoYXJlc1JlcXVlc3QiTQodTGlzdExhY3RhdGVUZXN0U2hhcmVzUmVzcG9uc2USLAoGc2hhcmVzGAEgAygLMhwubGFjdGF0ZS52MS5MYWN0YXRlVGVzdFNoYXJlIisKHURlbGV0ZUxhY3RhdGVUZXN0U2hhcmVSZXF1ZXN0EgoKAmlkGAEgASgJIiAKHkRlbGV0ZUxhY3RhdGVUZXN0U2hhcmVSZXNwb25zZSIyCiFDcmVhdGVMYWN0YXRlVGVzdFJlY29yZGluZ1JlcXVlc3QSDQoFdG9rZW4YASABKAkikAEKIkNyZWF0ZUxhY3RhdGVUZXN0UmVjb3JkaW5nUmVzcG9uc2USEgoKb3duZXJfbmFtZRgBIAEoCRIvCgtleHBpcmVfdGltZRgCIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASJQoEdGVzdBgDIAEoCzIXLmxhY3RhdGUudjEuTGFjdGF0ZVRlc3QiIAoeR2V0TGFjdGF0ZVRlc3RSZWNvcmRpbmdSZXF1ZXN0Io0BCh9HZXRMYWN0YXRlVGVzdFJlY29yZGluZ1Jlc3BvbnNlEhIKCm93bmVyX25hbWUYASABKAkSLwoLZXhwaXJlX3RpbWUYAiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEiUKBHRlc3QYAyABKAsyFy5sYWN0YXRlLnYxLkxhY3RhdGVUZXN0IkEKGFJlY29yZExhY3RhdGVUZXN0UmVxdWVzdBIlCgR0ZXN0GAEgASgLMhcubGFjdGF0ZS52MS5MYWN0YXRlVGVzdCJCChlSZWNvcmRMYWN0YXRlVGVzdFJlc3BvbnNlEiUKBHRlc3QYASABKAsyFy5sYWN0YXRlLnYxLkxhY3RhdGVUZXN0Kv4BChNUaHJlc2hvbGREZWZpbml0aW9uEiQKIFRIUkVTSE9MRF9ERUZJTklUSU9OX1VOU1BFQ0lGSUVEEAASJQohVEhSRVNIT0xEX0RFRklOSVRJT05fRklYRURfMl9NTU9MEAESJwojVEhSRVNIT0xEX0RFRklOSVRJT05fRklYRURfMl81X01NT0wQAhIrCidUSFJFU0hPTERfREVGSU5JVElPTl9MT1dFU1RfUExVU18xX01NT0wQAxIlCiFUSFJFU0hPTERfREVGSU5JVElPTl9GSVhFRF80X01NT0wQBBIdChlUSFJFU0hPTERfREVGSU5JVElPTl9ETUFYEAUyrgkKEkxhY3RhdGVUZXN0U2VydmljZRJgChFDcmVhdGVMYWN0YXRlVGVzdBIkLmxhY3RhdGUudjEuQ3JlYXRlTGFjdGF0ZVRlc3RSZXF1ZXN0GiUubGFjdGF0ZS52MS5DcmVhdGVMYWN0YXRlVGVzdFJlc3BvbnNlElcKDkdldExhY3RhdGVUZXN0EiEubGFjdGF0ZS52MS5HZXRMYWN0YXRlVGVzdFJlcXVlc3QaIi5sYWN0YXRlLnYxLkdldExhY3RhdGVUZXN0UmVzcG9uc2USXQoQTGlzdExhY3RhdGVUZXN0cxIjLmxhY3RhdGUudjEuTGlzdExhY3RhdGVUZXN0c1JlcXVlc3QaJC5sYWN0YXRlLnYxLkxpc3RMYWN0YXRlVGVzdHNSZXNwb25zZRJgChFVcGRhdGVMYWN0YXRlVGVzdBIkLmxhY3RhdGUudjEuVXBkYXRlTGFjdGF0ZVRlc3RSZXF1ZXN0GiUubGFjdGF0ZS52MS5VcGRhdGVMYWN0YXRlVGVzdFJlc3BvbnNlEmAKEURlbGV0ZUxhY3RhdGVUZXN0EiQubGFjdGF0ZS52MS5EZWxldGVMYWN0YXRlVGVzdFJlcXVlc3QaJS5sYWN0YXRlLnYxLkRlbGV0ZUxhY3RhdGVUZXN0UmVzcG9uc2USbwoWQ3JlYXRlTGFjdGF0ZVRlc3RTaGFyZRIpLmxhY3RhdGUudjEuQ3JlYXRlTGFjdGF0ZVRlc3RTaGFyZVJlcXVlc3QaKi5sYWN0YXRlLnYxLkNyZWF0ZUxhY3RhdGVUZXN0U2hhcmVSZXNwb25zZRJsChVMaXN0TGFjdGF0ZVRlc3RTaGFyZXMSKC5sYWN0YXRlLnYxLkxpc3RMYWN0YXRlVGVzdFNoYXJlc1JlcXVlc3QaKS5sYWN0YXRlLnYxLkxpc3RMYWN0YXRlVGVzdFNoYXJlc1Jlc3BvbnNlEm8KFkRlbGV0ZUxhY3RhdGVUZXN0U2hhcmUSKS5sYWN0YXRlLnYxLkRlbGV0ZUxhY3RhdGVUZXN0U2hhcmVSZXF1ZXN0GioubGFjdGF0ZS52MS5EZWxldGVMYWN0YXRlVGVzdFNoYXJlUmVzcG9uc2USgwEKGkNyZWF0ZUxhY3RhdGVUZXN0UmVjb3JkaW5nEi0ubGFjdGF0ZS52MS5DcmVhdGVMYWN0YXRlVGVzdFJlY29yZGluZ1JlcXVlc3QaLi5sYWN0YXRlLnYxLkNyZWF0ZUxhY3RhdGVUZXN0UmVjb3JkaW5nUmVzcG9uc2UiBqKfGQIIARJ6ChdHZXRMYWN0YXRlVGVzdFJlY29yZGluZxIqLmxhY3RhdGUudjEuR2V0TGFjdGF0ZVRlc3RSZWNvcmRpbmdSZXF1ZXN0GisubGFjdGF0ZS52MS5HZXRMYWN0YXRlVGVzdFJlY29yZGluZ1Jlc3BvbnNlIgainxkCCAESaAoRUmVjb3JkTGFjdGF0ZVRlc3QSJC5sYWN0YXRlLnYxLlJlY29yZExhY3RhdGVUZXN0UmVxdWVzdBolLmxhY3RhdGUudjEuUmVjb3JkTGFjdGF0ZVRlc3RSZXNwb25zZSIGop8ZAggBQqwBCg5jb20ubGFjdGF0ZS52MUIMTGFjdGF0ZVByb3RvUAFaQ2dpdGh1Yi5jb20vYnMtdG9vbHMvdHJhaWxydW5uLmluZy9pbnRlcm5hbC9nZW4vbGFjdGF0ZS92MTtsYWN0YXRldjGiAgNMWFiqAgpMYWN0YXRlLlYxygIKTGFjdGF0ZVxWMeICFkxhY3RhdGVcVjFcR1BCTWV0YWRhdGHqAgtMYWN0YXRlOjpWMWIGcHJvdG8z", [file_google_protobuf_field_mask, file_google_protobuf_timestamp, file_mcp_v1_options]);
+  fileDesc("ChhsYWN0YXRlL3YxL2xhY3RhdGUucHJvdG8SCmxhY3RhdGUudjEitQQKC0xhY3RhdGVUZXN0EgoKAmlkGAEgASgJEgwKBGRhdGUYAiABKAkSDQoFbm90ZXMYAyABKAkSJgoecmVzdGluZ19sYWN0YXRlX21tb2xfcGVyX2xpdGVyGAQgASgBEigKBnN0YWdlcxgFIAMoCzIYLmxhY3RhdGUudjEuTGFjdGF0ZVN0YWdlEi0KHWxvd2VzdF9sYWN0YXRlX21tb2xfcGVyX2xpdGVyGAYgASgBQgaqnxkCCAESMAogYWVyb2JpY190aHJlc2hvbGRfaGVhcnRfcmF0ZV9icG0YByABKAVCBqqfGQIIARJCChN0aHJlc2hvbGRfZXN0aW1hdGVzGAggAygLMh0ubGFjdGF0ZS52MS5UaHJlc2hvbGRFc3RpbWF0ZUIGqp8ZAggBEjIKImFuYWVyb2JpY190aHJlc2hvbGRfaGVhcnRfcmF0ZV9icG0YCyABKAVCBqqfGQIIARJMCh1hbmFlcm9iaWNfdGhyZXNob2xkX2VzdGltYXRlcxgMIAMoCzIdLmxhY3RhdGUudjEuVGhyZXNob2xkRXN0aW1hdGVCBqqfGQIIARISCgp3b3Jrb3V0X2lkGA0gASgJEjcKC2NyZWF0ZV90aW1lGAkgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcEIGqp8ZAggBEjcKC3VwZGF0ZV90aW1lGAogASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcEIGqp8ZAggBIoABChFUaHJlc2hvbGRFc3RpbWF0ZRIzCgpkZWZpbml0aW9uGAEgASgOMh8ubGFjdGF0ZS52MS5UaHJlc2hvbGREZWZpbml0aW9uEh4KFmxhY3RhdGVfbW1vbF9wZXJfbGl0ZXIYAiABKAESFgoOaGVhcnRfcmF0ZV9icG0YAyABKAUiRgoMTGFjdGF0ZVN0YWdlEhYKDmhlYXJ0X3JhdGVfYnBtGAEgASgFEh4KFmxhY3RhdGVfbW1vbF9wZXJfbGl0ZXIYAiABKAEiQQoYQ3JlYXRlTGFjdGF0ZVRlc3RSZXF1ZXN0EiUKBHRlc3QYASABKAsyFy5sYWN0YXRlLnYxLkxhY3RhdGVUZXN0IkIKGUNyZWF0ZUxhY3RhdGVUZXN0UmVzcG9uc2USJQoEdGVzdBgBIAEoCzIXLmxhY3RhdGUudjEuTGFjdGF0ZVRlc3QiIwoVR2V0TGFjdGF0ZVRlc3RSZXF1ZXN0EgoKAmlkGAEgASgJIj8KFkdldExhY3RhdGVUZXN0UmVzcG9uc2USJQoEdGVzdBgBIAEoCzIXLmxhY3RhdGUudjEuTGFjdGF0ZVRlc3QiGQoXTGlzdExhY3RhdGVUZXN0c1JlcXVlc3QiQgoYTGlzdExhY3RhdGVUZXN0c1Jlc3BvbnNlEiYKBXRlc3RzGAEgAygLMhcubGFjdGF0ZS52MS5MYWN0YXRlVGVzdCJyChhVcGRhdGVMYWN0YXRlVGVzdFJlcXVlc3QSJQoEdGVzdBgBIAEoCzIXLmxhY3RhdGUudjEuTGFjdGF0ZVRlc3QSLwoLdXBkYXRlX21hc2sYAiABKAsyGi5nb29nbGUucHJvdG9idWYuRmllbGRNYXNrIkIKGVVwZGF0ZUxhY3RhdGVUZXN0UmVzcG9uc2USJQoEdGVzdBgBIAEoCzIXLmxhY3RhdGUudjEuTGFjdGF0ZVRlc3QiJgoYRGVsZXRlTGFjdGF0ZVRlc3RSZXF1ZXN0EgoKAmlkGAEgASgJIhsKGURlbGV0ZUxhY3RhdGVUZXN0UmVzcG9uc2UinQEKDkxhY3RhdGVQcm9maWxlEi0KIGFlcm9iaWNfdGhyZXNob2xkX2hlYXJ0X3JhdGVfYnBtGAEgASgFSACIAQESNwoLdXBkYXRlX3RpbWUYAiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wQgaqnxkCCAFCIwohX2Flcm9iaWNfdGhyZXNob2xkX2hlYXJ0X3JhdGVfYnBtIhoKGEdldExhY3RhdGVQcm9maWxlUmVxdWVzdCJIChlHZXRMYWN0YXRlUHJvZmlsZVJlc3BvbnNlEisKB3Byb2ZpbGUYASABKAsyGi5sYWN0YXRlLnYxLkxhY3RhdGVQcm9maWxlIkcKGFNldExhY3RhdGVQcm9maWxlUmVxdWVzdBIrCgdwcm9maWxlGAEgASgLMhoubGFjdGF0ZS52MS5MYWN0YXRlUHJvZmlsZSJIChlTZXRMYWN0YXRlUHJvZmlsZVJlc3BvbnNlEisKB3Byb2ZpbGUYASABKAsyGi5sYWN0YXRlLnYxLkxhY3RhdGVQcm9maWxlIvoBChBMYWN0YXRlVGVzdFNoYXJlEhIKAmlkGAEgASgJQgaqnxkCCAESEwoDdXJsGAIgASgJQgaqnxkCCAESFgoGb3BlbmVkGAMgASgIQgaqnxkCCAESFwoHdGVzdF9pZBgEIAEoCUIGqp8ZAggBEjcKC2V4cGlyZV90aW1lGAUgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcEIGqp8ZAggBEjcKC2NyZWF0ZV90aW1lGAYgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcEIGqp8ZAggBEhoKCndvcmtvdXRfaWQYByABKAlCBqqfGQIIASIzCh1DcmVhdGVMYWN0YXRlVGVzdFNoYXJlUmVxdWVzdBISCgp3b3Jrb3V0X2lkGAEgASgJIk0KHkNyZWF0ZUxhY3RhdGVUZXN0U2hhcmVSZXNwb25zZRIrCgVzaGFyZRgBIAEoCzIcLmxhY3RhdGUudjEuTGFjdGF0ZVRlc3RTaGFyZSIeChxMaXN0TGFjdGF0ZVRlc3RTaGFyZXNSZXF1ZXN0Ik0KHUxpc3RMYWN0YXRlVGVzdFNoYXJlc1Jlc3BvbnNlEiwKBnNoYXJlcxgBIAMoCzIcLmxhY3RhdGUudjEuTGFjdGF0ZVRlc3RTaGFyZSIrCh1EZWxldGVMYWN0YXRlVGVzdFNoYXJlUmVxdWVzdBIKCgJpZBgBIAEoCSIgCh5EZWxldGVMYWN0YXRlVGVzdFNoYXJlUmVzcG9uc2UiMgohQ3JlYXRlTGFjdGF0ZVRlc3RSZWNvcmRpbmdSZXF1ZXN0Eg0KBXRva2VuGAEgASgJIpABCiJDcmVhdGVMYWN0YXRlVGVzdFJlY29yZGluZ1Jlc3BvbnNlEhIKCm93bmVyX25hbWUYASABKAkSLwoLZXhwaXJlX3RpbWUYAiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEiUKBHRlc3QYAyABKAsyFy5sYWN0YXRlLnYxLkxhY3RhdGVUZXN0IiAKHkdldExhY3RhdGVUZXN0UmVjb3JkaW5nUmVxdWVzdCKNAQofR2V0TGFjdGF0ZVRlc3RSZWNvcmRpbmdSZXNwb25zZRISCgpvd25lcl9uYW1lGAEgASgJEi8KC2V4cGlyZV90aW1lGAIgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIlCgR0ZXN0GAMgASgLMhcubGFjdGF0ZS52MS5MYWN0YXRlVGVzdCJBChhSZWNvcmRMYWN0YXRlVGVzdFJlcXVlc3QSJQoEdGVzdBgBIAEoCzIXLmxhY3RhdGUudjEuTGFjdGF0ZVRlc3QiQgoZUmVjb3JkTGFjdGF0ZVRlc3RSZXNwb25zZRIlCgR0ZXN0GAEgASgLMhcubGFjdGF0ZS52MS5MYWN0YXRlVGVzdCr+AQoTVGhyZXNob2xkRGVmaW5pdGlvbhIkCiBUSFJFU0hPTERfREVGSU5JVElPTl9VTlNQRUNJRklFRBAAEiUKIVRIUkVTSE9MRF9ERUZJTklUSU9OX0ZJWEVEXzJfTU1PTBABEicKI1RIUkVTSE9MRF9ERUZJTklUSU9OX0ZJWEVEXzJfNV9NTU9MEAISKwonVEhSRVNIT0xEX0RFRklOSVRJT05fTE9XRVNUX1BMVVNfMV9NTU9MEAMSJQohVEhSRVNIT0xEX0RFRklOSVRJT05fRklYRURfNF9NTU9MEAQSHQoZVEhSRVNIT0xEX0RFRklOSVRJT05fRE1BWBAFMvIKChJMYWN0YXRlVGVzdFNlcnZpY2USYAoRQ3JlYXRlTGFjdGF0ZVRlc3QSJC5sYWN0YXRlLnYxLkNyZWF0ZUxhY3RhdGVUZXN0UmVxdWVzdBolLmxhY3RhdGUudjEuQ3JlYXRlTGFjdGF0ZVRlc3RSZXNwb25zZRJXCg5HZXRMYWN0YXRlVGVzdBIhLmxhY3RhdGUudjEuR2V0TGFjdGF0ZVRlc3RSZXF1ZXN0GiIubGFjdGF0ZS52MS5HZXRMYWN0YXRlVGVzdFJlc3BvbnNlEl0KEExpc3RMYWN0YXRlVGVzdHMSIy5sYWN0YXRlLnYxLkxpc3RMYWN0YXRlVGVzdHNSZXF1ZXN0GiQubGFjdGF0ZS52MS5MaXN0TGFjdGF0ZVRlc3RzUmVzcG9uc2USYAoRVXBkYXRlTGFjdGF0ZVRlc3QSJC5sYWN0YXRlLnYxLlVwZGF0ZUxhY3RhdGVUZXN0UmVxdWVzdBolLmxhY3RhdGUudjEuVXBkYXRlTGFjdGF0ZVRlc3RSZXNwb25zZRJgChFEZWxldGVMYWN0YXRlVGVzdBIkLmxhY3RhdGUudjEuRGVsZXRlTGFjdGF0ZVRlc3RSZXF1ZXN0GiUubGFjdGF0ZS52MS5EZWxldGVMYWN0YXRlVGVzdFJlc3BvbnNlEmAKEUdldExhY3RhdGVQcm9maWxlEiQubGFjdGF0ZS52MS5HZXRMYWN0YXRlUHJvZmlsZVJlcXVlc3QaJS5sYWN0YXRlLnYxLkdldExhY3RhdGVQcm9maWxlUmVzcG9uc2USYAoRU2V0TGFjdGF0ZVByb2ZpbGUSJC5sYWN0YXRlLnYxLlNldExhY3RhdGVQcm9maWxlUmVxdWVzdBolLmxhY3RhdGUudjEuU2V0TGFjdGF0ZVByb2ZpbGVSZXNwb25zZRJvChZDcmVhdGVMYWN0YXRlVGVzdFNoYXJlEikubGFjdGF0ZS52MS5DcmVhdGVMYWN0YXRlVGVzdFNoYXJlUmVxdWVzdBoqLmxhY3RhdGUudjEuQ3JlYXRlTGFjdGF0ZVRlc3RTaGFyZVJlc3BvbnNlEmwKFUxpc3RMYWN0YXRlVGVzdFNoYXJlcxIoLmxhY3RhdGUudjEuTGlzdExhY3RhdGVUZXN0U2hhcmVzUmVxdWVzdBopLmxhY3RhdGUudjEuTGlzdExhY3RhdGVUZXN0U2hhcmVzUmVzcG9uc2USbwoWRGVsZXRlTGFjdGF0ZVRlc3RTaGFyZRIpLmxhY3RhdGUudjEuRGVsZXRlTGFjdGF0ZVRlc3RTaGFyZVJlcXVlc3QaKi5sYWN0YXRlLnYxLkRlbGV0ZUxhY3RhdGVUZXN0U2hhcmVSZXNwb25zZRKDAQoaQ3JlYXRlTGFjdGF0ZVRlc3RSZWNvcmRpbmcSLS5sYWN0YXRlLnYxLkNyZWF0ZUxhY3RhdGVUZXN0UmVjb3JkaW5nUmVxdWVzdBouLmxhY3RhdGUudjEuQ3JlYXRlTGFjdGF0ZVRlc3RSZWNvcmRpbmdSZXNwb25zZSIGop8ZAggBEnoKF0dldExhY3RhdGVUZXN0UmVjb3JkaW5nEioubGFjdGF0ZS52MS5HZXRMYWN0YXRlVGVzdFJlY29yZGluZ1JlcXVlc3QaKy5sYWN0YXRlLnYxLkdldExhY3RhdGVUZXN0UmVjb3JkaW5nUmVzcG9uc2UiBqKfGQIIARJoChFSZWNvcmRMYWN0YXRlVGVzdBIkLmxhY3RhdGUudjEuUmVjb3JkTGFjdGF0ZVRlc3RSZXF1ZXN0GiUubGFjdGF0ZS52MS5SZWNvcmRMYWN0YXRlVGVzdFJlc3BvbnNlIgainxkCCAFCrAEKDmNvbS5sYWN0YXRlLnYxQgxMYWN0YXRlUHJvdG9QAVpDZ2l0aHViLmNvbS9icy10b29scy90cmFpbHJ1bm4uaW5nL2ludGVybmFsL2dlbi9sYWN0YXRlL3YxO2xhY3RhdGV2MaICA0xYWKoCCkxhY3RhdGUuVjHKAgpMYWN0YXRlXFYx4gIWTGFjdGF0ZVxWMVxHUEJNZXRhZGF0YeoCC0xhY3RhdGU6OlYxYgZwcm90bzM", [file_google_protobuf_field_mask, file_google_protobuf_timestamp, file_mcp_v1_options]);
 
 /**
  * A blood lactate test.
@@ -389,6 +389,112 @@ export const DeleteLactateTestResponseSchema: GenMessage<DeleteLactateTestRespon
   messageDesc(file_lactate_v1_lactate, 12);
 
 /**
+ * What the user's next lactate test goes by. A test has stages 10 bpm apart,
+ * and 5 bpm apart within 10 bpm of the expected aerobic threshold, to find
+ * it more precisely, starting 30 bpm below it. The web app's guided test and
+ * the planned tests on the user's Garmin calendar are run that way.
+ *
+ * @generated from message lactate.v1.LactateProfile
+ */
+export type LactateProfile = Message<"lactate.v1.LactateProfile"> & {
+  /**
+   * The heart rate the next test expects the aerobic threshold at, from 40
+   * to 230. Each test that finds a threshold sets it, if it's the user's
+   * latest test. Until it's set, it's the threshold of the latest test that
+   * found one. Unset if there's none, and to clear it: the next test then
+   * has even steps.
+   *
+   * @generated from field: optional int32 aerobic_threshold_heart_rate_bpm = 1;
+   */
+  aerobicThresholdHeartRateBpm?: number | undefined;
+
+  /**
+   * When the profile was last set, by the user or a test. Unset if it never
+   * was.
+   *
+   * @generated from field: google.protobuf.Timestamp update_time = 2;
+   */
+  updateTime?: Timestamp | undefined;
+};
+
+/**
+ * Describes the message lactate.v1.LactateProfile.
+ * Use `create(LactateProfileSchema)` to create a new message.
+ */
+export const LactateProfileSchema: GenMessage<LactateProfile> = /*@__PURE__*/
+  messageDesc(file_lactate_v1_lactate, 13);
+
+/**
+ * @generated from message lactate.v1.GetLactateProfileRequest
+ */
+export type GetLactateProfileRequest = Message<"lactate.v1.GetLactateProfileRequest"> & {
+};
+
+/**
+ * Describes the message lactate.v1.GetLactateProfileRequest.
+ * Use `create(GetLactateProfileRequestSchema)` to create a new message.
+ */
+export const GetLactateProfileRequestSchema: GenMessage<GetLactateProfileRequest> = /*@__PURE__*/
+  messageDesc(file_lactate_v1_lactate, 14);
+
+/**
+ * @generated from message lactate.v1.GetLactateProfileResponse
+ */
+export type GetLactateProfileResponse = Message<"lactate.v1.GetLactateProfileResponse"> & {
+  /**
+   * The user's lactate profile.
+   *
+   * @generated from field: lactate.v1.LactateProfile profile = 1;
+   */
+  profile?: LactateProfile | undefined;
+};
+
+/**
+ * Describes the message lactate.v1.GetLactateProfileResponse.
+ * Use `create(GetLactateProfileResponseSchema)` to create a new message.
+ */
+export const GetLactateProfileResponseSchema: GenMessage<GetLactateProfileResponse> = /*@__PURE__*/
+  messageDesc(file_lactate_v1_lactate, 15);
+
+/**
+ * @generated from message lactate.v1.SetLactateProfileRequest
+ */
+export type SetLactateProfileRequest = Message<"lactate.v1.SetLactateProfileRequest"> & {
+  /**
+   * The user's lactate profile, replacing the earlier one.
+   *
+   * @generated from field: lactate.v1.LactateProfile profile = 1;
+   */
+  profile?: LactateProfile | undefined;
+};
+
+/**
+ * Describes the message lactate.v1.SetLactateProfileRequest.
+ * Use `create(SetLactateProfileRequestSchema)` to create a new message.
+ */
+export const SetLactateProfileRequestSchema: GenMessage<SetLactateProfileRequest> = /*@__PURE__*/
+  messageDesc(file_lactate_v1_lactate, 16);
+
+/**
+ * @generated from message lactate.v1.SetLactateProfileResponse
+ */
+export type SetLactateProfileResponse = Message<"lactate.v1.SetLactateProfileResponse"> & {
+  /**
+   * The user's lactate profile.
+   *
+   * @generated from field: lactate.v1.LactateProfile profile = 1;
+   */
+  profile?: LactateProfile | undefined;
+};
+
+/**
+ * Describes the message lactate.v1.SetLactateProfileResponse.
+ * Use `create(SetLactateProfileResponseSchema)` to create a new message.
+ */
+export const SetLactateProfileResponseSchema: GenMessage<SetLactateProfileResponse> = /*@__PURE__*/
+  messageDesc(file_lactate_v1_lactate, 17);
+
+/**
  * A recording link, which lets someone record a lactate test for the user
  * without signing in.
  *
@@ -452,7 +558,7 @@ export type LactateTestShare = Message<"lactate.v1.LactateTestShare"> & {
  * Use `create(LactateTestShareSchema)` to create a new message.
  */
 export const LactateTestShareSchema: GenMessage<LactateTestShare> = /*@__PURE__*/
-  messageDesc(file_lactate_v1_lactate, 13);
+  messageDesc(file_lactate_v1_lactate, 18);
 
 /**
  * @generated from message lactate.v1.CreateLactateTestShareRequest
@@ -473,7 +579,7 @@ export type CreateLactateTestShareRequest = Message<"lactate.v1.CreateLactateTes
  * Use `create(CreateLactateTestShareRequestSchema)` to create a new message.
  */
 export const CreateLactateTestShareRequestSchema: GenMessage<CreateLactateTestShareRequest> = /*@__PURE__*/
-  messageDesc(file_lactate_v1_lactate, 14);
+  messageDesc(file_lactate_v1_lactate, 19);
 
 /**
  * @generated from message lactate.v1.CreateLactateTestShareResponse
@@ -492,7 +598,7 @@ export type CreateLactateTestShareResponse = Message<"lactate.v1.CreateLactateTe
  * Use `create(CreateLactateTestShareResponseSchema)` to create a new message.
  */
 export const CreateLactateTestShareResponseSchema: GenMessage<CreateLactateTestShareResponse> = /*@__PURE__*/
-  messageDesc(file_lactate_v1_lactate, 15);
+  messageDesc(file_lactate_v1_lactate, 20);
 
 /**
  * @generated from message lactate.v1.ListLactateTestSharesRequest
@@ -505,7 +611,7 @@ export type ListLactateTestSharesRequest = Message<"lactate.v1.ListLactateTestSh
  * Use `create(ListLactateTestSharesRequestSchema)` to create a new message.
  */
 export const ListLactateTestSharesRequestSchema: GenMessage<ListLactateTestSharesRequest> = /*@__PURE__*/
-  messageDesc(file_lactate_v1_lactate, 16);
+  messageDesc(file_lactate_v1_lactate, 21);
 
 /**
  * @generated from message lactate.v1.ListLactateTestSharesResponse
@@ -524,7 +630,7 @@ export type ListLactateTestSharesResponse = Message<"lactate.v1.ListLactateTestS
  * Use `create(ListLactateTestSharesResponseSchema)` to create a new message.
  */
 export const ListLactateTestSharesResponseSchema: GenMessage<ListLactateTestSharesResponse> = /*@__PURE__*/
-  messageDesc(file_lactate_v1_lactate, 17);
+  messageDesc(file_lactate_v1_lactate, 22);
 
 /**
  * @generated from message lactate.v1.DeleteLactateTestShareRequest
@@ -543,7 +649,7 @@ export type DeleteLactateTestShareRequest = Message<"lactate.v1.DeleteLactateTes
  * Use `create(DeleteLactateTestShareRequestSchema)` to create a new message.
  */
 export const DeleteLactateTestShareRequestSchema: GenMessage<DeleteLactateTestShareRequest> = /*@__PURE__*/
-  messageDesc(file_lactate_v1_lactate, 18);
+  messageDesc(file_lactate_v1_lactate, 23);
 
 /**
  * @generated from message lactate.v1.DeleteLactateTestShareResponse
@@ -556,7 +662,7 @@ export type DeleteLactateTestShareResponse = Message<"lactate.v1.DeleteLactateTe
  * Use `create(DeleteLactateTestShareResponseSchema)` to create a new message.
  */
 export const DeleteLactateTestShareResponseSchema: GenMessage<DeleteLactateTestShareResponse> = /*@__PURE__*/
-  messageDesc(file_lactate_v1_lactate, 19);
+  messageDesc(file_lactate_v1_lactate, 24);
 
 /**
  * @generated from message lactate.v1.CreateLactateTestRecordingRequest
@@ -575,7 +681,7 @@ export type CreateLactateTestRecordingRequest = Message<"lactate.v1.CreateLactat
  * Use `create(CreateLactateTestRecordingRequestSchema)` to create a new message.
  */
 export const CreateLactateTestRecordingRequestSchema: GenMessage<CreateLactateTestRecordingRequest> = /*@__PURE__*/
-  messageDesc(file_lactate_v1_lactate, 20);
+  messageDesc(file_lactate_v1_lactate, 25);
 
 /**
  * @generated from message lactate.v1.CreateLactateTestRecordingResponse
@@ -609,7 +715,7 @@ export type CreateLactateTestRecordingResponse = Message<"lactate.v1.CreateLacta
  * Use `create(CreateLactateTestRecordingResponseSchema)` to create a new message.
  */
 export const CreateLactateTestRecordingResponseSchema: GenMessage<CreateLactateTestRecordingResponse> = /*@__PURE__*/
-  messageDesc(file_lactate_v1_lactate, 21);
+  messageDesc(file_lactate_v1_lactate, 26);
 
 /**
  * @generated from message lactate.v1.GetLactateTestRecordingRequest
@@ -622,7 +728,7 @@ export type GetLactateTestRecordingRequest = Message<"lactate.v1.GetLactateTestR
  * Use `create(GetLactateTestRecordingRequestSchema)` to create a new message.
  */
 export const GetLactateTestRecordingRequestSchema: GenMessage<GetLactateTestRecordingRequest> = /*@__PURE__*/
-  messageDesc(file_lactate_v1_lactate, 22);
+  messageDesc(file_lactate_v1_lactate, 27);
 
 /**
  * @generated from message lactate.v1.GetLactateTestRecordingResponse
@@ -655,7 +761,7 @@ export type GetLactateTestRecordingResponse = Message<"lactate.v1.GetLactateTest
  * Use `create(GetLactateTestRecordingResponseSchema)` to create a new message.
  */
 export const GetLactateTestRecordingResponseSchema: GenMessage<GetLactateTestRecordingResponse> = /*@__PURE__*/
-  messageDesc(file_lactate_v1_lactate, 23);
+  messageDesc(file_lactate_v1_lactate, 28);
 
 /**
  * @generated from message lactate.v1.RecordLactateTestRequest
@@ -674,7 +780,7 @@ export type RecordLactateTestRequest = Message<"lactate.v1.RecordLactateTestRequ
  * Use `create(RecordLactateTestRequestSchema)` to create a new message.
  */
 export const RecordLactateTestRequestSchema: GenMessage<RecordLactateTestRequest> = /*@__PURE__*/
-  messageDesc(file_lactate_v1_lactate, 24);
+  messageDesc(file_lactate_v1_lactate, 29);
 
 /**
  * @generated from message lactate.v1.RecordLactateTestResponse
@@ -693,7 +799,7 @@ export type RecordLactateTestResponse = Message<"lactate.v1.RecordLactateTestRes
  * Use `create(RecordLactateTestResponseSchema)` to create a new message.
  */
 export const RecordLactateTestResponseSchema: GenMessage<RecordLactateTestResponse> = /*@__PURE__*/
-  messageDesc(file_lactate_v1_lactate, 25);
+  messageDesc(file_lactate_v1_lactate, 30);
 
 /**
  * ThresholdDefinition is a definition of the aerobic or anaerobic threshold
@@ -828,6 +934,29 @@ export const LactateTestService: GenService<{
     methodKind: "unary";
     input: typeof DeleteLactateTestRequestSchema;
     output: typeof DeleteLactateTestResponseSchema;
+  },
+  /**
+   * Get the user's lactate profile: where their next test expects their
+   * aerobic threshold.
+   *
+   * @generated from rpc lactate.v1.LactateTestService.GetLactateProfile
+   */
+  getLactateProfile: {
+    methodKind: "unary";
+    input: typeof GetLactateProfileRequestSchema;
+    output: typeof GetLactateProfileResponseSchema;
+  },
+  /**
+   * Replace the user's lactate profile. The user usually does this in the
+   * web app's settings, and each test that finds a threshold sets it; only
+   * change it when they give their expected threshold.
+   *
+   * @generated from rpc lactate.v1.LactateTestService.SetLactateProfile
+   */
+  setLactateProfile: {
+    methodKind: "unary";
+    input: typeof SetLactateProfileRequestSchema;
+    output: typeof SetLactateProfileResponseSchema;
   },
   /**
    * Create a recording link, which lets someone record a lactate test for

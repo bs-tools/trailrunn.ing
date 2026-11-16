@@ -40,6 +40,13 @@ service LactateTestService {
   rpc UpdateLactateTest(UpdateLactateTestRequest) returns (UpdateLactateTestResponse);
   // Delete a lactate test.
   rpc DeleteLactateTest(DeleteLactateTestRequest) returns (DeleteLactateTestResponse);
+  // Get the user's lactate profile: where their next test expects their
+  // aerobic threshold.
+  rpc GetLactateProfile(GetLactateProfileRequest) returns (GetLactateProfileResponse);
+  // Replace the user's lactate profile. The user usually does this in the
+  // web app's settings, and each test that finds a threshold sets it; only
+  // change it when they give their expected threshold.
+  rpc SetLactateProfile(SetLactateProfileRequest) returns (SetLactateProfileResponse);
   // Create a recording link, which lets someone record a lactate test for
   // the user without signing in, e.g. a friend holding the lactate meter
   // during the test. The link works for 24 hours, in the first browser that
@@ -201,6 +208,39 @@ message DeleteLactateTestRequest {
 }
 
 message DeleteLactateTestResponse {}
+
+// What the user's next lactate test goes by. A test has stages 10 bpm apart,
+// and 5 bpm apart within 10 bpm of the expected aerobic threshold, to find
+// it more precisely, starting 30 bpm below it. The web app's guided test and
+// the planned tests on the user's Garmin calendar are run that way.
+message LactateProfile {
+  // The heart rate the next test expects the aerobic threshold at, from 40
+  // to 230. Each test that finds a threshold sets it, if it's the user's
+  // latest test. Until it's set, it's the threshold of the latest test that
+  // found one. Unset if there's none, and to clear it: the next test then
+  // has even steps.
+  optional int32 aerobic_threshold_heart_rate_bpm = 1;
+  // When the profile was last set, by the user or a test. Unset if it never
+  // was.
+  google.protobuf.Timestamp update_time = 2 [(mcp.v1.field).output_only = true];
+}
+
+message GetLactateProfileRequest {}
+
+message GetLactateProfileResponse {
+  // The user's lactate profile.
+  LactateProfile profile = 1;
+}
+
+message SetLactateProfileRequest {
+  // The user's lactate profile, replacing the earlier one.
+  LactateProfile profile = 1;
+}
+
+message SetLactateProfileResponse {
+  // The user's lactate profile.
+  LactateProfile profile = 1;
+}
 
 // A recording link, which lets someone record a lactate test for the user
 // without signing in.

@@ -39,6 +39,12 @@ const (
 	// LactateTestServiceDeleteLactateTestProcedure is the procedure name of the LactateTestService's
 	// DeleteLactateTest RPC.
 	LactateTestServiceDeleteLactateTestProcedure = "/lactate.v1.LactateTestService/DeleteLactateTest"
+	// LactateTestServiceGetLactateProfileProcedure is the procedure name of the LactateTestService's
+	// GetLactateProfile RPC.
+	LactateTestServiceGetLactateProfileProcedure = "/lactate.v1.LactateTestService/GetLactateProfile"
+	// LactateTestServiceSetLactateProfileProcedure is the procedure name of the LactateTestService's
+	// SetLactateProfile RPC.
+	LactateTestServiceSetLactateProfileProcedure = "/lactate.v1.LactateTestService/SetLactateProfile"
 	// LactateTestServiceCreateLactateTestShareProcedure is the procedure name of the
 	// LactateTestService's CreateLactateTestShare RPC.
 	LactateTestServiceCreateLactateTestShareProcedure = "/lactate.v1.LactateTestService/CreateLactateTestShare"
@@ -93,6 +99,20 @@ var (
 			StreamType: connect.StreamTypeUnary,
 			Schema:     v1.File_lactate_v1_lactate_proto.Services().ByName("LactateTestService").Methods().ByName("DeleteLactateTest"),
 			Procedure:  LactateTestServiceDeleteLactateTestProcedure,
+		}
+	})
+	lactateTestServiceGetLactateProfileSpec = sync.OnceValue(func() connect.Spec {
+		return connect.Spec{
+			StreamType: connect.StreamTypeUnary,
+			Schema:     v1.File_lactate_v1_lactate_proto.Services().ByName("LactateTestService").Methods().ByName("GetLactateProfile"),
+			Procedure:  LactateTestServiceGetLactateProfileProcedure,
+		}
+	})
+	lactateTestServiceSetLactateProfileSpec = sync.OnceValue(func() connect.Spec {
+		return connect.Spec{
+			StreamType: connect.StreamTypeUnary,
+			Schema:     v1.File_lactate_v1_lactate_proto.Services().ByName("LactateTestService").Methods().ByName("SetLactateProfile"),
+			Procedure:  LactateTestServiceSetLactateProfileProcedure,
 		}
 	})
 	lactateTestServiceCreateLactateTestShareSpec = sync.OnceValue(func() connect.Spec {
@@ -152,6 +172,13 @@ type LactateTestServiceClient interface {
 	UpdateLactateTest(context.Context, *v1.UpdateLactateTestRequest) (*v1.UpdateLactateTestResponse, error)
 	// Delete a lactate test.
 	DeleteLactateTest(context.Context, *v1.DeleteLactateTestRequest) (*v1.DeleteLactateTestResponse, error)
+	// Get the user's lactate profile: where their next test expects their
+	// aerobic threshold.
+	GetLactateProfile(context.Context, *v1.GetLactateProfileRequest) (*v1.GetLactateProfileResponse, error)
+	// Replace the user's lactate profile. The user usually does this in the
+	// web app's settings, and each test that finds a threshold sets it; only
+	// change it when they give their expected threshold.
+	SetLactateProfile(context.Context, *v1.SetLactateProfileRequest) (*v1.SetLactateProfileResponse, error)
 	// Create a recording link, which lets someone record a lactate test for
 	// the user without signing in, e.g. a friend holding the lactate meter
 	// during the test. The link works for 24 hours, in the first browser that
@@ -195,6 +222,13 @@ type LactateTestServiceHandler interface {
 	UpdateLactateTest(context.Context, *v1.UpdateLactateTestRequest) (*v1.UpdateLactateTestResponse, error)
 	// Delete a lactate test.
 	DeleteLactateTest(context.Context, *v1.DeleteLactateTestRequest) (*v1.DeleteLactateTestResponse, error)
+	// Get the user's lactate profile: where their next test expects their
+	// aerobic threshold.
+	GetLactateProfile(context.Context, *v1.GetLactateProfileRequest) (*v1.GetLactateProfileResponse, error)
+	// Replace the user's lactate profile. The user usually does this in the
+	// web app's settings, and each test that finds a threshold sets it; only
+	// change it when they give their expected threshold.
+	SetLactateProfile(context.Context, *v1.SetLactateProfileRequest) (*v1.SetLactateProfileResponse, error)
 	// Create a recording link, which lets someone record a lactate test for
 	// the user without signing in, e.g. a friend holding the lactate meter
 	// during the test. The link works for 24 hours, in the first browser that
@@ -229,6 +263,8 @@ func RegisterLactateTestServiceHandler(server *connect.Server, svc LactateTestSe
 		connect.Method{Spec: lactateTestServiceListLactateTestsSpec(), Handler: adapter.listLactateTests},
 		connect.Method{Spec: lactateTestServiceUpdateLactateTestSpec(), Handler: adapter.updateLactateTest},
 		connect.Method{Spec: lactateTestServiceDeleteLactateTestSpec(), Handler: adapter.deleteLactateTest},
+		connect.Method{Spec: lactateTestServiceGetLactateProfileSpec(), Handler: adapter.getLactateProfile},
+		connect.Method{Spec: lactateTestServiceSetLactateProfileSpec(), Handler: adapter.setLactateProfile},
 		connect.Method{Spec: lactateTestServiceCreateLactateTestShareSpec(), Handler: adapter.createLactateTestShare},
 		connect.Method{Spec: lactateTestServiceListLactateTestSharesSpec(), Handler: adapter.listLactateTestShares},
 		connect.Method{Spec: lactateTestServiceDeleteLactateTestShareSpec(), Handler: adapter.deleteLactateTestShare},
@@ -259,6 +295,14 @@ func (UnimplementedLactateTestServiceHandler) UpdateLactateTest(context.Context,
 
 func (UnimplementedLactateTestServiceHandler) DeleteLactateTest(context.Context, *v1.DeleteLactateTestRequest) (*v1.DeleteLactateTestResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, "lactate.v1.LactateTestService.DeleteLactateTest is not implemented")
+}
+
+func (UnimplementedLactateTestServiceHandler) GetLactateProfile(context.Context, *v1.GetLactateProfileRequest) (*v1.GetLactateProfileResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, "lactate.v1.LactateTestService.GetLactateProfile is not implemented")
+}
+
+func (UnimplementedLactateTestServiceHandler) SetLactateProfile(context.Context, *v1.SetLactateProfileRequest) (*v1.SetLactateProfileResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, "lactate.v1.LactateTestService.SetLactateProfile is not implemented")
 }
 
 func (UnimplementedLactateTestServiceHandler) CreateLactateTestShare(context.Context, *v1.CreateLactateTestShareRequest) (*v1.CreateLactateTestShareResponse, error) {
@@ -324,6 +368,22 @@ func (c *lactateTestServiceClient) UpdateLactateTest(ctx context.Context, req *v
 func (c *lactateTestServiceClient) DeleteLactateTest(ctx context.Context, req *v1.DeleteLactateTestRequest) (*v1.DeleteLactateTestResponse, error) {
 	var res v1.DeleteLactateTestResponse
 	if err := c.client.CallUnary(ctx, lactateTestServiceDeleteLactateTestSpec(), req, &res); err != nil {
+		return nil, err
+	}
+	return &res, nil
+}
+
+func (c *lactateTestServiceClient) GetLactateProfile(ctx context.Context, req *v1.GetLactateProfileRequest) (*v1.GetLactateProfileResponse, error) {
+	var res v1.GetLactateProfileResponse
+	if err := c.client.CallUnary(ctx, lactateTestServiceGetLactateProfileSpec(), req, &res); err != nil {
+		return nil, err
+	}
+	return &res, nil
+}
+
+func (c *lactateTestServiceClient) SetLactateProfile(ctx context.Context, req *v1.SetLactateProfileRequest) (*v1.SetLactateProfileResponse, error) {
+	var res v1.SetLactateProfileResponse
+	if err := c.client.CallUnary(ctx, lactateTestServiceSetLactateProfileSpec(), req, &res); err != nil {
 		return nil, err
 	}
 	return &res, nil
@@ -433,6 +493,30 @@ func (h lactateTestServiceHandler) deleteLactateTest(ctx context.Context, _ conn
 		return err
 	}
 	res, err := h.svc.DeleteLactateTest(ctx, &req)
+	if err != nil {
+		return err
+	}
+	return stream.Send(res)
+}
+
+func (h lactateTestServiceHandler) getLactateProfile(ctx context.Context, _ connect.Spec, stream connect.ServerStream) error {
+	var req v1.GetLactateProfileRequest
+	if err := stream.Receive(&req); err != nil {
+		return err
+	}
+	res, err := h.svc.GetLactateProfile(ctx, &req)
+	if err != nil {
+		return err
+	}
+	return stream.Send(res)
+}
+
+func (h lactateTestServiceHandler) setLactateProfile(ctx context.Context, _ connect.Spec, stream connect.ServerStream) error {
+	var req v1.SetLactateProfileRequest
+	if err := stream.Receive(&req); err != nil {
+		return err
+	}
+	res, err := h.svc.SetLactateProfile(ctx, &req)
 	if err != nil {
 		return err
 	}

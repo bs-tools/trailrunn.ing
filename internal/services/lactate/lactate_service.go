@@ -46,6 +46,8 @@ type TestRepository interface {
 	ListTests(ctx context.Context, userID pgtype.UUID) ([]*lactate.Test, error)
 	UpdateTest(ctx context.Context, test *lactate.Test) (*lactate.Test, error)
 	DeleteTest(ctx context.Context, userID, testID pgtype.UUID) error
+	GetProfile(ctx context.Context, userID pgtype.UUID) (*lactate.Profile, error)
+	SetProfile(ctx context.Context, userID pgtype.UUID, profile *lactate.Profile) (*lactate.Profile, error)
 	CreateShare(ctx context.Context, userID pgtype.UUID, tokenSHA256 []byte, expireTime time.Time, workoutID pgtype.UUID) (*lactate.Share, error)
 	ListShares(ctx context.Context, userID pgtype.UUID) ([]*lactate.Share, error)
 	DeleteShare(ctx context.Context, userID, shareID pgtype.UUID) error
