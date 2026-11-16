@@ -41,6 +41,23 @@ export const updateLactateTest = LactateTestService.method.updateLactateTest;
 export const deleteLactateTest = LactateTestService.method.deleteLactateTest;
 
 /**
+ * Get the user's lactate profile: where their next test expects their
+ * aerobic threshold.
+ *
+ * @generated from rpc lactate.v1.LactateTestService.GetLactateProfile
+ */
+export const getLactateProfile = LactateTestService.method.getLactateProfile;
+
+/**
+ * Replace the user's lactate profile. The user usually does this in the
+ * web app's settings, and each test that finds a threshold sets it; only
+ * change it when they give their expected threshold.
+ *
+ * @generated from rpc lactate.v1.LactateTestService.SetLactateProfile
+ */
+export const setLactateProfile = LactateTestService.method.setLactateProfile;
+
+/**
  * Create a recording link, which lets someone record a lactate test for
  * the user without signing in, e.g. a friend holding the lactate meter
  * during the test. The link works for 24 hours, in the first browser that

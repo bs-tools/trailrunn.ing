@@ -1143,6 +1143,12 @@ type Invitation struct {
 	UseTime     pgtype.Timestamptz
 }
 
+type LactateProfile struct {
+	UserID                       pgtype.UUID
+	AerobicThresholdHeartRateBpm pgtype.Int4
+	UpdateTime                   pgtype.Timestamptz
+}
+
 type LactateTest struct {
 	ID                         pgtype.UUID
 	UserID                     pgtype.UUID

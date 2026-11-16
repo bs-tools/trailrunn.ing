@@ -187,6 +187,9 @@ const RecordLactateTestPage: React.FC = () => {
         <GuidedTest
           test={test}
           previous={undefined}
+          // The recorder isn't signed in, so has no profile to go by.
+          expectedThreshold={0}
+          saveThreshold={undefined}
           pending={record.isPending}
           error={record.error}
           create={async (mmolPerLiter) => {

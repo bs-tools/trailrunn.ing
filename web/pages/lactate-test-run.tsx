@@ -39,8 +39,10 @@ import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 import { skipToken, useQueryClient } from "@tanstack/react-query";
 import {
   createLactateTest,
+  getLactateProfile,
   getLactateTest,
   listLactateTests,
+  setLactateProfile,
   updateLactateTest,
 } from "gen/lactate/v1/lactate-LactateTestService_connectquery";
 import type { LactateStage, LactateTest } from "gen/lactate/v1/lactate_pb";
@@ -259,7 +261,7 @@ const Prepare: React.FC<PrepareProps> = ({
           {field(
             "thresholdHeartRate",
             "Expected aerobic threshold (bpm)",
-            `From your last test, if you had one. Stages within ${FINE_WINDOW_BPM} bpm of it are ${FINE_STEP_BPM} bpm apart, to find it more precisely. Leave empty for even steps.`
+            `From your settings, which each test updates. Stages within ${FINE_WINDOW_BPM} bpm of it are ${FINE_STEP_BPM} bpm apart, to find it more precisely. Leave empty for even steps.`
           )}
           {field(
             "startHeartRate",
@@ -525,16 +527,17 @@ const Entry: React.FC<EntryProps> = ({
 
 /**
  * InitialSettings returns the settings a new test starts with: those of the
- * last guided test, around the previous test's aerobic threshold if it
- * found one, starting a few stages below it. Without a threshold, a test
- * starts where the previous one did, so the two are comparable.
+ * last guided test, around the aerobic threshold the user's profile
+ * expects, starting a few stages below it. Without a threshold, a test has
+ * even steps and starts where the previous one did, so the two are
+ * comparable.
  */
 const initialSettings = (
   stored: Settings | undefined,
-  previous: LactateTest | undefined
+  previous: LactateTest | undefined,
+  threshold: number
 ): Settings => {
-  const settings = stored ?? DEFAULT_SETTINGS;
-  const threshold = previous?.aerobicThresholdHeartRateBpm ?? 0;
+  const settings = { ...(stored ?? DEFAULT_SETTINGS), thresholdHeartRate: 0 };
   if (threshold > 0) {
     return {
       ...settings,
@@ -547,7 +550,7 @@ const initialSettings = (
     };
   }
   if (stored !== undefined) {
-    return stored;
+    return settings;
   }
   return {
     ...settings,
@@ -564,6 +567,12 @@ export interface GuidedTestProps {
   test: LactateTest | undefined;
   // The user's latest test, to start where it did, if there is one.
   previous: LactateTest | undefined;
+  /*
+   * Where the user's profile expects their aerobic threshold, 0 if nowhere,
+   * and how to set it, if the test is recorded by the user themselves.
+   */
+  expectedThreshold: number;
+  saveThreshold: ((heartRateBpm: number) => void) | undefined;
   pending: boolean;
   error: ConnectError | null;
   // Create creates the test, with its resting reading, 0 if none.
@@ -580,6 +589,8 @@ export interface GuidedTestProps {
 export const GuidedTest: React.FC<GuidedTestProps> = ({
   test: loaded,
   previous,
+  expectedThreshold,
+  saveThreshold,
   pending,
   error,
   create: createTest,
@@ -594,7 +605,7 @@ export const GuidedTest: React.FC<GuidedTestProps> = ({
     // A continued test keeps the settings it started with.
     (loaded !== undefined && stored !== undefined
       ? stored
-      : initialSettings(stored, previous));
+      : initialSettings(stored, previous, expectedThreshold));
   // A continued test goes straight to its next stage.
   const [chosenPhase, setPhase] = useState<Phase | undefined>(
     loaded === undefined ? "prepare" : undefined
@@ -613,6 +624,10 @@ export const GuidedTest: React.FC<GuidedTestProps> = ({
           writeStorage(SETTINGS_KEY, JSON.stringify(settings));
           // Once the test starts, its settings stay as they are.
           setChosen(settings);
+          // The threshold the test is run around is the profile's from now.
+          if (settings.thresholdHeartRate !== expectedThreshold) {
+            saveThreshold?.(settings.thresholdHeartRate);
+          }
           if (baseline.mode === "measure") {
             setPhase("resting");
             return;
@@ -720,6 +735,8 @@ const LactateTestRunPage: React.FC = () => {
   const transport = useTransport();
   const navigate = useNavigate();
   const tests = useQuery(listLactateTests, {});
+  const profile = useQuery(getLactateProfile);
+  const setProfile = useMutation(setLactateProfile);
   const test = useQuery(getLactateTest, id === undefined ? skipToken : { id });
 
   const store = (updated: LactateTest | undefined): void => {
@@ -754,7 +771,11 @@ const LactateTestRunPage: React.FC = () => {
     },
   });
 
-  if ((id !== undefined && test.isPending) || tests.isPending) {
+  if (
+    (id !== undefined && test.isPending) ||
+    tests.isPending ||
+    profile.isPending
+  ) {
     return <Loading />;
   }
   if (test.isError) {
@@ -784,8 +805,20 @@ const LactateTestRunPage: React.FC = () => {
         previous={tests.data?.tests.find(
           (other) => other.id !== test.data?.test?.id && other.stages.length > 0
         )}
+        // Without the profile, as when it failed to load, steps are even.
+        expectedThreshold={
+          profile.data?.profile?.aerobicThresholdHeartRateBpm ?? 0
+        }
+        saveThreshold={(heartRateBpm) => {
+          setProfile.mutate({
+            profile: {
+              aerobicThresholdHeartRateBpm:
+                heartRateBpm > 0 ? heartRateBpm : undefined,
+            },
+          });
+        }}
         pending={createTest.isPending || update.isPending}
-        error={createTest.error ?? update.error}
+        error={createTest.error ?? update.error ?? setProfile.error}
         create={async (mmolPerLiter) => {
           await createTest.mutateAsync({
             test: {

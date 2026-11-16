@@ -260,6 +260,9 @@ const workoutProvider = "trailrunn.ing"
 type thresholds struct {
 	aerobic, anaerobic int32
 	lactateStart       int32
+	// Where the next lactate test expects the aerobic threshold, 0 if
+	// nowhere.
+	lactateThreshold int32
 }
 
 // trainingWorkout returns a workout as a Training API workout, if it's a
@@ -285,9 +288,9 @@ func trainingWorkout(w *plans.Workout, t thresholds) (*garmin.Workout, bool) {
 			break
 		}
 		// A lactate test is run in its stages, closer together around the
-		// last test's aerobic threshold.
+		// aerobic threshold the user's profile expects.
 		if w.LactateTest {
-			steps = runSteps(plans.LactateTestStagesFrom(t.lactateStart, t.aerobic).Blocks(), t)
+			steps = runSteps(plans.LactateTestStagesFrom(t.lactateStart, t.lactateThreshold).Blocks(), t)
 			break
 		}
 		step := garmin.WorkoutStep{Type: "WorkoutStep", StepOrder: 1, Intensity: "ACTIVE", DurationType: "OPEN", TargetType: "OPEN"}
