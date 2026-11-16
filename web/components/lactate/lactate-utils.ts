@@ -124,14 +124,91 @@ export const pastThreshold = (
 };
 
 /**
+ * How a test is run around the expected aerobic threshold, the same as the
+ * server's stages for watches, in internal/plans/lactate_stages.go.
+ *
+ * FINE_STEP_BPM is how far apart the stages near the expected threshold
+ * are, FINE_WINDOW_BPM how far either side of it they are that close, and
+ * START_BELOW_THRESHOLD_BPM how far below it a test starts: three stages of
+ * baseline before the close ones.
+ */
+export const FINE_STEP_BPM = 5;
+export const FINE_WINDOW_BPM = 10;
+const START_BELOW_THRESHOLD_BPM = 30;
+
+// StagePlan is where a test's stages are.
+export interface StagePlan {
+  startHeartRate: number;
+  stepBpm: number;
+  // The expected aerobic threshold, like the last test's, or 0 if unknown.
+  thresholdHeartRate: number;
+}
+
+// RoundedThreshold rounds a threshold to 5 bpm, where a stage is.
+const roundedThreshold = (threshold: number): number =>
+  Math.round(threshold / FINE_STEP_BPM) * FINE_STEP_BPM;
+
+/**
+ * StartBelowThreshold returns the first stage of a test around an expected
+ * threshold.
+ */
+export const startBelowThreshold = (threshold: number): number =>
+  roundedThreshold(threshold) - START_BELOW_THRESHOLD_BPM;
+
+/**
+ * EndAboveThreshold returns the least a test's last stage should be: a
+ * stage past the close ones, in case the threshold rose.
+ */
+export const endAboveThreshold = (threshold: number, stepBpm: number): number =>
+  roundedThreshold(threshold) + FINE_WINDOW_BPM + stepBpm;
+
+/**
+ * NextStage returns the heart rate of the stage after the one at a heart
+ * rate: a step higher, or a smaller step around the expected threshold. The
+ * last stage below the close ones stops where they start.
+ */
+const nextStage = (heartRate: number, plan: StagePlan): number => {
+  if (plan.thresholdHeartRate <= 0) {
+    return heartRate + plan.stepBpm;
+  }
+  const center = roundedThreshold(plan.thresholdHeartRate);
+  const low = center - FINE_WINDOW_BPM;
+  if (heartRate >= center + FINE_WINDOW_BPM) {
+    return heartRate + plan.stepBpm;
+  }
+  if (heartRate < low) {
+    return Math.min(heartRate + plan.stepBpm, low);
+  }
+  return heartRate + Math.min(plan.stepBpm, FINE_STEP_BPM);
+};
+
+/**
  * NextHeartRate returns the heart rate of the stage after the test's
- * stages: the start heart rate, then a step above the last stage.
+ * stages: the start heart rate, then the stage above the last one.
  */
 export const nextHeartRate = (
   stages: LactateStage[],
-  start: number,
-  step: number
+  plan: StagePlan
 ): number => {
   const last = stages.at(-1);
-  return last === undefined ? start : last.heartRateBpm + step;
+  return last === undefined
+    ? plan.startHeartRate
+    : nextStage(last.heartRateBpm, plan);
+};
+
+// StageHeartRates returns the heart rates of a test's stages, up to an end.
+export const stageHeartRates = (plan: StagePlan, end: number): number[] => {
+  const heartRates: number[] = [];
+  // A step of 0 would never reach the end.
+  if (plan.stepBpm < 1) {
+    return heartRates;
+  }
+  for (
+    let heartRate = plan.startHeartRate;
+    heartRate <= end;
+    heartRate = nextStage(heartRate, plan)
+  ) {
+    heartRates.push(heartRate);
+  }
+  return heartRates;
 };
