@@ -321,3 +321,24 @@ func TestRefreshRevoked(t *testing.T) {
 		})
 	}
 }
+
+// TestExchangeLargeAthleteID checks that an athlete ID that a float64 can't
+// hold exactly, as Strava's can be from June 2027, is read exactly.
+func TestExchangeLargeAthleteID(t *testing.T) {
+	t.Parallel()
+	const id = 9007199254740993 // 2^53 + 1
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprintf(w, `{"access_token": "access", "refresh_token": "refresh", "expires_in": 3600,
+			"athlete": {"id": %d, "id_str": "%d", "firstname": "Demo", "lastname": "Runner"}}`, id, id)
+	}))
+	t.Cleanup(srv.Close)
+	client := New(Config{OAuthBaseURL: srv.URL, HTTPClient: srv.Client()})
+	_, athlete, err := client.Exchange(context.Background(), "code")
+	if err != nil {
+		t.Fatalf("Exchange: %v", err)
+	}
+	if athlete.ID != id || athlete.FirstName != "Demo" {
+		t.Errorf("got athlete %+v, want ID %d", athlete, id)
+	}
+}

@@ -197,6 +197,14 @@ func (c *Client) Exchange(ctx context.Context, code string) (*Token, *Athlete, e
 		if err == nil {
 			_ = json.Unmarshal(data, &athlete)
 		}
+		// The oauth2 package decodes the token response's numbers as
+		// float64, which is only exact up to 2^53, and Strava's IDs are
+		// 64 bit from June 2027. id_str has the ID as a string.
+		if text, ok := raw["id_str"].(string); ok {
+			if id, err := strconv.ParseInt(text, 10, 64); err == nil {
+				athlete.ID = id
+			}
+		}
 	}
 	return &Token{AccessToken: token.AccessToken, RefreshToken: token.RefreshToken, Expiry: token.Expiry}, &athlete, nil
 }

@@ -215,7 +215,7 @@ func (s *Server) token(w http.ResponseWriter, r *http.Request) {
 		"expires_in":    int(tokenLifetime.Seconds()),
 	}
 	if r.Form.Get("grant_type") == "authorization_code" {
-		resp["athlete"] = map[string]any{"id": athleteID, "firstname": "Demo", "lastname": "Runner"}
+		resp["athlete"] = map[string]any{"id": athleteID, "id_str": strconv.Itoa(athleteID), "firstname": "Demo", "lastname": "Runner"}
 	}
 	writeJSON(w, http.StatusOK, resp)
 }
