@@ -287,7 +287,7 @@ func (b *schemaBuilder) messageValue(md protoreflect.MessageDescriptor) (*jsonsc
 	case "google.protobuf.FieldMask":
 		return &jsonschema.Schema{
 			Type: typeString,
-		}, `A comma-separated list of lowerCamelCase field paths, e.g. "name,description".`
+		}, `A comma-separated list of field paths, e.g. "name,description". A path's field names can be snake_case, as in these descriptions, or lowerCamelCase.`
 	case "google.protobuf.Struct":
 		return &jsonschema.Schema{Type: typeObject}, "An arbitrary JSON object."
 	case "google.protobuf.Value":

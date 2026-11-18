@@ -114,7 +114,7 @@ func TestInputSchemaOptional(t *testing.T) {
 func TestInputSchemaOutputOnly(t *testing.T) {
 	s := newInputSchema(findMessage(t, "races.v1.UpdateRacePlanRequest"))
 	mask := s.Properties["updateMask"]
-	if mask.Type != "string" || !strings.Contains(mask.Description, "comma-separated list of lowerCamelCase field paths") {
+	if mask.Type != "string" || !strings.Contains(mask.Description, "comma-separated list of field paths") {
 		t.Errorf("updateMask = %+v, want comma-separated string", mask)
 	}
 	plan := s.Properties["plan"]
