@@ -259,12 +259,20 @@ select calendar_token from users where id = $1;
 update users set calendar_token = sqlc.narg(token) where id = sqlc.arg(user_id);
 
 -- name: GetCalendarFeedUser :one
--- Returns the user of a calendar feed, with the time zone of their latest
--- activity, which their workouts' local times are in. Empty if they have
--- no activities.
+-- Returns the user of a calendar feed, with the time zone their workouts'
+-- local times are in: that of their latest activity with a GPS track, which
+-- is where they were. Strava guesses the zone of activities without one,
+-- like indoor strength workouts, and can name a zone with the same offset
+-- in summer but another in winter, so those only count for a user with no
+-- tracked activity. Empty if they have no activities.
 select u.id, coalesce((
   select a.timezone from strava_activities a
-  where a.user_id = u.id
+  where a.user_id = u.id and a.timezone <> '' and a.min_lat is not null
+  order by a.start_time desc
+  limit 1
+), (
+  select a.timezone from strava_activities a
+  where a.user_id = u.id and a.timezone <> ''
   order by a.start_time desc
   limit 1
 ), '')::text as timezone

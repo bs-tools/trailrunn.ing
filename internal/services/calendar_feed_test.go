@@ -8,7 +8,9 @@ import (
 	"time"
 
 	"connectrpc.com/connect/v2"
+	"github.com/bs-tools/trailrunn.ing/internal/activities"
 	plansv1 "github.com/bs-tools/trailrunn.ing/internal/gen/plans/v1"
+	"github.com/bs-tools/trailrunn.ing/internal/geo"
 )
 
 func TestCalendarFeed(t *testing.T) {
@@ -141,6 +143,35 @@ func TestCalendarFeed(t *testing.T) {
 	}
 	if code := basic("wrong"); code != http.StatusUnauthorized {
 		t.Errorf("getting the feed with the wrong password: %d, want 401", code)
+	}
+
+	// Times are in the zone of the latest activity with a GPS track. Strava
+	// guesses the zone of an activity without one, like a strength workout
+	// at home in Squamish it puts in America/Ensenada, an hour off in
+	// winter, so a later one doesn't count.
+	for i, a := range []struct {
+		timezone, polyline string
+	}{
+		{"Asia/Tokyo", geo.EncodePolyline([]geo.Point{{Lat: 35.68, Lng: 139.76}, {Lat: 35.69, Lng: 139.76}})},
+		{"America/Vancouver", geo.EncodePolyline([]geo.Point{{Lat: 49.7, Lng: -123.15}, {Lat: 49.71, Lng: -123.15}})},
+		{"Europe/London", ""},
+	} {
+		start := time.Date(2026, 11, 10+i, 15, 0, 0, 0, time.UTC)
+		if _, _, err := e.activities.UpsertActivity(ctx, e.userID, &activities.ActivitySummary{
+			StravaID: int64(100 + i), Name: "Activity", SportType: "Run", StartTime: start,
+			StartDateLocal: start.Truncate(24 * time.Hour), Timezone: a.timezone, SummaryPolyline: a.polyline, RawJSON: []byte("{}"),
+		}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	vancouver, err := time.LoadLocation("America/Vancouver")
+	if err != nil {
+		t.Fatal(err)
+	}
+	date := today.AddDate(0, 0, 1)
+	want := "DTSTART:" + time.Date(date.Year(), date.Month(), date.Day(), 17, 0, 0, 0, vancouver).UTC().Format("20060102T150405Z") + "\r\n"
+	if _, body := e.get(feed.GetUrl(), ""); !strings.Contains(string(body), want) {
+		t.Errorf("the feed doesn't have 17:00 in Vancouver, %q:\n%s", want, body)
 	}
 
 	// Replacing the feed stops the old URL working, and deleting it the new.
