@@ -587,6 +587,31 @@ func TestCallTool(t *testing.T) {
 			t.Errorf("update mask = %v, want [goals]", paths)
 		}
 	})
+
+	// The API's comments name fields in snake_case, so masks may too, mixed
+	// with lowerCamelCase, which is all protojson reads.
+	t.Run("snake_case update mask paths", func(t *testing.T) {
+		res, err := session.CallTool(ctx, &mcp.CallToolParams{
+			Name: "UpdateRacePlan",
+			Arguments: map[string]any{
+				"plan":        map[string]any{"id": "p1", "goals": map[string]any{"a_finish_seconds": 36000}},
+				"update_mask": "goals.a_finish_seconds,goals.bFinishSeconds",
+			},
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if res.IsError {
+			t.Fatalf("tool error: %v", res.Content)
+		}
+		got := <-racePlans.got
+		if got.GetPlan().GetGoals().GetAFinishSeconds() != 36000 {
+			t.Errorf("goals = %v, want aFinishSeconds 36000", got.GetPlan().GetGoals())
+		}
+		if paths := got.GetUpdateMask().GetPaths(); !slices.Equal(paths, []string{"goals.a_finish_seconds", "goals.b_finish_seconds"}) {
+			t.Errorf("update mask = %v, want both goals", paths)
+		}
+	})
 }
 
 // fakeTrips returns a photo with an image.

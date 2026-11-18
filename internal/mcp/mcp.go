@@ -211,6 +211,7 @@ func newToolHandler(log *slog.Logger, report *errreport.Reporter, impl any, md p
 			if err := checkRemovedFields(args, inType.Descriptor()); err != nil {
 				return errorResult(connect.NewError(connect.CodeInvalidArgument, err.Error())), nil
 			}
+			args = camelCaseFieldMasks(args, inType.Descriptor())
 			if err := protojson.Unmarshal(args, in); err != nil {
 				return errorResult(connect.Errorf(connect.CodeInvalidArgument,
 					"invalid arguments, check them against the tool input schema: %v", err)), nil
