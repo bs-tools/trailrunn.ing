@@ -35,6 +35,15 @@ export const listAPITokens = UserService.method.listAPITokens;
 export const deleteAPIToken = UserService.method.deleteAPIToken;
 
 /**
+ * Set the time zone the user lives in. The web app sets it from the
+ * browser's when it's unset, and the user changes it in the settings;
+ * only change it when they say where they live or have moved to.
+ *
+ * @generated from rpc users.v1.UserService.SetTimeZone
+ */
+export const setTimeZone = UserService.method.setTimeZone;
+
+/**
  * Upload a picture to use as the user's avatar, replacing any previous
  * one. The middle square of the picture is used.
  *

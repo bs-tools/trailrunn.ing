@@ -673,7 +673,7 @@ func run(
 		log.InfoContext(ctx, "Garmin sync disabled, set -garmin-client-id, -garmin-client-secret and -garmin-webhook-secret to enable it")
 	}
 
-	userService := user.NewService(log, report, users, users, users, photos)
+	userService := user.NewService(log, report, users, users, users, users, photos)
 	authService, err := auth.NewService(log, report, users, baseURL, adminBootstrapToken)
 	if err != nil {
 		return fmt.Errorf("failed to create auth service: %w", err)

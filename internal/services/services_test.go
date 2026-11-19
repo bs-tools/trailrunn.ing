@@ -240,7 +240,7 @@ func newEnv(t *testing.T) *env {
 	if err != nil {
 		t.Fatal(err)
 	}
-	userService := user.NewService(log, report, userRepo, userRepo, userRepo, photos)
+	userService := user.NewService(log, report, userRepo, userRepo, userRepo, userRepo, photos)
 	tripService := trip.NewService(log, report, tripRepo, activityRepo, e.syncer, photos, userRepo, &http.Client{}, "https://trail.example")
 	raceReportService := racereport.NewService(log, report, raceRepo, activityRepo, e.syncer, tripRepo, racePlanService, userRepo, photos, tripRepo, "https://trail.example")
 

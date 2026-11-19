@@ -13,7 +13,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file users/v1/users.proto.
  */
 export const file_users_v1_users: GenFile = /*@__PURE__*/
-  fileDesc("ChR1c2Vycy92MS91c2Vycy5wcm90bxIIdXNlcnMudjEiYAoLUHJpdmFjeVpvbmUSEgoCaWQYASABKAlCBqqfGQIIARIMCgRuYW1lGAIgASgJEgsKA2xhdBgDIAEoARILCgNsbmcYBCABKAESFQoNcmFkaXVzX21ldGVycxgFIAEoBSIZChdMaXN0UHJpdmFjeVpvbmVzUmVxdWVzdCJAChhMaXN0UHJpdmFjeVpvbmVzUmVzcG9uc2USJAoFem9uZXMYASADKAsyFS51c2Vycy52MS5Qcml2YWN5Wm9uZSI+ChZTZXRQcml2YWN5Wm9uZXNSZXF1ZXN0EiQKBXpvbmVzGAEgAygLMhUudXNlcnMudjEuUHJpdmFjeVpvbmUiPwoXU2V0UHJpdmFjeVpvbmVzUmVzcG9uc2USJAoFem9uZXMYASADKAsyFS51c2Vycy52MS5Qcml2YWN5Wm9uZSJ7CgRVc2VyEgoKAmlkGAEgASgJEg0KBWVtYWlsGAIgASgJEgwKBG5hbWUYAyABKAkSEgoKZ2l2ZW5fbmFtZRgEIAEoCRITCgtmYW1pbHlfbmFtZRgFIAEoCRISCgphdmF0YXJfdXJsGAYgASgJEg0KBWFkbWluGAcgASgIIhcKFUdldEN1cnJlbnRVc2VyUmVxdWVzdCI2ChZHZXRDdXJyZW50VXNlclJlc3BvbnNlEhwKBHVzZXIYASABKAsyDi51c2Vycy52MS5Vc2VyIokBCghBUElUb2tlbhIKCgJpZBgBIAEoCRIMCgRuYW1lGAIgASgJEi8KC2NyZWF0ZV90aW1lGAMgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIyCg5sYXN0X3VzZWRfdGltZRgEIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXAiJQoVQ3JlYXRlQVBJVG9rZW5SZXF1ZXN0EgwKBG5hbWUYASABKAkiSwoWQ3JlYXRlQVBJVG9rZW5SZXNwb25zZRIhCgV0b2tlbhgBIAEoCzISLnVzZXJzLnYxLkFQSVRva2VuEg4KBnNlY3JldBgCIAEoCSIWChRMaXN0QVBJVG9rZW5zUmVxdWVzdCI7ChVMaXN0QVBJVG9rZW5zUmVzcG9uc2USIgoGdG9rZW5zGAEgAygLMhIudXNlcnMudjEuQVBJVG9rZW4iIwoVRGVsZXRlQVBJVG9rZW5SZXF1ZXN0EgoKAmlkGAEgASgJIhgKFkRlbGV0ZUFQSVRva2VuUmVzcG9uc2UiIwoTVXBsb2FkQXZhdGFyUmVxdWVzdBIMCgRkYXRhGAEgASgMIjQKFFVwbG9hZEF2YXRhclJlc3BvbnNlEhwKBHVzZXIYASABKAsyDi51c2Vycy52MS5Vc2VyIhUKE0RlbGV0ZUF2YXRhclJlcXVlc3QiNAoURGVsZXRlQXZhdGFyUmVzcG9uc2USHAoEdXNlchgBIAEoCzIOLnVzZXJzLnYxLlVzZXIy5wUKC1VzZXJTZXJ2aWNlElMKDkdldEN1cnJlbnRVc2VyEh8udXNlcnMudjEuR2V0Q3VycmVudFVzZXJSZXF1ZXN0GiAudXNlcnMudjEuR2V0Q3VycmVudFVzZXJSZXNwb25zZRJbCg5DcmVhdGVBUElUb2tlbhIfLnVzZXJzLnYxLkNyZWF0ZUFQSVRva2VuUmVxdWVzdBogLnVzZXJzLnYxLkNyZWF0ZUFQSVRva2VuUmVzcG9uc2UiBqKfGQIIARJYCg1MaXN0QVBJVG9rZW5zEh4udXNlcnMudjEuTGlzdEFQSVRva2Vuc1JlcXVlc3QaHy51c2Vycy52MS5MaXN0QVBJVG9rZW5zUmVzcG9uc2UiBqKfGQIIARJbCg5EZWxldGVBUElUb2tlbhIfLnVzZXJzLnYxLkRlbGV0ZUFQSVRva2VuUmVxdWVzdBogLnVzZXJzLnYxLkRlbGV0ZUFQSVRva2VuUmVzcG9uc2UiBqKfGQIIARJVCgxVcGxvYWRBdmF0YXISHS51c2Vycy52MS5VcGxvYWRBdmF0YXJSZXF1ZXN0Gh4udXNlcnMudjEuVXBsb2FkQXZhdGFyUmVzcG9uc2UiBqKfGQIIARJVCgxEZWxldGVBdmF0YXISHS51c2Vycy52MS5EZWxldGVBdmF0YXJSZXF1ZXN0Gh4udXNlcnMudjEuRGVsZXRlQXZhdGFyUmVzcG9uc2UiBqKfGQIIARJhChBMaXN0UHJpdmFjeVpvbmVzEiEudXNlcnMudjEuTGlzdFByaXZhY3lab25lc1JlcXVlc3QaIi51c2Vycy52MS5MaXN0UHJpdmFjeVpvbmVzUmVzcG9uc2UiBqKfGQIIARJeCg9TZXRQcml2YWN5Wm9uZXMSIC51c2Vycy52MS5TZXRQcml2YWN5Wm9uZXNSZXF1ZXN0GiEudXNlcnMudjEuU2V0UHJpdmFjeVpvbmVzUmVzcG9uc2UiBqKfGQIIAUKcAQoMY29tLnVzZXJzLnYxQgpVc2Vyc1Byb3RvUAFaP2dpdGh1Yi5jb20vYnMtdG9vbHMvdHJhaWxydW5uLmluZy9pbnRlcm5hbC9nZW4vdXNlcnMvdjE7dXNlcnN2MaICA1VYWKoCCFVzZXJzLlYxygIIVXNlcnNcVjHiAhRVc2Vyc1xWMVxHUEJNZXRhZGF0YeoCCVVzZXJzOjpWMWIGcHJvdG8z", [file_google_protobuf_timestamp, file_mcp_v1_options]);
+  fileDesc("ChR1c2Vycy92MS91c2Vycy5wcm90bxIIdXNlcnMudjEiYAoLUHJpdmFjeVpvbmUSEgoCaWQYASABKAlCBqqfGQIIARIMCgRuYW1lGAIgASgJEgsKA2xhdBgDIAEoARILCgNsbmcYBCABKAESFQoNcmFkaXVzX21ldGVycxgFIAEoBSIZChdMaXN0UHJpdmFjeVpvbmVzUmVxdWVzdCJAChhMaXN0UHJpdmFjeVpvbmVzUmVzcG9uc2USJAoFem9uZXMYASADKAsyFS51c2Vycy52MS5Qcml2YWN5Wm9uZSI+ChZTZXRQcml2YWN5Wm9uZXNSZXF1ZXN0EiQKBXpvbmVzGAEgAygLMhUudXNlcnMudjEuUHJpdmFjeVpvbmUiPwoXU2V0UHJpdmFjeVpvbmVzUmVzcG9uc2USJAoFem9uZXMYASADKAsyFS51c2Vycy52MS5Qcml2YWN5Wm9uZSKOAQoEVXNlchIKCgJpZBgBIAEoCRINCgVlbWFpbBgCIAEoCRIMCgRuYW1lGAMgASgJEhIKCmdpdmVuX25hbWUYBCABKAkSEwoLZmFtaWx5X25hbWUYBSABKAkSEgoKYXZhdGFyX3VybBgGIAEoCRINCgVhZG1pbhgHIAEoCBIRCgl0aW1lX3pvbmUYCCABKAkiJwoSU2V0VGltZVpvbmVSZXF1ZXN0EhEKCXRpbWVfem9uZRgBIAEoCSIzChNTZXRUaW1lWm9uZVJlc3BvbnNlEhwKBHVzZXIYASABKAsyDi51c2Vycy52MS5Vc2VyIhcKFUdldEN1cnJlbnRVc2VyUmVxdWVzdCI2ChZHZXRDdXJyZW50VXNlclJlc3BvbnNlEhwKBHVzZXIYASABKAsyDi51c2Vycy52MS5Vc2VyIokBCghBUElUb2tlbhIKCgJpZBgBIAEoCRIMCgRuYW1lGAIgASgJEi8KC2NyZWF0ZV90aW1lGAMgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIyCg5sYXN0X3VzZWRfdGltZRgEIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXAiJQoVQ3JlYXRlQVBJVG9rZW5SZXF1ZXN0EgwKBG5hbWUYASABKAkiSwoWQ3JlYXRlQVBJVG9rZW5SZXNwb25zZRIhCgV0b2tlbhgBIAEoCzISLnVzZXJzLnYxLkFQSVRva2VuEg4KBnNlY3JldBgCIAEoCSIWChRMaXN0QVBJVG9rZW5zUmVxdWVzdCI7ChVMaXN0QVBJVG9rZW5zUmVzcG9uc2USIgoGdG9rZW5zGAEgAygLMhIudXNlcnMudjEuQVBJVG9rZW4iIwoVRGVsZXRlQVBJVG9rZW5SZXF1ZXN0EgoKAmlkGAEgASgJIhgKFkRlbGV0ZUFQSVRva2VuUmVzcG9uc2UiIwoTVXBsb2FkQXZhdGFyUmVxdWVzdBIMCgRkYXRhGAEgASgMIjQKFFVwbG9hZEF2YXRhclJlc3BvbnNlEhwKBHVzZXIYASABKAsyDi51c2Vycy52MS5Vc2VyIhUKE0RlbGV0ZUF2YXRhclJlcXVlc3QiNAoURGVsZXRlQXZhdGFyUmVzcG9uc2USHAoEdXNlchgBIAEoCzIOLnVzZXJzLnYxLlVzZXIyswYKC1VzZXJTZXJ2aWNlElMKDkdldEN1cnJlbnRVc2VyEh8udXNlcnMudjEuR2V0Q3VycmVudFVzZXJSZXF1ZXN0GiAudXNlcnMudjEuR2V0Q3VycmVudFVzZXJSZXNwb25zZRJbCg5DcmVhdGVBUElUb2tlbhIfLnVzZXJzLnYxLkNyZWF0ZUFQSVRva2VuUmVxdWVzdBogLnVzZXJzLnYxLkNyZWF0ZUFQSVRva2VuUmVzcG9uc2UiBqKfGQIIARJYCg1MaXN0QVBJVG9rZW5zEh4udXNlcnMudjEuTGlzdEFQSVRva2Vuc1JlcXVlc3QaHy51c2Vycy52MS5MaXN0QVBJVG9rZW5zUmVzcG9uc2UiBqKfGQIIARJbCg5EZWxldGVBUElUb2tlbhIfLnVzZXJzLnYxLkRlbGV0ZUFQSVRva2VuUmVxdWVzdBogLnVzZXJzLnYxLkRlbGV0ZUFQSVRva2VuUmVzcG9uc2UiBqKfGQIIARJKCgtTZXRUaW1lWm9uZRIcLnVzZXJzLnYxLlNldFRpbWVab25lUmVxdWVzdBodLnVzZXJzLnYxLlNldFRpbWVab25lUmVzcG9uc2USVQoMVXBsb2FkQXZhdGFyEh0udXNlcnMudjEuVXBsb2FkQXZhdGFyUmVxdWVzdBoeLnVzZXJzLnYxLlVwbG9hZEF2YXRhclJlc3BvbnNlIgainxkCCAESVQoMRGVsZXRlQXZhdGFyEh0udXNlcnMudjEuRGVsZXRlQXZhdGFyUmVxdWVzdBoeLnVzZXJzLnYxLkRlbGV0ZUF2YXRhclJlc3BvbnNlIgainxkCCAESYQoQTGlzdFByaXZhY3lab25lcxIhLnVzZXJzLnYxLkxpc3RQcml2YWN5Wm9uZXNSZXF1ZXN0GiIudXNlcnMudjEuTGlzdFByaXZhY3lab25lc1Jlc3BvbnNlIgainxkCCAESXgoPU2V0UHJpdmFjeVpvbmVzEiAudXNlcnMudjEuU2V0UHJpdmFjeVpvbmVzUmVxdWVzdBohLnVzZXJzLnYxLlNldFByaXZhY3lab25lc1Jlc3BvbnNlIgainxkCCAFCnAEKDGNvbS51c2Vycy52MUIKVXNlcnNQcm90b1ABWj9naXRodWIuY29tL2JzLXRvb2xzL3RyYWlscnVubi5pbmcvaW50ZXJuYWwvZ2VuL3VzZXJzL3YxO3VzZXJzdjGiAgNVWFiqAghVc2Vycy5WMcoCCFVzZXJzXFYx4gIUVXNlcnNcVjFcR1BCTWV0YWRhdGHqAglVc2Vyczo6VjFiBnByb3RvMw", [file_google_protobuf_timestamp, file_mcp_v1_options]);
 
 /**
  * A privacy zone: a circle around a place, like the user's home, within
@@ -180,6 +180,17 @@ export type User = Message<"users.v1.User"> & {
    * @generated from field: bool admin = 7;
    */
   admin: boolean;
+
+  /**
+   * The time zone the user lives in, an IANA name like "America/Vancouver".
+   * Empty until it's set, see SetTimeZone. The start times of their
+   * workouts are in it, as on their calendar feed, and it's the time zone
+   * of their activities without a GPS track, like strength sessions
+   * indoors, whose zone the watch doesn't know.
+   *
+   * @generated from field: string time_zone = 8;
+   */
+  timeZone: string;
 };
 
 /**
@@ -188,6 +199,47 @@ export type User = Message<"users.v1.User"> & {
  */
 export const UserSchema: GenMessage<User> = /*@__PURE__*/
   messageDesc(file_users_v1_users, 5);
+
+/**
+ * @generated from message users.v1.SetTimeZoneRequest
+ */
+export type SetTimeZoneRequest = Message<"users.v1.SetTimeZoneRequest"> & {
+  /**
+   * The IANA name of the time zone, e.g. "America/Vancouver". Empty to
+   * unset it: activities without a GPS track then have the zone Strava
+   * guessed, and the calendar feed the zone of the latest activity with a
+   * GPS track.
+   *
+   * @generated from field: string time_zone = 1;
+   */
+  timeZone: string;
+};
+
+/**
+ * Describes the message users.v1.SetTimeZoneRequest.
+ * Use `create(SetTimeZoneRequestSchema)` to create a new message.
+ */
+export const SetTimeZoneRequestSchema: GenMessage<SetTimeZoneRequest> = /*@__PURE__*/
+  messageDesc(file_users_v1_users, 6);
+
+/**
+ * @generated from message users.v1.SetTimeZoneResponse
+ */
+export type SetTimeZoneResponse = Message<"users.v1.SetTimeZoneResponse"> & {
+  /**
+   * The user, with the time zone.
+   *
+   * @generated from field: users.v1.User user = 1;
+   */
+  user?: User | undefined;
+};
+
+/**
+ * Describes the message users.v1.SetTimeZoneResponse.
+ * Use `create(SetTimeZoneResponseSchema)` to create a new message.
+ */
+export const SetTimeZoneResponseSchema: GenMessage<SetTimeZoneResponse> = /*@__PURE__*/
+  messageDesc(file_users_v1_users, 7);
 
 /**
  * @generated from message users.v1.GetCurrentUserRequest
@@ -200,7 +252,7 @@ export type GetCurrentUserRequest = Message<"users.v1.GetCurrentUserRequest"> & 
  * Use `create(GetCurrentUserRequestSchema)` to create a new message.
  */
 export const GetCurrentUserRequestSchema: GenMessage<GetCurrentUserRequest> = /*@__PURE__*/
-  messageDesc(file_users_v1_users, 6);
+  messageDesc(file_users_v1_users, 8);
 
 /**
  * @generated from message users.v1.GetCurrentUserResponse
@@ -219,7 +271,7 @@ export type GetCurrentUserResponse = Message<"users.v1.GetCurrentUserResponse"> 
  * Use `create(GetCurrentUserResponseSchema)` to create a new message.
  */
 export const GetCurrentUserResponseSchema: GenMessage<GetCurrentUserResponse> = /*@__PURE__*/
-  messageDesc(file_users_v1_users, 7);
+  messageDesc(file_users_v1_users, 9);
 
 /**
  * An API token. The token secret is only returned when it is created.
@@ -261,7 +313,7 @@ export type APIToken = Message<"users.v1.APIToken"> & {
  * Use `create(APITokenSchema)` to create a new message.
  */
 export const APITokenSchema: GenMessage<APIToken> = /*@__PURE__*/
-  messageDesc(file_users_v1_users, 8);
+  messageDesc(file_users_v1_users, 10);
 
 /**
  * @generated from message users.v1.CreateAPITokenRequest
@@ -280,7 +332,7 @@ export type CreateAPITokenRequest = Message<"users.v1.CreateAPITokenRequest"> & 
  * Use `create(CreateAPITokenRequestSchema)` to create a new message.
  */
 export const CreateAPITokenRequestSchema: GenMessage<CreateAPITokenRequest> = /*@__PURE__*/
-  messageDesc(file_users_v1_users, 9);
+  messageDesc(file_users_v1_users, 11);
 
 /**
  * @generated from message users.v1.CreateAPITokenResponse
@@ -306,7 +358,7 @@ export type CreateAPITokenResponse = Message<"users.v1.CreateAPITokenResponse"> 
  * Use `create(CreateAPITokenResponseSchema)` to create a new message.
  */
 export const CreateAPITokenResponseSchema: GenMessage<CreateAPITokenResponse> = /*@__PURE__*/
-  messageDesc(file_users_v1_users, 10);
+  messageDesc(file_users_v1_users, 12);
 
 /**
  * @generated from message users.v1.ListAPITokensRequest
@@ -319,7 +371,7 @@ export type ListAPITokensRequest = Message<"users.v1.ListAPITokensRequest"> & {
  * Use `create(ListAPITokensRequestSchema)` to create a new message.
  */
 export const ListAPITokensRequestSchema: GenMessage<ListAPITokensRequest> = /*@__PURE__*/
-  messageDesc(file_users_v1_users, 11);
+  messageDesc(file_users_v1_users, 13);
 
 /**
  * @generated from message users.v1.ListAPITokensResponse
@@ -338,7 +390,7 @@ export type ListAPITokensResponse = Message<"users.v1.ListAPITokensResponse"> & 
  * Use `create(ListAPITokensResponseSchema)` to create a new message.
  */
 export const ListAPITokensResponseSchema: GenMessage<ListAPITokensResponse> = /*@__PURE__*/
-  messageDesc(file_users_v1_users, 12);
+  messageDesc(file_users_v1_users, 14);
 
 /**
  * @generated from message users.v1.DeleteAPITokenRequest
@@ -357,7 +409,7 @@ export type DeleteAPITokenRequest = Message<"users.v1.DeleteAPITokenRequest"> & 
  * Use `create(DeleteAPITokenRequestSchema)` to create a new message.
  */
 export const DeleteAPITokenRequestSchema: GenMessage<DeleteAPITokenRequest> = /*@__PURE__*/
-  messageDesc(file_users_v1_users, 13);
+  messageDesc(file_users_v1_users, 15);
 
 /**
  * @generated from message users.v1.DeleteAPITokenResponse
@@ -370,7 +422,7 @@ export type DeleteAPITokenResponse = Message<"users.v1.DeleteAPITokenResponse"> 
  * Use `create(DeleteAPITokenResponseSchema)` to create a new message.
  */
 export const DeleteAPITokenResponseSchema: GenMessage<DeleteAPITokenResponse> = /*@__PURE__*/
-  messageDesc(file_users_v1_users, 14);
+  messageDesc(file_users_v1_users, 16);
 
 /**
  * @generated from message users.v1.UploadAvatarRequest
@@ -389,7 +441,7 @@ export type UploadAvatarRequest = Message<"users.v1.UploadAvatarRequest"> & {
  * Use `create(UploadAvatarRequestSchema)` to create a new message.
  */
 export const UploadAvatarRequestSchema: GenMessage<UploadAvatarRequest> = /*@__PURE__*/
-  messageDesc(file_users_v1_users, 15);
+  messageDesc(file_users_v1_users, 17);
 
 /**
  * @generated from message users.v1.UploadAvatarResponse
@@ -408,7 +460,7 @@ export type UploadAvatarResponse = Message<"users.v1.UploadAvatarResponse"> & {
  * Use `create(UploadAvatarResponseSchema)` to create a new message.
  */
 export const UploadAvatarResponseSchema: GenMessage<UploadAvatarResponse> = /*@__PURE__*/
-  messageDesc(file_users_v1_users, 16);
+  messageDesc(file_users_v1_users, 18);
 
 /**
  * @generated from message users.v1.DeleteAvatarRequest
@@ -421,7 +473,7 @@ export type DeleteAvatarRequest = Message<"users.v1.DeleteAvatarRequest"> & {
  * Use `create(DeleteAvatarRequestSchema)` to create a new message.
  */
 export const DeleteAvatarRequestSchema: GenMessage<DeleteAvatarRequest> = /*@__PURE__*/
-  messageDesc(file_users_v1_users, 17);
+  messageDesc(file_users_v1_users, 19);
 
 /**
  * @generated from message users.v1.DeleteAvatarResponse
@@ -440,7 +492,7 @@ export type DeleteAvatarResponse = Message<"users.v1.DeleteAvatarResponse"> & {
  * Use `create(DeleteAvatarResponseSchema)` to create a new message.
  */
 export const DeleteAvatarResponseSchema: GenMessage<DeleteAvatarResponse> = /*@__PURE__*/
-  messageDesc(file_users_v1_users, 18);
+  messageDesc(file_users_v1_users, 20);
 
 /**
  * UserService provides information about the signed in user, and their
@@ -490,6 +542,18 @@ export const UserService: GenService<{
     methodKind: "unary";
     input: typeof DeleteAPITokenRequestSchema;
     output: typeof DeleteAPITokenResponseSchema;
+  },
+  /**
+   * Set the time zone the user lives in. The web app sets it from the
+   * browser's when it's unset, and the user changes it in the settings;
+   * only change it when they say where they live or have moved to.
+   *
+   * @generated from rpc users.v1.UserService.SetTimeZone
+   */
+  setTimeZone: {
+    methodKind: "unary";
+    input: typeof SetTimeZoneRequestSchema;
+    output: typeof SetTimeZoneResponseSchema;
   },
   /**
    * Upload a picture to use as the user's avatar, replacing any previous

@@ -1,4 +1,5 @@
 import Header from "@components/header/header";
+import { useDefaultTimeZone } from "@components/settings/time-zone";
 import { Code } from "@connectrpc/connect";
 import { useQuery } from "@connectrpc/connect-query";
 import { getCurrentUser } from "gen/users/v1/users-UserService_connectquery";
@@ -79,6 +80,9 @@ const App: React.FC = () => {
       staleTime: 1000 * 60 * 60 * 24 * 7,
     }
   );
+
+  // Undefined while loading and signed out, when there's nothing to set.
+  useDefaultTimeZone(data?.user?.timeZone);
 
   /**
    * The splash screen in index.html covers the page until the app has the

@@ -23,7 +23,7 @@ func (q *Queries) GetAvatarKeyForUpdate(ctx context.Context, id pgtype.UUID) (pg
 }
 
 const getUser = `-- name: GetUser :one
-select id, create_time, is_admin, avatar_key, privacy_seed, calendar_token from users where id = $1
+select id, create_time, is_admin, avatar_key, privacy_seed, calendar_token, time_zone from users where id = $1
 `
 
 func (q *Queries) GetUser(ctx context.Context, id pgtype.UUID) (*User, error) {
@@ -36,6 +36,7 @@ func (q *Queries) GetUser(ctx context.Context, id pgtype.UUID) (*User, error) {
 		&i.AvatarKey,
 		&i.PrivacySeed,
 		&i.CalendarToken,
+		&i.TimeZone,
 	)
 	return &i, err
 }
@@ -51,5 +52,19 @@ type SetAvatarKeyParams struct {
 
 func (q *Queries) SetAvatarKey(ctx context.Context, arg *SetAvatarKeyParams) error {
 	_, err := q.db.Exec(ctx, setAvatarKey, arg.ID, arg.AvatarKey)
+	return err
+}
+
+const setTimeZone = `-- name: SetTimeZone :exec
+update users set time_zone = $2 where id = $1
+`
+
+type SetTimeZoneParams struct {
+	ID       pgtype.UUID
+	TimeZone string
+}
+
+func (q *Queries) SetTimeZone(ctx context.Context, arg *SetTimeZoneParams) error {
+	_, err := q.db.Exec(ctx, setTimeZone, arg.ID, arg.TimeZone)
 	return err
 }

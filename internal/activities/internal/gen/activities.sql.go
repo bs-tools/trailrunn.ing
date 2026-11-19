@@ -90,13 +90,21 @@ func (q *Queries) CountActivities(ctx context.Context, arg *CountActivitiesParam
 
 const getActivity = `-- name: GetActivity :one
 select
-  id, coalesce(strava_id, 0)::bigint as strava_id, coalesce(garmin_activity_id, 0)::bigint as garmin_activity_id, data_source, name, description, sport_type, start_time, start_date_local, timezone,
+  id, coalesce(strava_id, 0)::bigint as strava_id, coalesce(garmin_activity_id, 0)::bigint as garmin_activity_id, data_source, name, description, sport_type, start_time, start_date_local,
+  -- Strava works out the zone of an activity with a GPS track from where it
+  -- was, and guesses the others' from the watch's UTC offset, naming any
+  -- zone with it, and activities from Garmin and Strava archives have none.
+  -- Those are in the zone the user lives in, if they've set it.
+  case
+    when min_lat is not null and timezone <> '' then timezone
+    else coalesce(nullif((select u.time_zone from users u where u.id = strava_activities.user_id), ''), timezone)
+  end::text as timezone,
   distance_meters, moving_time_seconds, elapsed_time_seconds, elevation_gain_meters,
   average_speed_mps, max_speed_mps, average_heartrate_bpm, max_heartrate_bpm,
   average_cadence_spm, summary_polyline, device_name, relative_effort, streams_synced, garmin_samples,
   coalesce(synced_photo_count, photo_count)::integer as photo_count
 from strava_activities
-where id = $1 and user_id = $2
+where strava_activities.id = $1 and strava_activities.user_id = $2
 `
 
 type GetActivityParams struct {
@@ -263,7 +271,15 @@ func (q *Queries) LinkWorkouts(ctx context.Context, arg *LinkWorkoutsParams) err
 
 const listActivities = `-- name: ListActivities :many
 select
-  id, coalesce(strava_id, 0)::bigint as strava_id, coalesce(garmin_activity_id, 0)::bigint as garmin_activity_id, data_source, name, description, sport_type, start_time, start_date_local, timezone,
+  id, coalesce(strava_id, 0)::bigint as strava_id, coalesce(garmin_activity_id, 0)::bigint as garmin_activity_id, data_source, name, description, sport_type, start_time, start_date_local,
+  -- Strava works out the zone of an activity with a GPS track from where it
+  -- was, and guesses the others' from the watch's UTC offset, naming any
+  -- zone with it, and activities from Garmin and Strava archives have none.
+  -- Those are in the zone the user lives in, if they've set it.
+  case
+    when min_lat is not null and timezone <> '' then timezone
+    else coalesce(nullif((select u.time_zone from users u where u.id = strava_activities.user_id), ''), timezone)
+  end::text as timezone,
   distance_meters, moving_time_seconds, elapsed_time_seconds, elevation_gain_meters,
   average_speed_mps, max_speed_mps, average_heartrate_bpm, max_heartrate_bpm,
   average_cadence_spm, summary_polyline, device_name, relative_effort, streams_synced, garmin_samples,

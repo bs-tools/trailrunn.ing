@@ -32,6 +32,8 @@ const (
 	UserServiceListAPITokensProcedure = "/users.v1.UserService/ListAPITokens"
 	// UserServiceDeleteAPITokenProcedure is the procedure name of the UserService's DeleteAPIToken RPC.
 	UserServiceDeleteAPITokenProcedure = "/users.v1.UserService/DeleteAPIToken"
+	// UserServiceSetTimeZoneProcedure is the procedure name of the UserService's SetTimeZone RPC.
+	UserServiceSetTimeZoneProcedure = "/users.v1.UserService/SetTimeZone"
 	// UserServiceUploadAvatarProcedure is the procedure name of the UserService's UploadAvatar RPC.
 	UserServiceUploadAvatarProcedure = "/users.v1.UserService/UploadAvatar"
 	// UserServiceDeleteAvatarProcedure is the procedure name of the UserService's DeleteAvatar RPC.
@@ -71,6 +73,13 @@ var (
 			StreamType: connect.StreamTypeUnary,
 			Schema:     v1.File_users_v1_users_proto.Services().ByName("UserService").Methods().ByName("DeleteAPIToken"),
 			Procedure:  UserServiceDeleteAPITokenProcedure,
+		}
+	})
+	userServiceSetTimeZoneSpec = sync.OnceValue(func() connect.Spec {
+		return connect.Spec{
+			StreamType: connect.StreamTypeUnary,
+			Schema:     v1.File_users_v1_users_proto.Services().ByName("UserService").Methods().ByName("SetTimeZone"),
+			Procedure:  UserServiceSetTimeZoneProcedure,
 		}
 	})
 	userServiceUploadAvatarSpec = sync.OnceValue(func() connect.Spec {
@@ -115,6 +124,10 @@ type UserServiceClient interface {
 	ListAPITokens(context.Context, *v1.ListAPITokensRequest) (*v1.ListAPITokensResponse, error)
 	// Delete an API token.
 	DeleteAPIToken(context.Context, *v1.DeleteAPITokenRequest) (*v1.DeleteAPITokenResponse, error)
+	// Set the time zone the user lives in. The web app sets it from the
+	// browser's when it's unset, and the user changes it in the settings;
+	// only change it when they say where they live or have moved to.
+	SetTimeZone(context.Context, *v1.SetTimeZoneRequest) (*v1.SetTimeZoneResponse, error)
 	// Upload a picture to use as the user's avatar, replacing any previous
 	// one. The middle square of the picture is used.
 	UploadAvatar(context.Context, *v1.UploadAvatarRequest) (*v1.UploadAvatarResponse, error)
@@ -145,6 +158,10 @@ type UserServiceHandler interface {
 	ListAPITokens(context.Context, *v1.ListAPITokensRequest) (*v1.ListAPITokensResponse, error)
 	// Delete an API token.
 	DeleteAPIToken(context.Context, *v1.DeleteAPITokenRequest) (*v1.DeleteAPITokenResponse, error)
+	// Set the time zone the user lives in. The web app sets it from the
+	// browser's when it's unset, and the user changes it in the settings;
+	// only change it when they say where they live or have moved to.
+	SetTimeZone(context.Context, *v1.SetTimeZoneRequest) (*v1.SetTimeZoneResponse, error)
 	// Upload a picture to use as the user's avatar, replacing any previous
 	// one. The middle square of the picture is used.
 	UploadAvatar(context.Context, *v1.UploadAvatarRequest) (*v1.UploadAvatarResponse, error)
@@ -165,6 +182,7 @@ func RegisterUserServiceHandler(server *connect.Server, svc UserServiceHandler) 
 		connect.Method{Spec: userServiceCreateAPITokenSpec(), Handler: adapter.createAPIToken},
 		connect.Method{Spec: userServiceListAPITokensSpec(), Handler: adapter.listAPITokens},
 		connect.Method{Spec: userServiceDeleteAPITokenSpec(), Handler: adapter.deleteAPIToken},
+		connect.Method{Spec: userServiceSetTimeZoneSpec(), Handler: adapter.setTimeZone},
 		connect.Method{Spec: userServiceUploadAvatarSpec(), Handler: adapter.uploadAvatar},
 		connect.Method{Spec: userServiceDeleteAvatarSpec(), Handler: adapter.deleteAvatar},
 		connect.Method{Spec: userServiceListPrivacyZonesSpec(), Handler: adapter.listPrivacyZones},
@@ -189,6 +207,10 @@ func (UnimplementedUserServiceHandler) ListAPITokens(context.Context, *v1.ListAP
 
 func (UnimplementedUserServiceHandler) DeleteAPIToken(context.Context, *v1.DeleteAPITokenRequest) (*v1.DeleteAPITokenResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, "users.v1.UserService.DeleteAPIToken is not implemented")
+}
+
+func (UnimplementedUserServiceHandler) SetTimeZone(context.Context, *v1.SetTimeZoneRequest) (*v1.SetTimeZoneResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, "users.v1.UserService.SetTimeZone is not implemented")
 }
 
 func (UnimplementedUserServiceHandler) UploadAvatar(context.Context, *v1.UploadAvatarRequest) (*v1.UploadAvatarResponse, error) {
@@ -238,6 +260,14 @@ func (c *userServiceClient) ListAPITokens(ctx context.Context, req *v1.ListAPITo
 func (c *userServiceClient) DeleteAPIToken(ctx context.Context, req *v1.DeleteAPITokenRequest) (*v1.DeleteAPITokenResponse, error) {
 	var res v1.DeleteAPITokenResponse
 	if err := c.client.CallUnary(ctx, userServiceDeleteAPITokenSpec(), req, &res); err != nil {
+		return nil, err
+	}
+	return &res, nil
+}
+
+func (c *userServiceClient) SetTimeZone(ctx context.Context, req *v1.SetTimeZoneRequest) (*v1.SetTimeZoneResponse, error) {
+	var res v1.SetTimeZoneResponse
+	if err := c.client.CallUnary(ctx, userServiceSetTimeZoneSpec(), req, &res); err != nil {
 		return nil, err
 	}
 	return &res, nil
@@ -319,6 +349,18 @@ func (h userServiceHandler) deleteAPIToken(ctx context.Context, _ connect.Spec, 
 		return err
 	}
 	res, err := h.svc.DeleteAPIToken(ctx, &req)
+	if err != nil {
+		return err
+	}
+	return stream.Send(res)
+}
+
+func (h userServiceHandler) setTimeZone(ctx context.Context, _ connect.Spec, stream connect.ServerStream) error {
+	var req v1.SetTimeZoneRequest
+	if err := stream.Receive(&req); err != nil {
+		return err
+	}
+	res, err := h.svc.SetTimeZone(ctx, &req)
 	if err != nil {
 		return err
 	}

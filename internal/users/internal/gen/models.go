@@ -1782,6 +1782,7 @@ type User struct {
 	AvatarKey     pgtype.Text
 	PrivacySeed   pgtype.UUID
 	CalendarToken pgtype.Text
+	TimeZone      string
 }
 
 type Workout struct {

@@ -773,8 +773,8 @@ func (r *Repository) SetCalendarToken(ctx context.Context, userID pgtype.UUID, t
 }
 
 // GetCalendarFeedUser returns the user of a calendar feed, and the time zone
-// of their latest activity with a GPS track, or else of their latest
-// activity, empty if they have none.
+// they live in, or until they set it, of their latest activity with a GPS
+// track, or else of their latest activity, empty if they have none.
 func (r *Repository) GetCalendarFeedUser(ctx context.Context, token string) (pgtype.UUID, string, error) {
 	if token == "" {
 		return pgtype.UUID{}, "", store.ErrNotFound
