@@ -31,7 +31,9 @@ type PasskeyUser struct {
 	// The key of the user's avatar image in the blob store. Empty if the
 	// user has no avatar.
 	AvatarKey string
-	admin     bool
+	// The IANA name of the time zone the user lives in, empty if unset.
+	TimeZone string
+	admin    bool
 }
 
 // ID returns the user's ID.
@@ -172,7 +174,7 @@ func (r *Repository) GetPasskeyUser(ctx context.Context, userID pgtype.UUID) (*P
 		}
 		return nil, fmt.Errorf("failed to get passkey user: %w", err)
 	}
-	return &PasskeyUser{id: row.ID, Name: row.Name, UserHandle: row.UserHandle, AvatarKey: row.AvatarKey.String, admin: row.IsAdmin}, nil
+	return &PasskeyUser{id: row.ID, Name: row.Name, UserHandle: row.UserHandle, AvatarKey: row.AvatarKey.String, TimeZone: row.TimeZone, admin: row.IsAdmin}, nil
 }
 
 // CreateChallenge stores a challenge for a WebAuthn ceremony until expiry,

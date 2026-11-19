@@ -24,6 +24,10 @@ service UserService {
   rpc DeleteAPIToken(DeleteAPITokenRequest) returns (DeleteAPITokenResponse) {
     option (mcp.v1.method).exclude = true;
   }
+  // Set the time zone the user lives in. The web app sets it from the
+  // browser's when it's unset, and the user changes it in the settings;
+  // only change it when they say where they live or have moved to.
+  rpc SetTimeZone(SetTimeZoneRequest) returns (SetTimeZoneResponse);
   // Upload a picture to use as the user's avatar, replacing any previous
   // one. The middle square of the picture is used.
   rpc UploadAvatar(UploadAvatarRequest) returns (UploadAvatarResponse) {
@@ -90,6 +94,25 @@ message User {
   string avatar_url = 6;
   // Whether the user is an administrator, who can invite new users.
   bool admin = 7;
+  // The time zone the user lives in, an IANA name like "America/Vancouver".
+  // Empty until it's set, see SetTimeZone. The start times of their
+  // workouts are in it, as on their calendar feed, and it's the time zone
+  // of their activities without a GPS track, like strength sessions
+  // indoors, whose zone the watch doesn't know.
+  string time_zone = 8;
+}
+
+message SetTimeZoneRequest {
+  // The IANA name of the time zone, e.g. "America/Vancouver". Empty to
+  // unset it: activities without a GPS track then have the zone Strava
+  // guessed, and the calendar feed the zone of the latest activity with a
+  // GPS track.
+  string time_zone = 1;
+}
+
+message SetTimeZoneResponse {
+  // The user, with the time zone.
+  User user = 1;
 }
 
 message GetCurrentUserRequest {}

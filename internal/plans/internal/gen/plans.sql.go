@@ -350,7 +350,7 @@ func (q *Queries) FindReferences(ctx context.Context, arg *FindReferencesParams)
 }
 
 const getCalendarFeedUser = `-- name: GetCalendarFeedUser :one
-select u.id, coalesce((
+select u.id, coalesce(nullif(u.time_zone, ''), (
   select a.timezone from strava_activities a
   where a.user_id = u.id and a.timezone <> '' and a.min_lat is not null
   order by a.start_time desc
@@ -371,11 +371,12 @@ type GetCalendarFeedUserRow struct {
 }
 
 // Returns the user of a calendar feed, with the time zone their workouts'
-// local times are in: that of their latest activity with a GPS track, which
-// is where they were. Strava guesses the zone of activities without one,
-// like indoor strength workouts, and can name a zone with the same offset
-// in summer but another in winter, so those only count for a user with no
-// tracked activity. Empty if they have no activities.
+// local times are in: the one they live in, if they've set it. Otherwise
+// it's that of their latest activity with a GPS track, which is where they
+// were. Strava guesses the zone of activities without one, like indoor
+// strength workouts, and can name a zone with the same offset in summer
+// but another in winter, so those only count for a user with no tracked
+// activity. Empty if they have no activities either.
 func (q *Queries) GetCalendarFeedUser(ctx context.Context, calendarToken pgtype.Text) (*GetCalendarFeedUserRow, error) {
 	row := q.db.QueryRow(ctx, getCalendarFeedUser, calendarToken)
 	var i GetCalendarFeedUserRow

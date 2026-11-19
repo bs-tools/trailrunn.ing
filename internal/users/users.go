@@ -1,6 +1,8 @@
 package users
 
 import (
+	"context"
+	"fmt"
 	"log/slog"
 
 	"github.com/bs-tools/trailrunn.ing/internal/store"
@@ -29,4 +31,13 @@ func NewRepository(log *slog.Logger, db *store.DB) (*Repository, error) {
 		querier: gen.New(db),
 		db:      db,
 	}, nil
+}
+
+// SetTimeZone sets the time zone the user lives in, an IANA name, or empty
+// to unset it.
+func (r *Repository) SetTimeZone(ctx context.Context, userID pgtype.UUID, timeZone string) error {
+	if err := r.querier.SetTimeZone(ctx, &gen.SetTimeZoneParams{ID: userID, TimeZone: timeZone}); err != nil {
+		return fmt.Errorf("failed to set time zone: %w", err)
+	}
+	return nil
 }

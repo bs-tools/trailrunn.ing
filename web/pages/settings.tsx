@@ -9,6 +9,7 @@ import Passkeys from "@components/settings/passkeys";
 import PrivacyZonesCard from "@components/settings/privacy-zones";
 import PublicProfileCard from "@components/settings/public-profile";
 import SweatProfileCard from "@components/settings/sweat-profile";
+import TimeZoneCard from "@components/settings/time-zone";
 import TouringLimitsCard from "@components/settings/touring-limits";
 import StravaArchiveImport from "@components/strava/archive-import";
 import StravaCard from "@components/strava/strava-card";
@@ -269,6 +270,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ user }) => (
       </div>
       <div className="flex flex-col gap-4">
         <PublicProfileCard />
+        <TimeZoneCard />
         <SweatProfileCard />
         <LactateProfileCard />
         <TouringLimitsCard />

@@ -30,24 +30,31 @@ type PrivacyZoneRepository interface {
 	SetPrivacyZones(ctx context.Context, userID pgtype.UUID, zones []users.PrivacyZone) error
 }
 
+// TimeZoneRepository stores the time zone the user lives in.
+type TimeZoneRepository interface {
+	SetTimeZone(ctx context.Context, userID pgtype.UUID, timeZone string) error
+}
+
 type Service struct {
 	log     *slog.Logger
 	report  *errreport.Reporter
 	tokens  APITokenRepository
 	avatars AvatarRepository
 	zones   PrivacyZoneRepository
+	users   TimeZoneRepository
 	blobs   blob.Store
 }
 
 // NewService creates a new Service from the provided logger, repositories
 // and the blob store avatar images are stored in.
-func NewService(log *slog.Logger, report *errreport.Reporter, tokens APITokenRepository, avatars AvatarRepository, zones PrivacyZoneRepository, blobs blob.Store) *Service {
+func NewService(log *slog.Logger, report *errreport.Reporter, tokens APITokenRepository, avatars AvatarRepository, zones PrivacyZoneRepository, timeZones TimeZoneRepository, blobs blob.Store) *Service {
 	return &Service{
 		log:     log,
 		report:  report,
 		tokens:  tokens,
 		avatars: avatars,
 		zones:   zones,
+		users:   timeZones,
 		blobs:   blobs,
 	}
 }

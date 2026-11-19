@@ -6,3 +6,6 @@ select avatar_key from users where id = $1 for update;
 
 -- name: SetAvatarKey :exec
 update users set avatar_key = $2 where id = $1;
+
+-- name: SetTimeZone :exec
+update users set time_zone = $2 where id = $1;

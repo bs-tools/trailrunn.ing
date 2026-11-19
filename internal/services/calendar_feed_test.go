@@ -9,7 +9,9 @@ import (
 
 	"connectrpc.com/connect/v2"
 	"github.com/bs-tools/trailrunn.ing/internal/activities"
+	activitiesv1 "github.com/bs-tools/trailrunn.ing/internal/gen/activities/v1"
 	plansv1 "github.com/bs-tools/trailrunn.ing/internal/gen/plans/v1"
+	usersv1 "github.com/bs-tools/trailrunn.ing/internal/gen/users/v1"
 	"github.com/bs-tools/trailrunn.ing/internal/geo"
 )
 
@@ -172,6 +174,49 @@ func TestCalendarFeed(t *testing.T) {
 	want := "DTSTART:" + time.Date(date.Year(), date.Month(), date.Day(), 17, 0, 0, 0, vancouver).UTC().Format("20060102T150405Z") + "\r\n"
 	if _, body := e.get(feed.GetUrl(), ""); !strings.Contains(string(body), want) {
 		t.Errorf("the feed doesn't have 17:00 in Vancouver, %q:\n%s", want, body)
+	}
+
+	// The time zone the user lives in, once set, is the feed's, and that of
+	// their activities without a GPS track, whatever Strava guessed.
+	for _, invalid := range []string{"Squamish", "UTC", "Local", "America/Nowhere"} {
+		_, err := e.users.SetTimeZone(ctx, usersv1.SetTimeZoneRequest_builder{TimeZone: invalid}.Build())
+		wantCode(t, err, connect.CodeInvalidArgument)
+	}
+	set, err := e.users.SetTimeZone(ctx, usersv1.SetTimeZoneRequest_builder{TimeZone: "Europe/Zurich"}.Build())
+	if err != nil || set.GetUser().GetTimeZone() != "Europe/Zurich" {
+		t.Fatalf("SetTimeZone: got %v, %v", set.GetUser(), err)
+	}
+	if current, err := e.users.GetCurrentUser(ctx, &usersv1.GetCurrentUserRequest{}); err != nil || current.GetUser().GetTimeZone() != "Europe/Zurich" {
+		t.Errorf("GetCurrentUser: got %v, %v, want the time zone set", current.GetUser(), err)
+	}
+	zurich, err := time.LoadLocation("Europe/Zurich")
+	if err != nil {
+		t.Fatal(err)
+	}
+	want = "DTSTART:" + time.Date(date.Year(), date.Month(), date.Day(), 17, 0, 0, 0, zurich).UTC().Format("20060102T150405Z") + "\r\n"
+	if _, body := e.get(feed.GetUrl(), ""); !strings.Contains(string(body), want) {
+		t.Errorf("the feed doesn't have 17:00 in Zurich, %q:\n%s", want, body)
+	}
+	listed, err := e.activity.ListActivities(ctx, &activitiesv1.ListActivitiesRequest{})
+	if err != nil || len(listed.GetActivities()) != 3 {
+		t.Fatalf("ListActivities: got %d activities, %v", len(listed.GetActivities()), err)
+	}
+	// The latest first: the one without a track, then the two with one.
+	for i, wantZone := range []string{"Europe/Zurich", "America/Vancouver", "Asia/Tokyo"} {
+		if got := listed.GetActivities()[i].GetTimezone(); got != wantZone {
+			t.Errorf("activity %d is in %s, want %s", i, got, wantZone)
+		}
+	}
+	untracked, err := e.activity.GetActivity(ctx, activitiesv1.GetActivityRequest_builder{Id: listed.GetActivities()[0].GetId()}.Build())
+	if err != nil || untracked.GetActivity().GetTimezone() != "Europe/Zurich" {
+		t.Errorf("GetActivity: got %s, %v, want Europe/Zurich", untracked.GetActivity().GetTimezone(), err)
+	}
+	// Unset, the zones are as before.
+	if _, err := e.users.SetTimeZone(ctx, &usersv1.SetTimeZoneRequest{}); err != nil {
+		t.Fatalf("SetTimeZone: %v", err)
+	}
+	if listed, err := e.activity.ListActivities(ctx, &activitiesv1.ListActivitiesRequest{}); err != nil || listed.GetActivities()[0].GetTimezone() != "Europe/London" {
+		t.Errorf("ListActivities without a time zone: got %v, %v, want Strava's Europe/London", listed.GetActivities()[0].GetTimezone(), err)
 	}
 
 	// Replacing the feed stops the old URL working, and deleting it the new.
