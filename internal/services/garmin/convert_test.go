@@ -226,11 +226,12 @@ func TestPlainRunHeartRate(t *testing.T) {
 		thresholds        thresholds
 		wantLow, wantHigh float64
 	}{
-		// A base run stays below the aerobic threshold, in a wide range.
-		{name: "base run", workout: plans.Workout{Type: plans.WorkoutTypeBase, TargetDurationSeconds: 3600}, thresholds: thresholds{aerobic: 149, anaerobic: 170}, wantLow: 109, wantHigh: 149},
-		{name: "low threshold", workout: plans.Workout{Type: plans.WorkoutTypeBase}, thresholds: thresholds{aerobic: 110}, wantLow: 80, wantHigh: 110},
-		// Without a lactate test there's no threshold to stay below, and a
-		// hard run without structure has no one range.
+		// A base run is in zones 1 and 2: from 80% of the aerobic
+		// threshold's heart rate up to it.
+		{name: "base run", workout: plans.Workout{Type: plans.WorkoutTypeBase, TargetDurationSeconds: 3600}, thresholds: thresholds{aerobic: 149, anaerobic: 170}, wantLow: 119, wantHigh: 149},
+		{name: "without an anaerobic threshold", workout: plans.Workout{Type: plans.WorkoutTypeBase}, thresholds: thresholds{aerobic: 110}, wantLow: 88, wantHigh: 110},
+		// Without an aerobic threshold there are no zones, and a hard run
+		// without structure has no one zone.
 		{name: "no threshold", workout: plans.Workout{Type: plans.WorkoutTypeBase}},
 		{name: "intensity run", workout: plans.Workout{Type: plans.WorkoutTypeIntensity}, thresholds: thresholds{aerobic: 149, anaerobic: 170}},
 	} {

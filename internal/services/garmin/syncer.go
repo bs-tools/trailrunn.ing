@@ -187,6 +187,12 @@ func (s *Syncer) userThresholds(ctx context.Context, userID pgtype.UUID) (thresh
 	}
 	if profile != nil {
 		t.lactateThreshold = profile.AerobicThresholdHeartRateBPM
+		// The profile's estimate is the latest test's unless the user
+		// corrected it, so it's the aerobic threshold of heart rate
+		// targets and zones too. Cleared, they stay the latest test's.
+		if profile.AerobicThresholdHeartRateBPM > 0 {
+			t.aerobic = profile.AerobicThresholdHeartRateBPM
+		}
 	}
 	return t, nil
 }

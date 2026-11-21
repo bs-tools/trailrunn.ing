@@ -297,8 +297,9 @@ type HeartRateReference int32
 const (
 	// Beats per minute.
 	HeartRateReference_HEART_RATE_REFERENCE_UNSPECIFIED HeartRateReference = 0
-	// Beats per minute from the user's aerobic threshold, from their latest
-	// lactate test that found it. See LactateTestService.
+	// Beats per minute from the user's aerobic threshold: the one their
+	// lactate profile estimates, which their latest test sets and they can
+	// correct, or else their latest lactate test's. See LactateTestService.
 	HeartRateReference_HEART_RATE_REFERENCE_AEROBIC_THRESHOLD HeartRateReference = 1
 	// Beats per minute from the user's anaerobic threshold, from their
 	// latest lactate test that found it.
@@ -1820,10 +1821,14 @@ type RunWorkout_builder struct {
 	// hard, 2 minutes easy) and a cool-down. Empty for a run without
 	// structure, like an easy run. Garmin watches guide the steps and alert
 	// outside their targets. On the Garmin calendar, a base run without
-	// blocks alerts above the user's aerobic threshold, if a lactate test
-	// found it, so an easy run needs no blocks for that. At most 20 blocks,
-	// and 50 steps in all, counting each block's steps once however often
-	// it's repeated.
+	// blocks has the heart rate range of zones 1 and 2 of Uphill Athlete's
+	// system, from 80% of the heart rate of the user's aerobic threshold up
+	// to it, so an easy run needs no blocks for that. The threshold is the
+	// one their lactate profile estimates, see
+	// LactateTestService.GetLactateProfile, or else their latest lactate
+	// test's; without one the run has no range. At most 20 blocks, and 50
+	// steps in all, counting each block's steps once however often it's
+	// repeated.
 	Blocks []*RunBlock
 	// Whether the run is a blood lactate test: stages of a few minutes at
 	// rising heart rates, with the lactate measured after each, to find the
