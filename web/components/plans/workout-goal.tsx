@@ -7,6 +7,7 @@ import {
   PolylineLayer,
 } from "@components/map/layers";
 import MapView from "@components/map/map-view";
+import { formatHeartRate } from "@components/plans/heart-rate";
 import { toTuples } from "@components/routes/route-geometry";
 import Card from "@components/ui/card";
 import { linkClass } from "@components/ui/styles";
@@ -76,7 +77,14 @@ export const Goal: React.FC<GoalProps> = ({ workout, threshold }) => {
       value: terrainStyle(planned.terrain).label,
     });
   }
-  if (capped) {
+  // The run's own range, or else the default of a base run.
+  const ownRange =
+    workout.details.case === "run" && workout.details.value.blocks.length === 0
+      ? workout.details.value.heartRate
+      : undefined;
+  if (ownRange !== undefined) {
+    targets.push({ label: "Heart rate", value: formatHeartRate(ownRange) });
+  } else if (capped) {
     targets.push({
       label: "Heart rate",
       value: `Under ${threshold.heartRateBpm} bpm`,

@@ -1,4 +1,9 @@
 import { create as createMessage } from "@bufbuild/protobuf";
+import {
+  choiceOf,
+  HeartRateField,
+  targetOf,
+} from "@components/plans/heart-rate";
 import { SelectField, TextAreaField, TextField } from "@components/ui/fields";
 import type { SelectOption } from "@components/ui/fields";
 import Modal from "@components/ui/modal";
@@ -123,6 +128,11 @@ const WorkoutDialog: React.FC<WorkoutDialogProps> = ({
   );
   const [routeId, setRouteId] = useState(stored?.routeId ?? "");
   const [lactateTest, setLactateTest] = useState(stored?.lactateTest ?? false);
+  const storedRun =
+    workout?.details.case === "run" ? workout.details.value : undefined;
+  const [heartRate, setHeartRate] = useState(() =>
+    choiceOf(storedRun?.heartRate)
+  );
   const storedFueling =
     workout?.details.case === "run" ? workout.details.value.fueling : undefined;
   const [carbs, setCarbs] = useState(
@@ -200,6 +210,11 @@ const WorkoutDialog: React.FC<WorkoutDialogProps> = ({
       setValidation("Fueling rates must be positive numbers.");
       return;
     }
+    const heartRateTarget = targetOf(heartRate);
+    if ("error" in heartRateTarget) {
+      setValidation(heartRateTarget.error);
+      return;
+    }
     setValidation("");
     const workoutType = parseEnum(WorkoutType, type, WorkoutType.BASE);
     const targetTerrain = parseEnum(Terrain, terrain, Terrain.UNSPECIFIED);
@@ -219,6 +234,7 @@ const WorkoutDialog: React.FC<WorkoutDialogProps> = ({
     };
     const details = workoutDetails(workoutType, targets, workout);
     if (details.case === "run") {
+      details.value.heartRate = heartRateTarget.target;
       // A run without rates has no fueling plan; its notes are kept.
       const [carbsRate = 0, fluidRate = 0, sodiumRate = 0] = rates;
       details.value.fueling =
@@ -461,6 +477,26 @@ const WorkoutDialog: React.FC<WorkoutDialogProps> = ({
               sweat out.
             </p>
           </fieldset>
+        )}
+        {isRun && !lactateTest && (storedRun?.blocks.length ?? 0) === 0 && (
+          <div className="flex flex-col gap-1">
+            <HeartRateField
+              label="Heart rate"
+              defaultLabel={
+                selectedType === WorkoutType.BASE
+                  ? "Default: zones 1–2"
+                  : "No range"
+              }
+              value={heartRate}
+              onChange={setHeartRate}
+            />
+            <p className="text-xs text-gray-500">
+              Your Garmin watch alerts outside the range. Zones are from your
+              aerobic and anaerobic thresholds: zone 1 is 80–90% of your aerobic
+              threshold&apos;s heart rate, zone 2 up to it, zone 3 up to your
+              anaerobic threshold, and zone 4 above.
+            </p>
+          </div>
         )}
         {isRun && (
           <label className="flex items-start gap-2 text-sm text-gray-700">

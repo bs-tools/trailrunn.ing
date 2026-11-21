@@ -14,26 +14,28 @@ import Card from "@components/ui/card";
 import QueryError from "@components/ui/query-error";
 import { linkClass, secondaryButton } from "@components/ui/styles";
 import { Code } from "@connectrpc/connect";
-import { useQuery } from "@connectrpc/connect-query";
+import { useMutation, useQuery } from "@connectrpc/connect-query";
 import {
   ArrowLeftIcon,
   CheckCircleIcon,
   PencilSquareIcon,
 } from "@heroicons/react/24/outline";
-import { skipToken } from "@tanstack/react-query";
+import { skipToken, useQueryClient } from "@tanstack/react-query";
 import { listActivities } from "gen/activities/v1/activities-ActivityService_connectquery";
 import { listExercises } from "gen/plans/v1/exercises-ExerciseService_connectquery";
 import {
   getTrainingPlan,
   getWorkout,
   getWorkoutWeather,
+  updateWorkout,
 } from "gen/plans/v1/plans-TrainingPlanService_connectquery";
 import type { Workout } from "gen/plans/v1/plans_pb";
-import { WorkoutType } from "gen/plans/v1/plans_pb";
+import { TrainingPlanService, WorkoutType } from "gen/plans/v1/plans_pb";
 import { getRoute } from "gen/routes/v1/routes-RouteService_connectquery";
 import { addDays, today } from "helpers/dates";
 import { formatDate } from "helpers/format";
 import { styleOfWorkout } from "helpers/labels";
+import { invalidateServices } from "helpers/query";
 import {
   isCompleted,
   isSkiTour,
@@ -142,6 +144,13 @@ const WorkoutPage: React.FC = () => {
     id,
   });
   const workout = data?.workout;
+  const queryClient = useQueryClient();
+  // Saves a run's blocks, after a step's heart rate range was changed.
+  const saveBlocks = useMutation(updateWorkout, {
+    onSuccess: async () => {
+      await invalidateServices(queryClient, [TrainingPlanService]);
+    },
+  });
   const plan = useQuery(
     getTrainingPlan,
     workout === undefined ? skipToken : { id: workout.planId }
@@ -312,7 +321,20 @@ const WorkoutPage: React.FC = () => {
             )}
           {workout.details.case === "run" &&
             workout.details.value.blocks.length > 0 && (
-              <RunSteps blocks={workout.details.value.blocks} />
+              <RunSteps
+                blocks={workout.details.value.blocks}
+                pending={saveBlocks.isPending}
+                error={saveBlocks.error}
+                onChange={(blocks) => {
+                  saveBlocks.mutate({
+                    updateMask: { paths: ["run.blocks"] },
+                    workout: {
+                      details: { case: "run", value: { blocks } },
+                      id: workout.id,
+                    },
+                  });
+                }}
+              />
             )}
           {workout.details.case === "strength" && (
             <StrengthWorkoutView
