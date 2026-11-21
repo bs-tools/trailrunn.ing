@@ -218,6 +218,46 @@ func TestStrengthUnevenSteps(t *testing.T) {
 	}
 }
 
+func TestPlainRunHeartRate(t *testing.T) {
+	t.Parallel()
+	for _, tc := range []struct {
+		name              string
+		workout           plans.Workout
+		thresholds        thresholds
+		wantLow, wantHigh float64
+	}{
+		// A base run is in zones 1 and 2: from 80% of the aerobic
+		// threshold's heart rate up to it.
+		{name: "base run", workout: plans.Workout{Type: plans.WorkoutTypeBase, TargetDurationSeconds: 3600}, thresholds: thresholds{aerobic: 149, anaerobic: 170}, wantLow: 119, wantHigh: 149},
+		{name: "without an anaerobic threshold", workout: plans.Workout{Type: plans.WorkoutTypeBase}, thresholds: thresholds{aerobic: 110}, wantLow: 88, wantHigh: 110},
+		// Without an aerobic threshold there are no zones, and a hard run
+		// without structure has no one zone.
+		{name: "no threshold", workout: plans.Workout{Type: plans.WorkoutTypeBase}},
+		{name: "intensity run", workout: plans.Workout{Type: plans.WorkoutTypeIntensity}, thresholds: thresholds{aerobic: 149, anaerobic: 170}},
+	} {
+		gw, ok := trainingWorkout(&tc.workout, tc.thresholds)
+		if !ok || len(gw.Segments[0].Steps) != 1 {
+			t.Fatalf("%s: got %+v, want a workout of one step", tc.name, gw)
+		}
+		step := gw.Segments[0].Steps[0]
+		wantType := "OPEN"
+		if tc.wantHigh > 0 {
+			wantType = "HEART_RATE"
+		}
+		if step.TargetType != wantType || step.TargetValueLow != tc.wantLow || step.TargetValueHigh != tc.wantHigh {
+			t.Errorf("%s: got target %s %v-%v, want %s %v-%v", tc.name, step.TargetType, step.TargetValueLow, step.TargetValueHigh, wantType, tc.wantLow, tc.wantHigh)
+		}
+		if (tc.wantHigh > 0) != strings.Contains(step.Description, "aerobic threshold") {
+			t.Errorf("%s: unexpected description %q", tc.name, step.Description)
+		}
+	}
+	// The duration is kept with the target.
+	timed, _ := trainingWorkout(&plans.Workout{Type: plans.WorkoutTypeBase, TargetDurationSeconds: 3600}, thresholds{aerobic: 149})
+	if step := timed.Segments[0].Steps[0]; step.DurationType != "TIME" || step.DurationValue != 3600 {
+		t.Errorf("got duration %s %v, want an hour", step.DurationType, step.DurationValue)
+	}
+}
+
 func TestLactateTestSteps(t *testing.T) {
 	t.Parallel()
 	w := &plans.Workout{Type: plans.WorkoutTypeBase, Title: "Lactate test", LactateTest: true}
