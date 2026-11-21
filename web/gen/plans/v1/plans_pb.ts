@@ -377,8 +377,11 @@ export type RunWorkout = Message<"plans.v1.RunWorkout"> & {
    * The structure of the run, in order: e.g. a warm-up, 6 x (3 minutes
    * hard, 2 minutes easy) and a cool-down. Empty for a run without
    * structure, like an easy run. Garmin watches guide the steps and alert
-   * outside their targets. At most 20 blocks, and 50 steps in all, counting
-   * each block's steps once however often it's repeated.
+   * outside their targets. On the Garmin calendar, a base run without
+   * blocks alerts above the user's aerobic threshold, if a lactate test
+   * found it, so an easy run needs no blocks for that. At most 20 blocks,
+   * and 50 steps in all, counting each block's steps once however often
+   * it's repeated.
    *
    * @generated from field: repeated plans.v1.RunBlock blocks = 7;
    */
@@ -392,8 +395,11 @@ export type RunWorkout = Message<"plans.v1.RunWorkout"> & {
    * linked to the workout. Plan it as a base run without blocks: on the
    * Garmin calendar it gets the test's stages, a warm-up and then 4 minute
    * stages 10 bpm apart, each followed by a step to sample lactate in that
-   * ends at the lap button. The stages start where the user's last test
-   * did, or at 100 bpm, and go to 180 bpm, or at least 5 stages.
+   * ends at the lap button. With an expected aerobic threshold, see
+   * LactateTestService.GetLactateProfile, the stages start 30 bpm below it
+   * and are 5 bpm apart within 10 bpm of it. Without one they start where
+   * the user's last test did, or at 100 bpm, and go to 180 bpm, or at
+   * least 5 stages.
    *
    * @generated from field: bool lactate_test = 8;
    */

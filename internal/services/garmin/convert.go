@@ -265,10 +265,23 @@ type thresholds struct {
 	lactateThreshold int32
 }
 
+// The heart rate range of a base run without structure, whose top is the
+// aerobic threshold. Garmin's targets are ranges, and the watch alerts below
+// them too, so the range is wide: walking a climb or running downhill
+// shouldn't set it off.
+const (
+	// baseRunRangeBPM is how far below the aerobic threshold the range
+	// starts.
+	baseRunRangeBPM = 40
+	// minBaseRunBPM is the lowest the range starts, for a low threshold.
+	minBaseRunBPM = 80
+)
+
 // trainingWorkout returns a workout as a Training API workout, if it's a
 // kind Garmin takes: a run, or a strength workout with exercises, of at most
 // garmin.MaxWorkoutSteps steps. Heart rate targets relative to a threshold
-// are converted with t.
+// are converted with t, and a base run without structure stays below the
+// aerobic threshold.
 func trainingWorkout(w *plans.Workout, t thresholds) (*garmin.Workout, bool) {
 	gw := &garmin.Workout{
 		WorkoutName:     w.Title,
@@ -299,6 +312,13 @@ func trainingWorkout(w *plans.Workout, t thresholds) (*garmin.Workout, bool) {
 			step.DurationType, step.DurationValue = "DISTANCE", w.TargetDistanceMeters
 		case w.TargetDurationSeconds > 0:
 			step.DurationType, step.DurationValue = "TIME", float64(w.TargetDurationSeconds)
+		}
+		// A base run stays below the aerobic threshold, so the watch alerts
+		// above it. An intensity run without structure has no one range.
+		if w.Type == plans.WorkoutTypeBase && t.aerobic > 0 {
+			step.TargetType = "HEART_RATE"
+			step.TargetValueLow, step.TargetValueHigh = float64(max(t.aerobic-baseRunRangeBPM, minBaseRunBPM)), float64(t.aerobic)
+			step.Description = fmt.Sprintf("Easy, under %d bpm, your aerobic threshold", t.aerobic)
 		}
 		steps = []garmin.WorkoutStep{step}
 	case plans.WorkoutTypeStrength:
