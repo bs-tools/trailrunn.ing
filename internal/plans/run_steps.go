@@ -45,12 +45,17 @@ type RunStep struct {
 	Notes           string           `json:"notes,omitempty"`
 }
 
-// HeartRateTarget is a heart rate range, in beats per minute or relative to
-// a threshold.
+// HeartRateTarget is a heart rate range: in beats per minute, relative to
+// a threshold, or from the bottom of LowZone to the top of HighZone, zones
+// of Uphill Athlete's system, see HeartRateZones. It's stored as JSON, so
+// its field names mustn't change.
 type HeartRateTarget struct {
 	Reference HeartRateReference `json:"reference,omitempty"`
-	LowBPM    int32              `json:"low_bpm"`
-	HighBPM   int32              `json:"high_bpm"`
+	LowBPM    int32              `json:"low_bpm,omitempty"`
+	HighBPM   int32              `json:"high_bpm,omitempty"`
+	// From 1 to 4, and 0 if the range isn't of zones.
+	LowZone  int32 `json:"low_zone,omitempty"`
+	HighZone int32 `json:"high_zone,omitempty"`
 }
 
 // PaceTarget is a pace range, in seconds per kilometer.
@@ -61,8 +66,15 @@ type PaceTarget struct {
 
 // Resolve returns a heart rate target's range in beats per minute, given
 // the user's thresholds, 0 if unknown. It reports false if it's relative to
-// an unknown threshold.
+// an unknown threshold, or of zones that need one.
 func (t *HeartRateTarget) Resolve(aerobicBPM, anaerobicBPM int32) (low, high int32, ok bool) {
+	if t.LowZone > 0 {
+		zones, ok := UphillAthleteZones(aerobicBPM, anaerobicBPM)
+		if !ok {
+			return 0, 0, false
+		}
+		return zones.Range(t.LowZone, t.HighZone)
+	}
 	var base int32
 	switch t.Reference {
 	case HeartRateBPM:
@@ -75,6 +87,31 @@ func (t *HeartRateTarget) Resolve(aerobicBPM, anaerobicBPM int32) (low, high int
 		return 0, 0, false
 	}
 	return base + t.LowBPM, base + t.HighBPM, true
+}
+
+// heartRateToDB returns a heart rate target as stored, empty for none.
+func heartRateToDB(t *HeartRateTarget) string {
+	if t == nil {
+		return ""
+	}
+	data, err := json.Marshal(t)
+	if err != nil {
+		// The target is plain values, which always marshal.
+		panic(fmt.Sprintf("marshaling a heart rate target: %v", err))
+	}
+	return string(data)
+}
+
+// heartRateFromDB returns a heart rate target from the database.
+func heartRateFromDB(data []byte) *HeartRateTarget {
+	if len(data) == 0 {
+		return nil
+	}
+	var t HeartRateTarget
+	if err := json.Unmarshal(data, &t); err != nil {
+		return nil
+	}
+	return &t
 }
 
 // runBlocksToDB returns a run's blocks as stored, empty for none.

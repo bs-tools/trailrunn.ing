@@ -206,3 +206,68 @@ func TestSweatProfile(t *testing.T) {
 		t.Errorf("got amounts in the heat %v, want 3000 ml of sweat and its 3000 mg of sodium", a)
 	}
 }
+
+func TestRunHeartRate(t *testing.T) {
+	t.Parallel()
+	e := newEnv(t)
+	ctx := context.Background()
+	plan, err := e.plans.CreateTrainingPlan(ctx, plansv1.CreateTrainingPlanRequest_builder{
+		Plan: plansv1.TrainingPlan_builder{Name: "Build", StartDate: "2026-11-02", EndDate: "2026-11-30"}.Build(),
+	}.Build())
+	if err != nil {
+		t.Fatal(err)
+	}
+	run := func(target *plansv1.HeartRateTarget) *plansv1.Workout {
+		return plansv1.Workout_builder{Date: "2026-11-10", Title: "Easy", Run: plansv1.RunWorkout_builder{
+			Intensity: plansv1.RunIntensity_RUN_INTENSITY_BASE, TargetDurationSeconds: 3600, HeartRate: target,
+		}.Build()}.Build()
+	}
+	// A run has the default range unless it sets its own, here of a zone.
+	created, err := e.plans.CreateWorkouts(ctx, plansv1.CreateWorkoutsRequest_builder{
+		PlanId: plan.GetPlan().GetId(),
+		Workouts: []*plansv1.Workout{
+			run(nil),
+			run(plansv1.HeartRateTarget_builder{LowZone: 1, HighZone: 1}.Build()),
+		},
+	}.Build())
+	if err != nil {
+		t.Fatalf("CreateWorkouts: %v", err)
+	}
+	if got := created.GetWorkouts()[0].GetRun(); got.HasHeartRate() {
+		t.Errorf("got heart rate %v on a run without one", got.GetHeartRate())
+	}
+	recovery := created.GetWorkouts()[1]
+	if got := recovery.GetRun().GetHeartRate(); got.GetLowZone() != 1 || got.GetHighZone() != 1 || got.GetHighBpm() != 0 {
+		t.Errorf("got heart rate %v, want zone 1", got)
+	}
+
+	// It changes to an exact range on its own, and is removed again.
+	update := func(target *plansv1.HeartRateTarget) (*plansv1.RunWorkout, error) {
+		updated, err := e.plans.UpdateWorkout(ctx, plansv1.UpdateWorkoutRequest_builder{
+			Workout:    plansv1.Workout_builder{Id: recovery.GetId(), Run: plansv1.RunWorkout_builder{HeartRate: target}.Build()}.Build(),
+			UpdateMask: &fieldmaskpb.FieldMask{Paths: []string{"run.heart_rate"}},
+		}.Build())
+		return updated.GetWorkout().GetRun(), err
+	}
+	got, err := update(plansv1.HeartRateTarget_builder{LowBpm: 120, HighBpm: 135}.Build())
+	if err != nil || got.GetHeartRate().GetLowBpm() != 120 || got.GetHeartRate().GetHighBpm() != 135 || got.GetHeartRate().GetLowZone() != 0 || got.GetTargetDurationSeconds() != 3600 {
+		t.Errorf("got run %v, %v, want 120 to 135 bpm with its duration kept", got, err)
+	}
+	if got, err := update(nil); err != nil || got.HasHeartRate() {
+		t.Errorf("got heart rate %v, %v, want it removed", got.GetHeartRate(), err)
+	}
+
+	// Zones and beats per minute don't mix, and zones are 1 to 4 in order.
+	for name, target := range map[string]*plansv1.HeartRateTarget{
+		"zones and bpm":    plansv1.HeartRateTarget_builder{LowZone: 1, HighZone: 2, HighBpm: 150}.Build(),
+		"zone 5":           plansv1.HeartRateTarget_builder{LowZone: 4, HighZone: 5}.Build(),
+		"zones backwards":  plansv1.HeartRateTarget_builder{LowZone: 3, HighZone: 2}.Build(),
+		"only a high zone": plansv1.HeartRateTarget_builder{HighZone: 2}.Build(),
+		"bpm backwards":    plansv1.HeartRateTarget_builder{LowBpm: 150, HighBpm: 120}.Build(),
+		"empty":            {},
+	} {
+		if _, err := update(target); connect.CodeOf(err) != connect.CodeInvalidArgument {
+			t.Errorf("%s: got %v, want InvalidArgument", name, err)
+		}
+	}
+}

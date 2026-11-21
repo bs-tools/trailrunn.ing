@@ -125,8 +125,8 @@ export const workoutDetails = (
     case WorkoutType.BASE:
     case WorkoutType.INTENSITY: {
       /*
-       * The structure and fueling of an existing run are kept, unless the
-       * caller replaces them.
+       * The structure, fueling and heart rate range of an existing run are
+       * kept, unless the caller replaces them.
        */
       const existingRun =
         existing?.details.case === "run" ? existing.details.value : undefined;
@@ -135,6 +135,7 @@ export const workoutDetails = (
         value: create(RunWorkoutSchema, {
           blocks: existingRun?.blocks ?? [],
           fueling: existingRun?.fueling,
+          heartRate: existingRun?.heartRate,
           intensity:
             type === WorkoutType.BASE ? RunIntensity.BASE : RunIntensity.HARD,
           lactateTest: targets.lactateTest,

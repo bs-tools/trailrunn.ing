@@ -22,3 +22,34 @@ func TestUphillAthleteZones(t *testing.T) {
 		}
 	}
 }
+
+func TestHeartRateZoneRange(t *testing.T) {
+	t.Parallel()
+	both, _ := UphillAthleteZones(149, 170)
+	aerobic, _ := UphillAthleteZones(149, 0)
+	for _, tc := range []struct {
+		zones             HeartRateZones
+		low, high         int32
+		wantLow, wantHigh int32
+		wantOK            bool
+	}{
+		{zones: both, low: 1, high: 1, wantLow: 119, wantHigh: 134, wantOK: true},
+		{zones: both, low: 1, high: 2, wantLow: 119, wantHigh: 149, wantOK: true},
+		{zones: both, low: 2, high: 3, wantLow: 134, wantHigh: 170, wantOK: true},
+		// Zone 4 has no top short of the maximum heart rate.
+		{zones: both, low: 4, high: 4, wantLow: 170, wantHigh: 220, wantOK: true},
+		// The anaerobic threshold is the top of zone 3 and the bottom of 4.
+		{zones: aerobic, low: 1, high: 2, wantLow: 119, wantHigh: 149, wantOK: true},
+		{zones: aerobic, low: 3, high: 3},
+		{zones: aerobic, low: 4, high: 4},
+		{zones: aerobic, low: 3, high: 4, wantLow: 149, wantHigh: 220, wantOK: true},
+		{zones: both, low: 0, high: 2},
+		{zones: both, low: 3, high: 2},
+		{zones: both, low: 4, high: 5},
+	} {
+		low, high, ok := tc.zones.Range(tc.low, tc.high)
+		if low != tc.wantLow || high != tc.wantHigh || ok != tc.wantOK {
+			t.Errorf("Range(%d, %d) = %d, %d, %v, want %d, %d, %v", tc.low, tc.high, low, high, ok, tc.wantLow, tc.wantHigh, tc.wantOK)
+		}
+	}
+}

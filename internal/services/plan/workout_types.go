@@ -87,6 +87,13 @@ func workoutDetailsFromProto(w *plansv1.Workout, workout *plans.Workout) error {
 			return invalidArgument("run.%v", err)
 		}
 		workout.RunBlocks = blocks
+		if run.HasHeartRate() {
+			target, err := heartRateFromProto(run.GetHeartRate())
+			if err != nil {
+				return invalidArgument("run.%v", err)
+			}
+			workout.RunHeartRate = target
+		}
 		workout.LactateTest = run.GetLactateTest()
 		if run.HasFueling() {
 			f := run.GetFueling()
@@ -403,6 +410,7 @@ func workoutToProto(w *plans.Workout) *plansv1.Workout {
 			TargetTerrain:             route.TerrainToProto(w.TargetTerrain),
 			RouteId:                   store.UUIDToString(w.RouteID),
 			Blocks:                    runBlocksToProto(w.RunBlocks),
+			HeartRate:                 heartRateToProto(w.RunHeartRate),
 			LactateTest:               w.LactateTest,
 			Fueling:                   runFuelingToProto(w),
 		}.Build()

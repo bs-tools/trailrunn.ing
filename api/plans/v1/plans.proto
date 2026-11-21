@@ -299,6 +299,12 @@ message RunWorkout {
   // the run's expected time, and raised for the heat in its forecast, see
   // WorkoutWeather.fueling.
   RunFueling fueling = 9;
+  // The heart rate range to hold on a run without blocks, which the Garmin
+  // watch alerts outside of. Unset for the default: zones 1 to 2 for a base
+  // run, and none for a hard one. Set it to override that, e.g. zone 1 only
+  // for a recovery run, zones 1 to 3 for a hilly long run, or an exact
+  // range. In a run with blocks, the steps have their own targets instead.
+  HeartRateTarget heart_rate = 10;
 }
 
 // Fueling and hydration for a run.
@@ -414,10 +420,23 @@ enum HeartRateReference {
   HEART_RATE_REFERENCE_ANAEROBIC_THRESHOLD = 2;
 }
 
-// A heart rate range to hold. With a threshold reference, the range is
-// relative to it and follows it as new lactate tests move it, e.g. -15 to 0
-// for easy running below the aerobic threshold, or -5 to 3 for intervals at
-// the anaerobic threshold.
+// A heart rate range to hold, given one of three ways:
+//
+//   - In beats per minute: low_bpm and high_bpm, e.g. 130 to 145.
+//   - Relative to a threshold: a reference, with low_bpm and high_bpm
+//     measured from it, e.g. -15 to 0 for easy running below the aerobic
+//     threshold, or -5 to 3 for intervals at the anaerobic threshold.
+//   - As zones: low_zone and high_zone, from the bottom of the one to the
+//     top of the other, e.g. 1 to 2 for aerobic base running, or 3 to 3 for
+//     a tempo run.
+//
+// Ranges relative to a threshold and zones follow the thresholds as new
+// lactate tests move them. The zones are those of Uphill Athlete's system:
+// zone 1 is from 80% to 90% of the heart rate of the aerobic threshold,
+// zone 2 from there to the aerobic threshold, zone 3 from the aerobic to
+// the anaerobic threshold, and zone 4 above it. Zones 3 and 4 need the
+// anaerobic threshold, from a lactate test that went that far: until
+// there's one, a range with them is described on the watch, not alerted on.
 message HeartRateTarget {
   // What low_bpm and high_bpm are measured from; unspecified for beats per
   // minute.
@@ -427,6 +446,12 @@ message HeartRateTarget {
   // The top of the range, in beats per minute, or from the threshold. At
   // least low_bpm.
   int32 high_bpm = 3;
+  // The zone the range starts at the bottom of, from 1 to 4. 0 if the
+  // range isn't of zones; set, reference, low_bpm and high_bpm must be
+  // unset.
+  int32 low_zone = 4;
+  // The zone the range ends at the top of, from low_zone to 4.
+  int32 high_zone = 5;
 }
 
 // A pace range to hold.

@@ -1810,6 +1810,7 @@ type Workout struct {
 	LactateTest               bool
 	RunFueling                json.RawMessage
 	CrossTrainingSport        string
+	RunHeartRate              json.RawMessage
 }
 
 type WorkoutExercise struct {

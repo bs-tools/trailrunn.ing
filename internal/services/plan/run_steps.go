@@ -94,22 +94,11 @@ func runStepFromProto(st *plansv1.RunStep) (plans.RunStep, error) {
 	}
 	switch st.WhichTarget() {
 	case plansv1.RunStep_HeartRate_case:
-		hr := st.GetHeartRate()
-		reference, ok := heartRateReferences[hr.GetReference()]
-		if !ok {
-			return step, fmt.Errorf("heart_rate.reference is unknown")
+		target, err := heartRateFromProto(st.GetHeartRate())
+		if err != nil {
+			return step, err
 		}
-		low, high := hr.GetLowBpm(), hr.GetHighBpm()
-		if high < low {
-			return step, fmt.Errorf("heart_rate.high_bpm must be at least low_bpm")
-		}
-		if reference == plans.HeartRateBPM && (low < minHeartRateBPM || high > maxHeartRateBPM) {
-			return step, fmt.Errorf("heart_rate must be from %d to %d bpm", minHeartRateBPM, maxHeartRateBPM)
-		}
-		if reference != plans.HeartRateBPM && (low < -maxThresholdOffsetBPM || high > maxThresholdOffsetBPM) {
-			return step, fmt.Errorf("heart_rate relative to a threshold must be within %d bpm of it", maxThresholdOffsetBPM)
-		}
-		step.HeartRate = &plans.HeartRateTarget{Reference: reference, LowBPM: low, HighBPM: high}
+		step.HeartRate = target
 	case plansv1.RunStep_Pace_case:
 		pace := st.GetPace()
 		fast, slow := pace.GetFastSecondsPerKilometer(), pace.GetSlowSecondsPerKilometer()
@@ -119,6 +108,49 @@ func runStepFromProto(st *plansv1.RunStep) (plans.RunStep, error) {
 		step.Pace = &plans.PaceTarget{FastSecondsPerKilometer: fast, SlowSecondsPerKilometer: slow}
 	}
 	return step, nil
+}
+
+// heartRateFromProto validates a heart rate target: a range in beats per
+// minute, relative to a threshold, or of zones.
+func heartRateFromProto(hr *plansv1.HeartRateTarget) (*plans.HeartRateTarget, error) {
+	reference, ok := heartRateReferences[hr.GetReference()]
+	if !ok {
+		return nil, fmt.Errorf("heart_rate.reference is unknown")
+	}
+	low, high := hr.GetLowBpm(), hr.GetHighBpm()
+	if lowZone, highZone := hr.GetLowZone(), hr.GetHighZone(); lowZone != 0 || highZone != 0 {
+		if reference != plans.HeartRateBPM || low != 0 || high != 0 {
+			return nil, fmt.Errorf("heart_rate is a range of zones or of beats per minute: set low_zone and high_zone, or low_bpm and high_bpm, not both")
+		}
+		if lowZone < 1 || highZone > plans.MaxHeartRateZone || highZone < lowZone {
+			return nil, fmt.Errorf("heart_rate zones must be from 1 to %d, low_zone first; for one zone, set both to it", plans.MaxHeartRateZone)
+		}
+		return &plans.HeartRateTarget{LowZone: lowZone, HighZone: highZone}, nil
+	}
+	if high < low {
+		return nil, fmt.Errorf("heart_rate.high_bpm must be at least low_bpm")
+	}
+	if reference == plans.HeartRateBPM && (low < minHeartRateBPM || high > maxHeartRateBPM) {
+		return nil, fmt.Errorf("heart_rate must be from %d to %d bpm", minHeartRateBPM, maxHeartRateBPM)
+	}
+	if reference != plans.HeartRateBPM && (low < -maxThresholdOffsetBPM || high > maxThresholdOffsetBPM) {
+		return nil, fmt.Errorf("heart_rate relative to a threshold must be within %d bpm of it", maxThresholdOffsetBPM)
+	}
+	return &plans.HeartRateTarget{Reference: reference, LowBPM: low, HighBPM: high}, nil
+}
+
+// heartRateToProto converts a heart rate target, nil for none.
+func heartRateToProto(t *plans.HeartRateTarget) *plansv1.HeartRateTarget {
+	if t == nil {
+		return nil
+	}
+	return plansv1.HeartRateTarget_builder{
+		Reference: heartRateReferenceToProto(t.Reference),
+		LowBpm:    t.LowBPM,
+		HighBpm:   t.HighBPM,
+		LowZone:   t.LowZone,
+		HighZone:  t.HighZone,
+	}.Build()
 }
 
 // runBlocksToProto converts a run's blocks.
@@ -133,13 +165,7 @@ func runBlocksToProto(blocks []plans.RunBlock) []*plansv1.RunBlock {
 				DistanceMeters:  st.DistanceMeters,
 				Notes:           st.Notes,
 			}
-			if st.HeartRate != nil {
-				sb.HeartRate = plansv1.HeartRateTarget_builder{
-					Reference: heartRateReferenceToProto(st.HeartRate.Reference),
-					LowBpm:    st.HeartRate.LowBPM,
-					HighBpm:   st.HeartRate.HighBPM,
-				}.Build()
-			}
+			sb.HeartRate = heartRateToProto(st.HeartRate)
 			if st.Pace != nil {
 				sb.Pace = plansv1.PaceTarget_builder{
 					FastSecondsPerKilometer: st.Pace.FastSecondsPerKilometer,

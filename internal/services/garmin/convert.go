@@ -303,14 +303,16 @@ func trainingWorkout(w *plans.Workout, t thresholds) (*garmin.Workout, bool) {
 		case w.TargetDurationSeconds > 0:
 			step.DurationType, step.DurationValue = "TIME", float64(w.TargetDurationSeconds)
 		}
-		// A base run is aerobic base training, in zones 1 and 2 of Uphill
-		// Athlete's system: from 80% of the aerobic threshold's heart rate
-		// up to it. Garmin's targets are ranges, and the watch alerts on
-		// both sides. An intensity run without structure has no one zone.
-		if zones, ok := plans.UphillAthleteZones(t.aerobic, t.anaerobic); ok && w.Type == plans.WorkoutTypeBase {
-			step.TargetType = "HEART_RATE"
-			step.TargetValueLow, step.TargetValueHigh = float64(zones.Zone1BPM), float64(zones.Zone3BPM)
-			step.Description = fmt.Sprintf("Zones 1 and 2: %d to %d bpm, up to your aerobic threshold", zones.Zone1BPM, zones.Zone3BPM)
+		// The run's own heart rate range, or else the default: a base run
+		// is aerobic base training, in zones 1 and 2 of Uphill Athlete's
+		// system, from 80% of the aerobic threshold's heart rate up to it.
+		// An intensity run without structure has no one zone.
+		target := w.RunHeartRate
+		if target == nil && w.Type == plans.WorkoutTypeBase && t.aerobic > 0 {
+			target = &plans.HeartRateTarget{LowZone: 1, HighZone: 2}
+		}
+		if target != nil {
+			setHeartRate(&step, target, t)
 		}
 		steps = []garmin.WorkoutStep{step}
 	case plans.WorkoutTypeStrength:
@@ -408,17 +410,7 @@ func runStep(st plans.RunStep, order int, t thresholds) garmin.WorkoutStep {
 	}
 	switch {
 	case st.HeartRate != nil:
-		low, high, ok := st.HeartRate.Resolve(t.aerobic, t.anaerobic)
-		if !ok {
-			missing := "aerobic"
-			if st.HeartRate.Reference == plans.HeartRateAnaerobicThreshold {
-				missing = "anaerobic"
-			}
-			note := fmt.Sprintf("Heart rate %+d to %+d bpm from your %s threshold; do a lactate test to set it", st.HeartRate.LowBPM, st.HeartRate.HighBPM, missing)
-			step.Description = truncate(strings.TrimPrefix(step.Description+". "+note, ". "), 512)
-			break
-		}
-		step.TargetType, step.TargetValueLow, step.TargetValueHigh = "HEART_RATE", float64(low), float64(high)
+		setHeartRate(&step, st.HeartRate, t)
 	case st.Pace != nil:
 		// Garmin takes paces as speeds in meters per second; the slow pace is
 		// the low speed.
@@ -427,6 +419,43 @@ func runStep(st plans.RunStep, order int, t thresholds) garmin.WorkoutStep {
 		step.TargetValueHigh = math.Round(1000/float64(st.Pace.FastSecondsPerKilometer)*1000) / 1000
 	}
 	return step
+}
+
+// setHeartRate sets a step's target to a heart rate range, which the watch
+// alerts outside of, and names a range of zones in the step's description.
+// A range that needs a threshold the user doesn't have is left open, and
+// described instead.
+func setHeartRate(step *garmin.WorkoutStep, target *plans.HeartRateTarget, t thresholds) {
+	describe := func(note string) {
+		step.Description = truncate(strings.TrimPrefix(step.Description+". "+note, ". "), 512)
+	}
+	zones := ""
+	if target.LowZone > 0 {
+		zones = fmt.Sprintf("Zone %d", target.LowZone)
+		if target.HighZone > target.LowZone {
+			zones = fmt.Sprintf("Zones %d to %d", target.LowZone, target.HighZone)
+		}
+	}
+	low, high, ok := target.Resolve(t.aerobic, t.anaerobic)
+	switch {
+	case ok:
+		step.TargetType, step.TargetValueLow, step.TargetValueHigh = "HEART_RATE", float64(low), float64(high)
+		if zones != "" {
+			describe(fmt.Sprintf("%s: %d to %d bpm", zones, low, high))
+		}
+	case zones != "":
+		missing := "aerobic"
+		if t.aerobic > 0 {
+			missing = "anaerobic"
+		}
+		describe(fmt.Sprintf("%s; do a lactate test that finds your %s threshold to set the heart rates", zones, missing))
+	default:
+		missing := "aerobic"
+		if target.Reference == plans.HeartRateAnaerobicThreshold {
+			missing = "anaerobic"
+		}
+		describe(fmt.Sprintf("Heart rate %+d to %+d bpm from your %s threshold; do a lactate test to set it", target.LowBPM, target.HighBPM, missing))
+	}
 }
 
 // garminExercise returns the exercise of Garmin's catalog a planned
