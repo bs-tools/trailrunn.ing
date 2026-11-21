@@ -41,3 +41,27 @@ func UphillAthleteZones(aerobicBPM, anaerobicBPM int32) (HeartRateZones, bool) {
 	}
 	return z, true
 }
+
+// MaxHeartRateZone is the highest zone.
+const MaxHeartRateZone = 4
+
+// zone4TopBPM is the top of zone 4, which goes up to the maximum heart
+// rate. That isn't known, and nobody's is higher than this.
+const zone4TopBPM = 220
+
+// Range returns the heart rates from the bottom of a zone to the top of
+// another, at least as high. It reports false for zones that aren't, and
+// for zones bounded by the anaerobic threshold if it's unknown: the top of
+// zone 3, and the bottom of zone 4.
+func (z HeartRateZones) Range(lowZone, highZone int32) (lowBPM, highBPM int32, ok bool) {
+	if lowZone < 1 || highZone > MaxHeartRateZone || highZone < lowZone {
+		return 0, 0, false
+	}
+	bottoms := [...]int32{z.Zone1BPM, z.Zone2BPM, z.Zone3BPM, z.Zone4BPM}
+	tops := [...]int32{z.Zone2BPM, z.Zone3BPM, z.Zone4BPM, zone4TopBPM}
+	lowBPM, highBPM = bottoms[lowZone-1], tops[highZone-1]
+	if lowBPM == 0 || highBPM == 0 {
+		return 0, 0, false
+	}
+	return lowBPM, highBPM, true
+}

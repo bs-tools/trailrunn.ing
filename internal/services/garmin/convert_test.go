@@ -220,20 +220,33 @@ func TestStrengthUnevenSteps(t *testing.T) {
 
 func TestPlainRunHeartRate(t *testing.T) {
 	t.Parallel()
+	both := thresholds{aerobic: 149, anaerobic: 170}
 	for _, tc := range []struct {
 		name              string
 		workout           plans.Workout
 		thresholds        thresholds
 		wantLow, wantHigh float64
+		// What the step's description has, empty for no description.
+		wantNote string
 	}{
-		// A base run is in zones 1 and 2: from 80% of the aerobic
-		// threshold's heart rate up to it.
-		{name: "base run", workout: plans.Workout{Type: plans.WorkoutTypeBase, TargetDurationSeconds: 3600}, thresholds: thresholds{aerobic: 149, anaerobic: 170}, wantLow: 119, wantHigh: 149},
-		{name: "without an anaerobic threshold", workout: plans.Workout{Type: plans.WorkoutTypeBase}, thresholds: thresholds{aerobic: 110}, wantLow: 88, wantHigh: 110},
+		// A base run is in zones 1 and 2 by default: from 80% of the
+		// aerobic threshold's heart rate up to it.
+		{name: "base run", workout: plans.Workout{Type: plans.WorkoutTypeBase, TargetDurationSeconds: 3600}, thresholds: both, wantLow: 119, wantHigh: 149, wantNote: "Zones 1 to 2: 119 to 149 bpm"},
+		{name: "without an anaerobic threshold", workout: plans.Workout{Type: plans.WorkoutTypeBase}, thresholds: thresholds{aerobic: 110}, wantLow: 88, wantHigh: 110, wantNote: "Zones 1 to 2"},
 		// Without an aerobic threshold there are no zones, and a hard run
 		// without structure has no one zone.
 		{name: "no threshold", workout: plans.Workout{Type: plans.WorkoutTypeBase}},
-		{name: "intensity run", workout: plans.Workout{Type: plans.WorkoutTypeIntensity}, thresholds: thresholds{aerobic: 149, anaerobic: 170}},
+		{name: "intensity run", workout: plans.Workout{Type: plans.WorkoutTypeIntensity}, thresholds: both},
+		// The run's own range replaces the default: zones, also of a hard
+		// run, or beats per minute.
+		{name: "recovery run", workout: plans.Workout{Type: plans.WorkoutTypeBase, RunHeartRate: &plans.HeartRateTarget{LowZone: 1, HighZone: 1}}, thresholds: both, wantLow: 119, wantHigh: 134, wantNote: "Zone 1: 119 to 134 bpm"},
+		{name: "tempo run", workout: plans.Workout{Type: plans.WorkoutTypeIntensity, RunHeartRate: &plans.HeartRateTarget{LowZone: 3, HighZone: 3}}, thresholds: both, wantLow: 149, wantHigh: 170, wantNote: "Zone 3: 149 to 170 bpm"},
+		{name: "exact range", workout: plans.Workout{Type: plans.WorkoutTypeBase, RunHeartRate: &plans.HeartRateTarget{LowBPM: 125, HighBPM: 140}}, thresholds: both, wantLow: 125, wantHigh: 140},
+		{name: "exact range without thresholds", workout: plans.Workout{Type: plans.WorkoutTypeBase, RunHeartRate: &plans.HeartRateTarget{LowBPM: 125, HighBPM: 140}}, wantLow: 125, wantHigh: 140},
+		// Zone 3 ends at the anaerobic threshold: without it the run is
+		// open, and says what's missing.
+		{name: "zone 3 without an anaerobic threshold", workout: plans.Workout{Type: plans.WorkoutTypeIntensity, RunHeartRate: &plans.HeartRateTarget{LowZone: 2, HighZone: 3}}, thresholds: thresholds{aerobic: 149}, wantNote: "Zones 2 to 3; do a lactate test that finds your anaerobic threshold"},
+		{name: "zones without thresholds", workout: plans.Workout{Type: plans.WorkoutTypeBase, RunHeartRate: &plans.HeartRateTarget{LowZone: 1, HighZone: 2}}, wantNote: "Zones 1 to 2; do a lactate test that finds your aerobic threshold"},
 	} {
 		gw, ok := trainingWorkout(&tc.workout, tc.thresholds)
 		if !ok || len(gw.Segments[0].Steps) != 1 {
@@ -247,14 +260,21 @@ func TestPlainRunHeartRate(t *testing.T) {
 		if step.TargetType != wantType || step.TargetValueLow != tc.wantLow || step.TargetValueHigh != tc.wantHigh {
 			t.Errorf("%s: got target %s %v-%v, want %s %v-%v", tc.name, step.TargetType, step.TargetValueLow, step.TargetValueHigh, wantType, tc.wantLow, tc.wantHigh)
 		}
-		if (tc.wantHigh > 0) != strings.Contains(step.Description, "aerobic threshold") {
-			t.Errorf("%s: unexpected description %q", tc.name, step.Description)
+		if !strings.HasPrefix(step.Description, tc.wantNote) || (tc.wantNote == "") != (step.Description == "") {
+			t.Errorf("%s: got description %q, want %q", tc.name, step.Description, tc.wantNote)
 		}
 	}
 	// The duration is kept with the target.
 	timed, _ := trainingWorkout(&plans.Workout{Type: plans.WorkoutTypeBase, TargetDurationSeconds: 3600}, thresholds{aerobic: 149})
 	if step := timed.Segments[0].Steps[0]; step.DurationType != "TIME" || step.DurationValue != 3600 {
 		t.Errorf("got duration %s %v, want an hour", step.DurationType, step.DurationValue)
+	}
+	// A step of a structured run takes zones too, after its own notes.
+	structured, _ := trainingWorkout(&plans.Workout{Type: plans.WorkoutTypeIntensity, RunBlocks: []plans.RunBlock{{Repeats: 1, Steps: []plans.RunStep{
+		{Kind: plans.RunStepRun, DurationSeconds: 1200, Notes: "Steady", HeartRate: &plans.HeartRateTarget{LowZone: 3, HighZone: 4}},
+	}}}}, both)
+	if step := structured.Segments[0].Steps[0]; step.TargetValueLow != 149 || step.TargetValueHigh != 220 || step.Description != "Steady. Zones 3 to 4: 149 to 220 bpm" {
+		t.Errorf("got step %+v, want zones 3 to 4 after its notes", step)
 	}
 }
 

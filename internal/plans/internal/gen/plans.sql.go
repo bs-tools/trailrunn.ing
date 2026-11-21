@@ -112,6 +112,7 @@ insert into workouts (
   location_lng,
   location_name,
   run_blocks,
+  run_heart_rate,
   lactate_test,
   run_fueling,
   cross_training_sport
@@ -135,6 +136,7 @@ select
   case when w.has_location then w.location_lng end,
   w.location_name,
   nullif(w.run_blocks, '')::jsonb,
+  nullif(w.run_heart_rate, '')::jsonb,
   w.lactate_test,
   nullif(w.run_fueling, '')::jsonb,
   w.cross_training_sport
@@ -162,13 +164,15 @@ from (
     unnest($18::text[]) as location_name,
     -- Empty for runs without structure.
     unnest($19::text[]) as run_blocks,
-    unnest($20::boolean[]) as lactate_test,
+    -- Empty for runs with the default heart rate range.
+    unnest($20::text[]) as run_heart_rate,
+    unnest($21::boolean[]) as lactate_test,
     -- Empty for runs without a fueling plan.
-    unnest($21::text[]) as run_fueling,
+    unnest($22::text[]) as run_fueling,
     -- Empty for workouts other than ski tours.
-    unnest($22::text[]) as cross_training_sport
+    unnest($23::text[]) as cross_training_sport
 ) w
-returning id, plan_id, date, type, title, description, target_distance_meters, target_elevation_gain_meters, target_duration_seconds, target_terrain, route_id, completed_activity_id, create_time, start_time, start_window_minutes, location_lat, location_lng, location_name, run_blocks, share_token, link_dismissed, lactate_test, run_fueling, cross_training_sport
+returning id, plan_id, date, type, title, description, target_distance_meters, target_elevation_gain_meters, target_duration_seconds, target_terrain, route_id, completed_activity_id, create_time, start_time, start_window_minutes, location_lat, location_lng, location_name, run_blocks, share_token, link_dismissed, lactate_test, run_fueling, cross_training_sport, run_heart_rate
 `
 
 type CreateWorkoutsParams struct {
@@ -191,6 +195,7 @@ type CreateWorkoutsParams struct {
 	LocationLngs               []float64
 	LocationNames              []string
 	RunBlocks                  []string
+	RunHeartRates              []string
 	LactateTests               []bool
 	RunFuelings                []string
 	CrossTrainingSports        []string
@@ -217,6 +222,7 @@ func (q *Queries) CreateWorkouts(ctx context.Context, arg *CreateWorkoutsParams)
 		arg.LocationLngs,
 		arg.LocationNames,
 		arg.RunBlocks,
+		arg.RunHeartRates,
 		arg.LactateTests,
 		arg.RunFuelings,
 		arg.CrossTrainingSports,
@@ -253,6 +259,7 @@ func (q *Queries) CreateWorkouts(ctx context.Context, arg *CreateWorkoutsParams)
 			&i.LactateTest,
 			&i.RunFueling,
 			&i.CrossTrainingSport,
+			&i.RunHeartRate,
 		); err != nil {
 			return nil, err
 		}
@@ -423,7 +430,7 @@ func (q *Queries) GetTrainingPlan(ctx context.Context, arg *GetTrainingPlanParam
 }
 
 const getWorkout = `-- name: GetWorkout :one
-select w.id, w.plan_id, w.date, w.type, w.title, w.description, w.target_distance_meters, w.target_elevation_gain_meters, w.target_duration_seconds, w.target_terrain, w.route_id, w.completed_activity_id, w.create_time, w.start_time, w.start_window_minutes, w.location_lat, w.location_lng, w.location_name, w.run_blocks, w.share_token, w.link_dismissed, w.lactate_test, w.run_fueling, w.cross_training_sport from workouts w
+select w.id, w.plan_id, w.date, w.type, w.title, w.description, w.target_distance_meters, w.target_elevation_gain_meters, w.target_duration_seconds, w.target_terrain, w.route_id, w.completed_activity_id, w.create_time, w.start_time, w.start_window_minutes, w.location_lat, w.location_lng, w.location_name, w.run_blocks, w.share_token, w.link_dismissed, w.lactate_test, w.run_fueling, w.cross_training_sport, w.run_heart_rate from workouts w
 join training_plans p on p.id = w.plan_id
 where w.id = $1 and p.user_id = $2
 `
@@ -461,6 +468,7 @@ func (q *Queries) GetWorkout(ctx context.Context, arg *GetWorkoutParams) (*Worko
 		&i.LactateTest,
 		&i.RunFueling,
 		&i.CrossTrainingSport,
+		&i.RunHeartRate,
 	)
 	return &i, err
 }
@@ -607,7 +615,7 @@ func (q *Queries) ListTrainingPlans(ctx context.Context, userID pgtype.UUID) ([]
 }
 
 const listUserWorkouts = `-- name: ListUserWorkouts :many
-select w.id, w.plan_id, w.date, w.type, w.title, w.description, w.target_distance_meters, w.target_elevation_gain_meters, w.target_duration_seconds, w.target_terrain, w.route_id, w.completed_activity_id, w.create_time, w.start_time, w.start_window_minutes, w.location_lat, w.location_lng, w.location_name, w.run_blocks, w.share_token, w.link_dismissed, w.lactate_test, w.run_fueling, w.cross_training_sport from workouts w
+select w.id, w.plan_id, w.date, w.type, w.title, w.description, w.target_distance_meters, w.target_elevation_gain_meters, w.target_duration_seconds, w.target_terrain, w.route_id, w.completed_activity_id, w.create_time, w.start_time, w.start_window_minutes, w.location_lat, w.location_lng, w.location_name, w.run_blocks, w.share_token, w.link_dismissed, w.lactate_test, w.run_fueling, w.cross_training_sport, w.run_heart_rate from workouts w
 join training_plans p on p.id = w.plan_id
 where p.user_id = $1
   and ($2::date is null or w.date >= $2::date)
@@ -655,6 +663,7 @@ func (q *Queries) ListUserWorkouts(ctx context.Context, arg *ListUserWorkoutsPar
 			&i.LactateTest,
 			&i.RunFueling,
 			&i.CrossTrainingSport,
+			&i.RunHeartRate,
 		); err != nil {
 			return nil, err
 		}
@@ -667,7 +676,7 @@ func (q *Queries) ListUserWorkouts(ctx context.Context, arg *ListUserWorkoutsPar
 }
 
 const listWorkouts = `-- name: ListWorkouts :many
-select id, plan_id, date, type, title, description, target_distance_meters, target_elevation_gain_meters, target_duration_seconds, target_terrain, route_id, completed_activity_id, create_time, start_time, start_window_minutes, location_lat, location_lng, location_name, run_blocks, share_token, link_dismissed, lactate_test, run_fueling, cross_training_sport from workouts
+select id, plan_id, date, type, title, description, target_distance_meters, target_elevation_gain_meters, target_duration_seconds, target_terrain, route_id, completed_activity_id, create_time, start_time, start_window_minutes, location_lat, location_lng, location_name, run_blocks, share_token, link_dismissed, lactate_test, run_fueling, cross_training_sport, run_heart_rate from workouts
 where plan_id = $1
   and ($2::date is null or date >= $2::date)
   and ($3::date is null or date <= $3::date)
@@ -714,6 +723,7 @@ func (q *Queries) ListWorkouts(ctx context.Context, arg *ListWorkoutsParams) ([]
 			&i.LactateTest,
 			&i.RunFueling,
 			&i.CrossTrainingSport,
+			&i.RunHeartRate,
 		); err != nil {
 			return nil, err
 		}
@@ -847,11 +857,12 @@ update workouts set
   location_lng = $15,
   location_name = $16,
   run_blocks = nullif($17::text, '')::jsonb,
-  lactate_test = $18,
-  run_fueling = nullif($19::text, '')::jsonb,
-  cross_training_sport = $20
+  run_heart_rate = nullif($18::text, '')::jsonb,
+  lactate_test = $19,
+  run_fueling = nullif($20::text, '')::jsonb,
+  cross_training_sport = $21
 where id = $1
-returning id, plan_id, date, type, title, description, target_distance_meters, target_elevation_gain_meters, target_duration_seconds, target_terrain, route_id, completed_activity_id, create_time, start_time, start_window_minutes, location_lat, location_lng, location_name, run_blocks, share_token, link_dismissed, lactate_test, run_fueling, cross_training_sport
+returning id, plan_id, date, type, title, description, target_distance_meters, target_elevation_gain_meters, target_duration_seconds, target_terrain, route_id, completed_activity_id, create_time, start_time, start_window_minutes, location_lat, location_lng, location_name, run_blocks, share_token, link_dismissed, lactate_test, run_fueling, cross_training_sport, run_heart_rate
 `
 
 type UpdateWorkoutParams struct {
@@ -872,6 +883,7 @@ type UpdateWorkoutParams struct {
 	LocationLng               pgtype.Float8
 	LocationName              string
 	RunBlocks                 string
+	RunHeartRate              string
 	LactateTest               bool
 	RunFueling                string
 	CrossTrainingSport        string
@@ -896,6 +908,7 @@ func (q *Queries) UpdateWorkout(ctx context.Context, arg *UpdateWorkoutParams) (
 		arg.LocationLng,
 		arg.LocationName,
 		arg.RunBlocks,
+		arg.RunHeartRate,
 		arg.LactateTest,
 		arg.RunFueling,
 		arg.CrossTrainingSport,
@@ -926,6 +939,7 @@ func (q *Queries) UpdateWorkout(ctx context.Context, arg *UpdateWorkoutParams) (
 		&i.LactateTest,
 		&i.RunFueling,
 		&i.CrossTrainingSport,
+		&i.RunHeartRate,
 	)
 	return &i, err
 }

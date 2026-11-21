@@ -1661,6 +1661,7 @@ type RunWorkout struct {
 	xxx_hidden_Blocks                    *[]*RunBlock           `protobuf:"bytes,7,rep,name=blocks,proto3"`
 	xxx_hidden_LactateTest               bool                   `protobuf:"varint,8,opt,name=lactate_test,json=lactateTest,proto3"`
 	xxx_hidden_Fueling                   *RunFueling            `protobuf:"bytes,9,opt,name=fueling,proto3"`
+	xxx_hidden_HeartRate                 *HeartRateTarget       `protobuf:"bytes,10,opt,name=heart_rate,json=heartRate,proto3"`
 	unknownFields                        protoimpl.UnknownFields
 	sizeCache                            protoimpl.SizeCache
 }
@@ -1755,6 +1756,13 @@ func (x *RunWorkout) GetFueling() *RunFueling {
 	return nil
 }
 
+func (x *RunWorkout) GetHeartRate() *HeartRateTarget {
+	if x != nil {
+		return x.xxx_hidden_HeartRate
+	}
+	return nil
+}
+
 func (x *RunWorkout) SetIntensity(v RunIntensity) {
 	x.xxx_hidden_Intensity = v
 }
@@ -1791,6 +1799,10 @@ func (x *RunWorkout) SetFueling(v *RunFueling) {
 	x.xxx_hidden_Fueling = v
 }
 
+func (x *RunWorkout) SetHeartRate(v *HeartRateTarget) {
+	x.xxx_hidden_HeartRate = v
+}
+
 func (x *RunWorkout) HasFueling() bool {
 	if x == nil {
 		return false
@@ -1798,8 +1810,19 @@ func (x *RunWorkout) HasFueling() bool {
 	return x.xxx_hidden_Fueling != nil
 }
 
+func (x *RunWorkout) HasHeartRate() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_HeartRate != nil
+}
+
 func (x *RunWorkout) ClearFueling() {
 	x.xxx_hidden_Fueling = nil
+}
+
+func (x *RunWorkout) ClearHeartRate() {
+	x.xxx_hidden_HeartRate = nil
 }
 
 type RunWorkout_builder struct {
@@ -1849,6 +1872,12 @@ type RunWorkout_builder struct {
 	// the run's expected time, and raised for the heat in its forecast, see
 	// WorkoutWeather.fueling.
 	Fueling *RunFueling
+	// The heart rate range to hold on a run without blocks, which the Garmin
+	// watch alerts outside of. Unset for the default: zones 1 to 2 for a base
+	// run, and none for a hard one. Set it to override that, e.g. zone 1 only
+	// for a recovery run, zones 1 to 3 for a hilly long run, or an exact
+	// range. In a run with blocks, the steps have their own targets instead.
+	HeartRate *HeartRateTarget
 }
 
 func (b0 RunWorkout_builder) Build() *RunWorkout {
@@ -1864,6 +1893,7 @@ func (b0 RunWorkout_builder) Build() *RunWorkout {
 	x.xxx_hidden_Blocks = &b.Blocks
 	x.xxx_hidden_LactateTest = b.LactateTest
 	x.xxx_hidden_Fueling = b.Fueling
+	x.xxx_hidden_HeartRate = b.HeartRate
 	return m0
 }
 
@@ -2530,15 +2560,30 @@ func (*runStep_HeartRate) isRunStep_Target() {}
 
 func (*runStep_Pace) isRunStep_Target() {}
 
-// A heart rate range to hold. With a threshold reference, the range is
-// relative to it and follows it as new lactate tests move it, e.g. -15 to 0
-// for easy running below the aerobic threshold, or -5 to 3 for intervals at
-// the anaerobic threshold.
+// A heart rate range to hold, given one of three ways:
+//
+//   - In beats per minute: low_bpm and high_bpm, e.g. 130 to 145.
+//   - Relative to a threshold: a reference, with low_bpm and high_bpm
+//     measured from it, e.g. -15 to 0 for easy running below the aerobic
+//     threshold, or -5 to 3 for intervals at the anaerobic threshold.
+//   - As zones: low_zone and high_zone, from the bottom of the one to the
+//     top of the other, e.g. 1 to 2 for aerobic base running, or 3 to 3 for
+//     a tempo run.
+//
+// Ranges relative to a threshold and zones follow the thresholds as new
+// lactate tests move them. The zones are those of Uphill Athlete's system:
+// zone 1 is from 80% to 90% of the heart rate of the aerobic threshold,
+// zone 2 from there to the aerobic threshold, zone 3 from the aerobic to
+// the anaerobic threshold, and zone 4 above it. Zones 3 and 4 need the
+// anaerobic threshold, from a lactate test that went that far: until
+// there's one, a range with them is described on the watch, not alerted on.
 type HeartRateTarget struct {
 	state                protoimpl.MessageState `protogen:"opaque.v1"`
 	xxx_hidden_Reference HeartRateReference     `protobuf:"varint,1,opt,name=reference,proto3,enum=plans.v1.HeartRateReference"`
 	xxx_hidden_LowBpm    int32                  `protobuf:"varint,2,opt,name=low_bpm,json=lowBpm,proto3"`
 	xxx_hidden_HighBpm   int32                  `protobuf:"varint,3,opt,name=high_bpm,json=highBpm,proto3"`
+	xxx_hidden_LowZone   int32                  `protobuf:"varint,4,opt,name=low_zone,json=lowZone,proto3"`
+	xxx_hidden_HighZone  int32                  `protobuf:"varint,5,opt,name=high_zone,json=highZone,proto3"`
 	unknownFields        protoimpl.UnknownFields
 	sizeCache            protoimpl.SizeCache
 }
@@ -2589,6 +2634,20 @@ func (x *HeartRateTarget) GetHighBpm() int32 {
 	return 0
 }
 
+func (x *HeartRateTarget) GetLowZone() int32 {
+	if x != nil {
+		return x.xxx_hidden_LowZone
+	}
+	return 0
+}
+
+func (x *HeartRateTarget) GetHighZone() int32 {
+	if x != nil {
+		return x.xxx_hidden_HighZone
+	}
+	return 0
+}
+
 func (x *HeartRateTarget) SetReference(v HeartRateReference) {
 	x.xxx_hidden_Reference = v
 }
@@ -2599,6 +2658,14 @@ func (x *HeartRateTarget) SetLowBpm(v int32) {
 
 func (x *HeartRateTarget) SetHighBpm(v int32) {
 	x.xxx_hidden_HighBpm = v
+}
+
+func (x *HeartRateTarget) SetLowZone(v int32) {
+	x.xxx_hidden_LowZone = v
+}
+
+func (x *HeartRateTarget) SetHighZone(v int32) {
+	x.xxx_hidden_HighZone = v
 }
 
 type HeartRateTarget_builder struct {
@@ -2612,6 +2679,12 @@ type HeartRateTarget_builder struct {
 	// The top of the range, in beats per minute, or from the threshold. At
 	// least low_bpm.
 	HighBpm int32
+	// The zone the range starts at the bottom of, from 1 to 4. 0 if the
+	// range isn't of zones; set, reference, low_bpm and high_bpm must be
+	// unset.
+	LowZone int32
+	// The zone the range ends at the top of, from low_zone to 4.
+	HighZone int32
 }
 
 func (b0 HeartRateTarget_builder) Build() *HeartRateTarget {
@@ -2621,6 +2694,8 @@ func (b0 HeartRateTarget_builder) Build() *HeartRateTarget {
 	x.xxx_hidden_Reference = b.Reference
 	x.xxx_hidden_LowBpm = b.LowBpm
 	x.xxx_hidden_HighBpm = b.HighBpm
+	x.xxx_hidden_LowZone = b.LowZone
+	x.xxx_hidden_HighZone = b.HighZone
 	return m0
 }
 
@@ -8125,7 +8200,7 @@ const file_plans_v1_plans_proto_rawDesc = "" +
 	"\x04rest\x18\x11 \x01(\v2\x11.plans.v1.RestDayH\x00R\x04restB\t\n" +
 	"\adetailsJ\x04\b\a\x10\bJ\x04\b\b\x10\tJ\x04\b\t\x10\n" +
 	"J\x04\b\n" +
-	"\x10\vJ\x04\b\v\x10\fR\x16target_distance_metersR\x1ctarget_elevation_gain_metersR\x17target_duration_secondsR\x0etarget_terrainR\broute_id\"\xc3\x03\n" +
+	"\x10\vJ\x04\b\v\x10\fR\x16target_distance_metersR\x1ctarget_elevation_gain_metersR\x17target_duration_secondsR\x0etarget_terrainR\broute_id\"\xfd\x03\n" +
 	"\n" +
 	"RunWorkout\x124\n" +
 	"\tintensity\x18\x01 \x01(\x0e2\x16.plans.v1.RunIntensityR\tintensity\x124\n" +
@@ -8136,7 +8211,10 @@ const file_plans_v1_plans_proto_rawDesc = "" +
 	"\broute_id\x18\x06 \x01(\tR\arouteId\x12*\n" +
 	"\x06blocks\x18\a \x03(\v2\x12.plans.v1.RunBlockR\x06blocks\x12!\n" +
 	"\flactate_test\x18\b \x01(\bR\vlactateTest\x12.\n" +
-	"\afueling\x18\t \x01(\v2\x14.plans.v1.RunFuelingR\afueling\"\xe4\x01\n" +
+	"\afueling\x18\t \x01(\v2\x14.plans.v1.RunFuelingR\afueling\x128\n" +
+	"\n" +
+	"heart_rate\x18\n" +
+	" \x01(\v2\x19.plans.v1.HeartRateTargetR\theartRate\"\xe4\x01\n" +
 	"\n" +
 	"RunFueling\x12/\n" +
 	"\x14carbs_grams_per_hour\x18\x01 \x01(\x01R\x11carbsGramsPerHour\x12)\n" +
@@ -8167,11 +8245,13 @@ const file_plans_v1_plans_proto_rawDesc = "" +
 	"heart_rate\x18\x04 \x01(\v2\x19.plans.v1.HeartRateTargetH\x00R\theartRate\x12*\n" +
 	"\x04pace\x18\x05 \x01(\v2\x14.plans.v1.PaceTargetH\x00R\x04pace\x12\x14\n" +
 	"\x05notes\x18\x06 \x01(\tR\x05notesB\b\n" +
-	"\x06target\"\x81\x01\n" +
+	"\x06target\"\xb9\x01\n" +
 	"\x0fHeartRateTarget\x12:\n" +
 	"\treference\x18\x01 \x01(\x0e2\x1c.plans.v1.HeartRateReferenceR\treference\x12\x17\n" +
 	"\alow_bpm\x18\x02 \x01(\x05R\x06lowBpm\x12\x19\n" +
-	"\bhigh_bpm\x18\x03 \x01(\x05R\ahighBpm\"\x86\x01\n" +
+	"\bhigh_bpm\x18\x03 \x01(\x05R\ahighBpm\x12\x19\n" +
+	"\blow_zone\x18\x04 \x01(\x05R\alowZone\x12\x1b\n" +
+	"\thigh_zone\x18\x05 \x01(\x05R\bhighZone\"\x86\x01\n" +
 	"\n" +
 	"PaceTarget\x12;\n" +
 	"\x1afast_seconds_per_kilometer\x18\x01 \x01(\x05R\x17fastSecondsPerKilometer\x12;\n" +
@@ -8622,123 +8702,124 @@ var file_plans_v1_plans_proto_depIdxs = []int32{
 	81,  // 11: plans.v1.RunWorkout.target_terrain:type_name -> geo.v1.Terrain
 	19,  // 12: plans.v1.RunWorkout.blocks:type_name -> plans.v1.RunBlock
 	17,  // 13: plans.v1.RunWorkout.fueling:type_name -> plans.v1.RunFueling
-	18,  // 14: plans.v1.RunFueling.amounts:type_name -> plans.v1.FuelAmounts
-	20,  // 15: plans.v1.RunBlock.steps:type_name -> plans.v1.RunStep
-	3,   // 16: plans.v1.RunStep.kind:type_name -> plans.v1.RunStepKind
-	21,  // 17: plans.v1.RunStep.heart_rate:type_name -> plans.v1.HeartRateTarget
-	22,  // 18: plans.v1.RunStep.pace:type_name -> plans.v1.PaceTarget
-	4,   // 19: plans.v1.HeartRateTarget.reference:type_name -> plans.v1.HeartRateReference
-	5,   // 20: plans.v1.CrossTrainingWorkout.sport:type_name -> plans.v1.CrossTrainingSport
-	29,  // 21: plans.v1.StrengthWorkout.exercises:type_name -> plans.v1.PlannedExercise
-	30,  // 22: plans.v1.StrengthWorkout.log:type_name -> plans.v1.StrengthLog
-	28,  // 23: plans.v1.StrengthWorkout.equipment_issues:type_name -> plans.v1.EquipmentIssue
-	27,  // 24: plans.v1.StrengthWorkout.groups:type_name -> plans.v1.ExerciseGroup
-	6,   // 25: plans.v1.ExerciseGroup.kind:type_name -> plans.v1.ExerciseGroupKind
-	82,  // 26: plans.v1.EquipmentIssue.equipment:type_name -> plans.v1.Equipment
-	83,  // 27: plans.v1.EquipmentIssue.closest_weights:type_name -> plans.v1.Weight
-	83,  // 28: plans.v1.PlannedExercise.weight:type_name -> plans.v1.Weight
-	79,  // 29: plans.v1.StrengthLog.complete_time:type_name -> google.protobuf.Timestamp
-	7,   // 30: plans.v1.StrengthLog.effort:type_name -> plans.v1.SessionEffort
-	31,  // 31: plans.v1.StrengthLog.exercises:type_name -> plans.v1.LoggedExercise
-	32,  // 32: plans.v1.LoggedExercise.sets:type_name -> plans.v1.LoggedSet
-	8,   // 33: plans.v1.LoggedExercise.effort:type_name -> plans.v1.ExerciseEffort
-	9,   // 34: plans.v1.LoggedExercise.volume:type_name -> plans.v1.ExerciseVolume
-	10,  // 35: plans.v1.LoggedExercise.stiffness:type_name -> plans.v1.Stiffness
-	83,  // 36: plans.v1.LoggedSet.weight:type_name -> plans.v1.Weight
-	8,   // 37: plans.v1.LoggedSet.effort:type_name -> plans.v1.ExerciseEffort
-	10,  // 38: plans.v1.LoggedSet.stiffness:type_name -> plans.v1.Stiffness
-	13,  // 39: plans.v1.CreateTrainingPlanRequest.plan:type_name -> plans.v1.TrainingPlan
-	13,  // 40: plans.v1.CreateTrainingPlanResponse.plan:type_name -> plans.v1.TrainingPlan
-	13,  // 41: plans.v1.GetTrainingPlanResponse.plan:type_name -> plans.v1.TrainingPlan
-	14,  // 42: plans.v1.GetTrainingPlanResponse.periods:type_name -> plans.v1.PlanPeriod
-	13,  // 43: plans.v1.ListTrainingPlansResponse.plans:type_name -> plans.v1.TrainingPlan
-	13,  // 44: plans.v1.UpdateTrainingPlanRequest.plan:type_name -> plans.v1.TrainingPlan
-	84,  // 45: plans.v1.UpdateTrainingPlanRequest.update_mask:type_name -> google.protobuf.FieldMask
-	13,  // 46: plans.v1.UpdateTrainingPlanResponse.plan:type_name -> plans.v1.TrainingPlan
-	14,  // 47: plans.v1.SetPlanPeriodsRequest.periods:type_name -> plans.v1.PlanPeriod
-	14,  // 48: plans.v1.SetPlanPeriodsResponse.periods:type_name -> plans.v1.PlanPeriod
-	0,   // 49: plans.v1.DeletePlanPeriodsRequest.granularity:type_name -> plans.v1.PeriodGranularity
-	15,  // 50: plans.v1.ListWorkoutsResponse.workouts:type_name -> plans.v1.Workout
-	15,  // 51: plans.v1.GetWorkoutResponse.workout:type_name -> plans.v1.Workout
-	80,  // 52: plans.v1.WorkoutWeather.location:type_name -> geo.v1.LatLng
-	11,  // 53: plans.v1.WorkoutWeather.location_source:type_name -> plans.v1.WeatherLocationSource
-	53,  // 54: plans.v1.WorkoutWeather.day:type_name -> plans.v1.DayWeather
-	54,  // 55: plans.v1.WorkoutWeather.hours:type_name -> plans.v1.HourWeather
-	53,  // 56: plans.v1.WorkoutWeather.workout:type_name -> plans.v1.DayWeather
-	79,  // 57: plans.v1.WorkoutWeather.workout_start_time:type_name -> google.protobuf.Timestamp
-	79,  // 58: plans.v1.WorkoutWeather.workout_end_time:type_name -> google.protobuf.Timestamp
-	18,  // 59: plans.v1.WorkoutWeather.fueling:type_name -> plans.v1.FuelAmounts
-	52,  // 60: plans.v1.WorkoutWeather.warnings:type_name -> plans.v1.WeatherWarning
-	85,  // 61: plans.v1.WorkoutWeather.avalanche_forecast:type_name -> geo.v1.AvalancheForecast
-	86,  // 62: plans.v1.WorkoutWeather.touring_verdict:type_name -> geo.v1.TouringVerdict
-	12,  // 63: plans.v1.WeatherWarning.kind:type_name -> plans.v1.WeatherWarningKind
-	87,  // 64: plans.v1.WeatherWarning.max_avalanche_danger:type_name -> geo.v1.AvalancheDanger
-	79,  // 65: plans.v1.HourWeather.time:type_name -> google.protobuf.Timestamp
-	51,  // 66: plans.v1.ListWorkoutWeatherResponse.weather:type_name -> plans.v1.WorkoutWeather
-	79,  // 67: plans.v1.SweatProfile.update_time:type_name -> google.protobuf.Timestamp
-	57,  // 68: plans.v1.GetSweatProfileResponse.profile:type_name -> plans.v1.SweatProfile
-	57,  // 69: plans.v1.SetSweatProfileRequest.profile:type_name -> plans.v1.SweatProfile
-	57,  // 70: plans.v1.SetSweatProfileResponse.profile:type_name -> plans.v1.SweatProfile
-	87,  // 71: plans.v1.TouringLimits.max_avalanche_danger_alpine:type_name -> geo.v1.AvalancheDanger
-	87,  // 72: plans.v1.TouringLimits.max_avalanche_danger_treeline:type_name -> geo.v1.AvalancheDanger
-	87,  // 73: plans.v1.TouringLimits.max_avalanche_danger_below_treeline:type_name -> geo.v1.AvalancheDanger
-	79,  // 74: plans.v1.TouringLimits.update_time:type_name -> google.protobuf.Timestamp
-	62,  // 75: plans.v1.GetTouringLimitsResponse.limits:type_name -> plans.v1.TouringLimits
-	62,  // 76: plans.v1.SetTouringLimitsRequest.limits:type_name -> plans.v1.TouringLimits
-	62,  // 77: plans.v1.SetTouringLimitsResponse.limits:type_name -> plans.v1.TouringLimits
-	51,  // 78: plans.v1.GetWorkoutWeatherResponse.weather:type_name -> plans.v1.WorkoutWeather
-	15,  // 79: plans.v1.CreateWorkoutsRequest.workouts:type_name -> plans.v1.Workout
-	15,  // 80: plans.v1.CreateWorkoutsResponse.workouts:type_name -> plans.v1.Workout
-	15,  // 81: plans.v1.UpdateWorkoutRequest.workout:type_name -> plans.v1.Workout
-	84,  // 82: plans.v1.UpdateWorkoutRequest.update_mask:type_name -> google.protobuf.FieldMask
-	15,  // 83: plans.v1.UpdateWorkoutResponse.workout:type_name -> plans.v1.Workout
-	30,  // 84: plans.v1.SetStrengthLogRequest.log:type_name -> plans.v1.StrengthLog
-	15,  // 85: plans.v1.SetStrengthLogResponse.workout:type_name -> plans.v1.Workout
-	33,  // 86: plans.v1.TrainingPlanService.CreateTrainingPlan:input_type -> plans.v1.CreateTrainingPlanRequest
-	35,  // 87: plans.v1.TrainingPlanService.GetTrainingPlan:input_type -> plans.v1.GetTrainingPlanRequest
-	37,  // 88: plans.v1.TrainingPlanService.ListTrainingPlans:input_type -> plans.v1.ListTrainingPlansRequest
-	39,  // 89: plans.v1.TrainingPlanService.UpdateTrainingPlan:input_type -> plans.v1.UpdateTrainingPlanRequest
-	41,  // 90: plans.v1.TrainingPlanService.DeleteTrainingPlan:input_type -> plans.v1.DeleteTrainingPlanRequest
-	43,  // 91: plans.v1.TrainingPlanService.SetPlanPeriods:input_type -> plans.v1.SetPlanPeriodsRequest
-	45,  // 92: plans.v1.TrainingPlanService.DeletePlanPeriods:input_type -> plans.v1.DeletePlanPeriodsRequest
-	47,  // 93: plans.v1.TrainingPlanService.ListWorkouts:input_type -> plans.v1.ListWorkoutsRequest
-	49,  // 94: plans.v1.TrainingPlanService.GetWorkout:input_type -> plans.v1.GetWorkoutRequest
-	69,  // 95: plans.v1.TrainingPlanService.CreateWorkouts:input_type -> plans.v1.CreateWorkoutsRequest
-	71,  // 96: plans.v1.TrainingPlanService.UpdateWorkout:input_type -> plans.v1.UpdateWorkoutRequest
-	73,  // 97: plans.v1.TrainingPlanService.DeleteWorkouts:input_type -> plans.v1.DeleteWorkoutsRequest
-	75,  // 98: plans.v1.TrainingPlanService.SetStrengthLog:input_type -> plans.v1.SetStrengthLogRequest
-	77,  // 99: plans.v1.TrainingPlanService.DeleteStrengthLog:input_type -> plans.v1.DeleteStrengthLogRequest
-	55,  // 100: plans.v1.TrainingPlanService.ListWorkoutWeather:input_type -> plans.v1.ListWorkoutWeatherRequest
-	67,  // 101: plans.v1.TrainingPlanService.GetWorkoutWeather:input_type -> plans.v1.GetWorkoutWeatherRequest
-	58,  // 102: plans.v1.TrainingPlanService.GetSweatProfile:input_type -> plans.v1.GetSweatProfileRequest
-	60,  // 103: plans.v1.TrainingPlanService.SetSweatProfile:input_type -> plans.v1.SetSweatProfileRequest
-	63,  // 104: plans.v1.TrainingPlanService.GetTouringLimits:input_type -> plans.v1.GetTouringLimitsRequest
-	65,  // 105: plans.v1.TrainingPlanService.SetTouringLimits:input_type -> plans.v1.SetTouringLimitsRequest
-	34,  // 106: plans.v1.TrainingPlanService.CreateTrainingPlan:output_type -> plans.v1.CreateTrainingPlanResponse
-	36,  // 107: plans.v1.TrainingPlanService.GetTrainingPlan:output_type -> plans.v1.GetTrainingPlanResponse
-	38,  // 108: plans.v1.TrainingPlanService.ListTrainingPlans:output_type -> plans.v1.ListTrainingPlansResponse
-	40,  // 109: plans.v1.TrainingPlanService.UpdateTrainingPlan:output_type -> plans.v1.UpdateTrainingPlanResponse
-	42,  // 110: plans.v1.TrainingPlanService.DeleteTrainingPlan:output_type -> plans.v1.DeleteTrainingPlanResponse
-	44,  // 111: plans.v1.TrainingPlanService.SetPlanPeriods:output_type -> plans.v1.SetPlanPeriodsResponse
-	46,  // 112: plans.v1.TrainingPlanService.DeletePlanPeriods:output_type -> plans.v1.DeletePlanPeriodsResponse
-	48,  // 113: plans.v1.TrainingPlanService.ListWorkouts:output_type -> plans.v1.ListWorkoutsResponse
-	50,  // 114: plans.v1.TrainingPlanService.GetWorkout:output_type -> plans.v1.GetWorkoutResponse
-	70,  // 115: plans.v1.TrainingPlanService.CreateWorkouts:output_type -> plans.v1.CreateWorkoutsResponse
-	72,  // 116: plans.v1.TrainingPlanService.UpdateWorkout:output_type -> plans.v1.UpdateWorkoutResponse
-	74,  // 117: plans.v1.TrainingPlanService.DeleteWorkouts:output_type -> plans.v1.DeleteWorkoutsResponse
-	76,  // 118: plans.v1.TrainingPlanService.SetStrengthLog:output_type -> plans.v1.SetStrengthLogResponse
-	78,  // 119: plans.v1.TrainingPlanService.DeleteStrengthLog:output_type -> plans.v1.DeleteStrengthLogResponse
-	56,  // 120: plans.v1.TrainingPlanService.ListWorkoutWeather:output_type -> plans.v1.ListWorkoutWeatherResponse
-	68,  // 121: plans.v1.TrainingPlanService.GetWorkoutWeather:output_type -> plans.v1.GetWorkoutWeatherResponse
-	59,  // 122: plans.v1.TrainingPlanService.GetSweatProfile:output_type -> plans.v1.GetSweatProfileResponse
-	61,  // 123: plans.v1.TrainingPlanService.SetSweatProfile:output_type -> plans.v1.SetSweatProfileResponse
-	64,  // 124: plans.v1.TrainingPlanService.GetTouringLimits:output_type -> plans.v1.GetTouringLimitsResponse
-	66,  // 125: plans.v1.TrainingPlanService.SetTouringLimits:output_type -> plans.v1.SetTouringLimitsResponse
-	106, // [106:126] is the sub-list for method output_type
-	86,  // [86:106] is the sub-list for method input_type
-	86,  // [86:86] is the sub-list for extension type_name
-	86,  // [86:86] is the sub-list for extension extendee
-	0,   // [0:86] is the sub-list for field type_name
+	21,  // 14: plans.v1.RunWorkout.heart_rate:type_name -> plans.v1.HeartRateTarget
+	18,  // 15: plans.v1.RunFueling.amounts:type_name -> plans.v1.FuelAmounts
+	20,  // 16: plans.v1.RunBlock.steps:type_name -> plans.v1.RunStep
+	3,   // 17: plans.v1.RunStep.kind:type_name -> plans.v1.RunStepKind
+	21,  // 18: plans.v1.RunStep.heart_rate:type_name -> plans.v1.HeartRateTarget
+	22,  // 19: plans.v1.RunStep.pace:type_name -> plans.v1.PaceTarget
+	4,   // 20: plans.v1.HeartRateTarget.reference:type_name -> plans.v1.HeartRateReference
+	5,   // 21: plans.v1.CrossTrainingWorkout.sport:type_name -> plans.v1.CrossTrainingSport
+	29,  // 22: plans.v1.StrengthWorkout.exercises:type_name -> plans.v1.PlannedExercise
+	30,  // 23: plans.v1.StrengthWorkout.log:type_name -> plans.v1.StrengthLog
+	28,  // 24: plans.v1.StrengthWorkout.equipment_issues:type_name -> plans.v1.EquipmentIssue
+	27,  // 25: plans.v1.StrengthWorkout.groups:type_name -> plans.v1.ExerciseGroup
+	6,   // 26: plans.v1.ExerciseGroup.kind:type_name -> plans.v1.ExerciseGroupKind
+	82,  // 27: plans.v1.EquipmentIssue.equipment:type_name -> plans.v1.Equipment
+	83,  // 28: plans.v1.EquipmentIssue.closest_weights:type_name -> plans.v1.Weight
+	83,  // 29: plans.v1.PlannedExercise.weight:type_name -> plans.v1.Weight
+	79,  // 30: plans.v1.StrengthLog.complete_time:type_name -> google.protobuf.Timestamp
+	7,   // 31: plans.v1.StrengthLog.effort:type_name -> plans.v1.SessionEffort
+	31,  // 32: plans.v1.StrengthLog.exercises:type_name -> plans.v1.LoggedExercise
+	32,  // 33: plans.v1.LoggedExercise.sets:type_name -> plans.v1.LoggedSet
+	8,   // 34: plans.v1.LoggedExercise.effort:type_name -> plans.v1.ExerciseEffort
+	9,   // 35: plans.v1.LoggedExercise.volume:type_name -> plans.v1.ExerciseVolume
+	10,  // 36: plans.v1.LoggedExercise.stiffness:type_name -> plans.v1.Stiffness
+	83,  // 37: plans.v1.LoggedSet.weight:type_name -> plans.v1.Weight
+	8,   // 38: plans.v1.LoggedSet.effort:type_name -> plans.v1.ExerciseEffort
+	10,  // 39: plans.v1.LoggedSet.stiffness:type_name -> plans.v1.Stiffness
+	13,  // 40: plans.v1.CreateTrainingPlanRequest.plan:type_name -> plans.v1.TrainingPlan
+	13,  // 41: plans.v1.CreateTrainingPlanResponse.plan:type_name -> plans.v1.TrainingPlan
+	13,  // 42: plans.v1.GetTrainingPlanResponse.plan:type_name -> plans.v1.TrainingPlan
+	14,  // 43: plans.v1.GetTrainingPlanResponse.periods:type_name -> plans.v1.PlanPeriod
+	13,  // 44: plans.v1.ListTrainingPlansResponse.plans:type_name -> plans.v1.TrainingPlan
+	13,  // 45: plans.v1.UpdateTrainingPlanRequest.plan:type_name -> plans.v1.TrainingPlan
+	84,  // 46: plans.v1.UpdateTrainingPlanRequest.update_mask:type_name -> google.protobuf.FieldMask
+	13,  // 47: plans.v1.UpdateTrainingPlanResponse.plan:type_name -> plans.v1.TrainingPlan
+	14,  // 48: plans.v1.SetPlanPeriodsRequest.periods:type_name -> plans.v1.PlanPeriod
+	14,  // 49: plans.v1.SetPlanPeriodsResponse.periods:type_name -> plans.v1.PlanPeriod
+	0,   // 50: plans.v1.DeletePlanPeriodsRequest.granularity:type_name -> plans.v1.PeriodGranularity
+	15,  // 51: plans.v1.ListWorkoutsResponse.workouts:type_name -> plans.v1.Workout
+	15,  // 52: plans.v1.GetWorkoutResponse.workout:type_name -> plans.v1.Workout
+	80,  // 53: plans.v1.WorkoutWeather.location:type_name -> geo.v1.LatLng
+	11,  // 54: plans.v1.WorkoutWeather.location_source:type_name -> plans.v1.WeatherLocationSource
+	53,  // 55: plans.v1.WorkoutWeather.day:type_name -> plans.v1.DayWeather
+	54,  // 56: plans.v1.WorkoutWeather.hours:type_name -> plans.v1.HourWeather
+	53,  // 57: plans.v1.WorkoutWeather.workout:type_name -> plans.v1.DayWeather
+	79,  // 58: plans.v1.WorkoutWeather.workout_start_time:type_name -> google.protobuf.Timestamp
+	79,  // 59: plans.v1.WorkoutWeather.workout_end_time:type_name -> google.protobuf.Timestamp
+	18,  // 60: plans.v1.WorkoutWeather.fueling:type_name -> plans.v1.FuelAmounts
+	52,  // 61: plans.v1.WorkoutWeather.warnings:type_name -> plans.v1.WeatherWarning
+	85,  // 62: plans.v1.WorkoutWeather.avalanche_forecast:type_name -> geo.v1.AvalancheForecast
+	86,  // 63: plans.v1.WorkoutWeather.touring_verdict:type_name -> geo.v1.TouringVerdict
+	12,  // 64: plans.v1.WeatherWarning.kind:type_name -> plans.v1.WeatherWarningKind
+	87,  // 65: plans.v1.WeatherWarning.max_avalanche_danger:type_name -> geo.v1.AvalancheDanger
+	79,  // 66: plans.v1.HourWeather.time:type_name -> google.protobuf.Timestamp
+	51,  // 67: plans.v1.ListWorkoutWeatherResponse.weather:type_name -> plans.v1.WorkoutWeather
+	79,  // 68: plans.v1.SweatProfile.update_time:type_name -> google.protobuf.Timestamp
+	57,  // 69: plans.v1.GetSweatProfileResponse.profile:type_name -> plans.v1.SweatProfile
+	57,  // 70: plans.v1.SetSweatProfileRequest.profile:type_name -> plans.v1.SweatProfile
+	57,  // 71: plans.v1.SetSweatProfileResponse.profile:type_name -> plans.v1.SweatProfile
+	87,  // 72: plans.v1.TouringLimits.max_avalanche_danger_alpine:type_name -> geo.v1.AvalancheDanger
+	87,  // 73: plans.v1.TouringLimits.max_avalanche_danger_treeline:type_name -> geo.v1.AvalancheDanger
+	87,  // 74: plans.v1.TouringLimits.max_avalanche_danger_below_treeline:type_name -> geo.v1.AvalancheDanger
+	79,  // 75: plans.v1.TouringLimits.update_time:type_name -> google.protobuf.Timestamp
+	62,  // 76: plans.v1.GetTouringLimitsResponse.limits:type_name -> plans.v1.TouringLimits
+	62,  // 77: plans.v1.SetTouringLimitsRequest.limits:type_name -> plans.v1.TouringLimits
+	62,  // 78: plans.v1.SetTouringLimitsResponse.limits:type_name -> plans.v1.TouringLimits
+	51,  // 79: plans.v1.GetWorkoutWeatherResponse.weather:type_name -> plans.v1.WorkoutWeather
+	15,  // 80: plans.v1.CreateWorkoutsRequest.workouts:type_name -> plans.v1.Workout
+	15,  // 81: plans.v1.CreateWorkoutsResponse.workouts:type_name -> plans.v1.Workout
+	15,  // 82: plans.v1.UpdateWorkoutRequest.workout:type_name -> plans.v1.Workout
+	84,  // 83: plans.v1.UpdateWorkoutRequest.update_mask:type_name -> google.protobuf.FieldMask
+	15,  // 84: plans.v1.UpdateWorkoutResponse.workout:type_name -> plans.v1.Workout
+	30,  // 85: plans.v1.SetStrengthLogRequest.log:type_name -> plans.v1.StrengthLog
+	15,  // 86: plans.v1.SetStrengthLogResponse.workout:type_name -> plans.v1.Workout
+	33,  // 87: plans.v1.TrainingPlanService.CreateTrainingPlan:input_type -> plans.v1.CreateTrainingPlanRequest
+	35,  // 88: plans.v1.TrainingPlanService.GetTrainingPlan:input_type -> plans.v1.GetTrainingPlanRequest
+	37,  // 89: plans.v1.TrainingPlanService.ListTrainingPlans:input_type -> plans.v1.ListTrainingPlansRequest
+	39,  // 90: plans.v1.TrainingPlanService.UpdateTrainingPlan:input_type -> plans.v1.UpdateTrainingPlanRequest
+	41,  // 91: plans.v1.TrainingPlanService.DeleteTrainingPlan:input_type -> plans.v1.DeleteTrainingPlanRequest
+	43,  // 92: plans.v1.TrainingPlanService.SetPlanPeriods:input_type -> plans.v1.SetPlanPeriodsRequest
+	45,  // 93: plans.v1.TrainingPlanService.DeletePlanPeriods:input_type -> plans.v1.DeletePlanPeriodsRequest
+	47,  // 94: plans.v1.TrainingPlanService.ListWorkouts:input_type -> plans.v1.ListWorkoutsRequest
+	49,  // 95: plans.v1.TrainingPlanService.GetWorkout:input_type -> plans.v1.GetWorkoutRequest
+	69,  // 96: plans.v1.TrainingPlanService.CreateWorkouts:input_type -> plans.v1.CreateWorkoutsRequest
+	71,  // 97: plans.v1.TrainingPlanService.UpdateWorkout:input_type -> plans.v1.UpdateWorkoutRequest
+	73,  // 98: plans.v1.TrainingPlanService.DeleteWorkouts:input_type -> plans.v1.DeleteWorkoutsRequest
+	75,  // 99: plans.v1.TrainingPlanService.SetStrengthLog:input_type -> plans.v1.SetStrengthLogRequest
+	77,  // 100: plans.v1.TrainingPlanService.DeleteStrengthLog:input_type -> plans.v1.DeleteStrengthLogRequest
+	55,  // 101: plans.v1.TrainingPlanService.ListWorkoutWeather:input_type -> plans.v1.ListWorkoutWeatherRequest
+	67,  // 102: plans.v1.TrainingPlanService.GetWorkoutWeather:input_type -> plans.v1.GetWorkoutWeatherRequest
+	58,  // 103: plans.v1.TrainingPlanService.GetSweatProfile:input_type -> plans.v1.GetSweatProfileRequest
+	60,  // 104: plans.v1.TrainingPlanService.SetSweatProfile:input_type -> plans.v1.SetSweatProfileRequest
+	63,  // 105: plans.v1.TrainingPlanService.GetTouringLimits:input_type -> plans.v1.GetTouringLimitsRequest
+	65,  // 106: plans.v1.TrainingPlanService.SetTouringLimits:input_type -> plans.v1.SetTouringLimitsRequest
+	34,  // 107: plans.v1.TrainingPlanService.CreateTrainingPlan:output_type -> plans.v1.CreateTrainingPlanResponse
+	36,  // 108: plans.v1.TrainingPlanService.GetTrainingPlan:output_type -> plans.v1.GetTrainingPlanResponse
+	38,  // 109: plans.v1.TrainingPlanService.ListTrainingPlans:output_type -> plans.v1.ListTrainingPlansResponse
+	40,  // 110: plans.v1.TrainingPlanService.UpdateTrainingPlan:output_type -> plans.v1.UpdateTrainingPlanResponse
+	42,  // 111: plans.v1.TrainingPlanService.DeleteTrainingPlan:output_type -> plans.v1.DeleteTrainingPlanResponse
+	44,  // 112: plans.v1.TrainingPlanService.SetPlanPeriods:output_type -> plans.v1.SetPlanPeriodsResponse
+	46,  // 113: plans.v1.TrainingPlanService.DeletePlanPeriods:output_type -> plans.v1.DeletePlanPeriodsResponse
+	48,  // 114: plans.v1.TrainingPlanService.ListWorkouts:output_type -> plans.v1.ListWorkoutsResponse
+	50,  // 115: plans.v1.TrainingPlanService.GetWorkout:output_type -> plans.v1.GetWorkoutResponse
+	70,  // 116: plans.v1.TrainingPlanService.CreateWorkouts:output_type -> plans.v1.CreateWorkoutsResponse
+	72,  // 117: plans.v1.TrainingPlanService.UpdateWorkout:output_type -> plans.v1.UpdateWorkoutResponse
+	74,  // 118: plans.v1.TrainingPlanService.DeleteWorkouts:output_type -> plans.v1.DeleteWorkoutsResponse
+	76,  // 119: plans.v1.TrainingPlanService.SetStrengthLog:output_type -> plans.v1.SetStrengthLogResponse
+	78,  // 120: plans.v1.TrainingPlanService.DeleteStrengthLog:output_type -> plans.v1.DeleteStrengthLogResponse
+	56,  // 121: plans.v1.TrainingPlanService.ListWorkoutWeather:output_type -> plans.v1.ListWorkoutWeatherResponse
+	68,  // 122: plans.v1.TrainingPlanService.GetWorkoutWeather:output_type -> plans.v1.GetWorkoutWeatherResponse
+	59,  // 123: plans.v1.TrainingPlanService.GetSweatProfile:output_type -> plans.v1.GetSweatProfileResponse
+	61,  // 124: plans.v1.TrainingPlanService.SetSweatProfile:output_type -> plans.v1.SetSweatProfileResponse
+	64,  // 125: plans.v1.TrainingPlanService.GetTouringLimits:output_type -> plans.v1.GetTouringLimitsResponse
+	66,  // 126: plans.v1.TrainingPlanService.SetTouringLimits:output_type -> plans.v1.SetTouringLimitsResponse
+	107, // [107:127] is the sub-list for method output_type
+	87,  // [87:107] is the sub-list for method input_type
+	87,  // [87:87] is the sub-list for extension type_name
+	87,  // [87:87] is the sub-list for extension extendee
+	0,   // [0:87] is the sub-list for field type_name
 }
 
 func init() { file_plans_v1_plans_proto_init() }

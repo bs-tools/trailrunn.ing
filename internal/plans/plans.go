@@ -121,6 +121,9 @@ type Workout struct {
 	// The structure of a run, in order. Nil for runs without structure and
 	// other workouts.
 	RunBlocks []RunBlock
+	// The heart rate range to hold on a run without structure. Nil for the
+	// default: the aerobic zones for a base run, none for a hard one.
+	RunHeartRate *HeartRateTarget
 	// Whether a run is a lactate test, run in stages of rising heart rate.
 	LactateTest bool
 	// What to eat and drink during a run. Nil if it has no fueling plan.
@@ -407,6 +410,7 @@ func (r *Repository) CreateWorkouts(ctx context.Context, userID, planID pgtype.U
 		params.LocationNames = append(params.LocationNames, w.LocationName)
 		params.CrossTrainingSports = append(params.CrossTrainingSports, string(w.CrossTrainingSport))
 		params.RunBlocks = append(params.RunBlocks, runBlocksToDB(w.RunBlocks))
+		params.RunHeartRates = append(params.RunHeartRates, heartRateToDB(w.RunHeartRate))
 		params.LactateTests = append(params.LactateTests, w.LactateTest)
 		params.RunFuelings = append(params.RunFuelings, runFuelingToDB(w.RunFueling))
 	}
@@ -529,6 +533,7 @@ func (r *Repository) UpdateWorkout(ctx context.Context, userID pgtype.UUID, w *W
 				LocationLng:               locationToDB(w.Location, func(p geo.Point) float64 { return p.Lng }),
 				LocationName:              w.LocationName,
 				RunBlocks:                 runBlocksToDB(w.RunBlocks),
+				RunHeartRate:              heartRateToDB(w.RunHeartRate),
 				LactateTest:               w.LactateTest,
 				RunFueling:                runFuelingToDB(w.RunFueling),
 				CrossTrainingSport:        string(w.CrossTrainingSport),
@@ -664,6 +669,7 @@ func workoutFromDB(w *gen.Workout) *Workout {
 		StartWindowMinutes:        w.StartWindowMinutes,
 		LocationName:              w.LocationName,
 		RunBlocks:                 runBlocksFromDB(w.RunBlocks),
+		RunHeartRate:              heartRateFromDB(w.RunHeartRate),
 		LactateTest:               w.LactateTest,
 		RunFueling:                runFuelingFromDB(w.RunFueling),
 		ShareToken:                w.ShareToken.String,
