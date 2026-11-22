@@ -124,20 +124,23 @@ func gearFeelToProto(feel plans.GearFeel) plansv1.GearFeel {
 	return plansv1.GearFeel_GEAR_FEEL_UNSPECIFIED
 }
 
-// gearComfortToProto lists what feedback taught, in the order of the
-// parts of the body.
-func gearComfortToProto(comfort map[plans.GearArea]plans.GearComfort) []*plansv1.GearComfort {
+// gearComfortToProto lists what feedback taught, dry workouts' first, in
+// the order of the parts of the body.
+func gearComfortToProto(comfort map[plans.ComfortKey]plans.GearComfort) []*plansv1.GearComfort {
 	var result []*plansv1.GearComfort
-	for _, area := range plans.GearAreas {
-		c, ok := comfort[area]
-		if !ok {
-			continue
+	for _, wet := range []bool{false, true} {
+		for _, area := range plans.GearAreas {
+			c, ok := comfort[plans.ComfortKey{Area: area, Wet: wet}]
+			if !ok {
+				continue
+			}
+			result = append(result, plansv1.GearComfort_builder{
+				Area:          gearAreaToProto(area),
+				OffsetCelsius: c.OffsetCelsius,
+				Ratings:       int32(c.Ratings),
+				Wet:           wet,
+			}.Build())
 		}
-		result = append(result, plansv1.GearComfort_builder{
-			Area:          gearAreaToProto(area),
-			OffsetCelsius: c.OffsetCelsius,
-			Ratings:       int32(c.Ratings),
-		}.Build())
 	}
 	return result
 }
@@ -146,7 +149,7 @@ func gearFeedbackToProto(f *plans.GearFeedback) *plansv1.GearFeedback {
 	if f == nil {
 		return nil
 	}
-	b := plansv1.GearFeedback_builder{Notes: f.Notes, UpdateTime: timestamppb.New(f.UpdateTime)}
+	b := plansv1.GearFeedback_builder{Notes: f.Notes, Wet: f.Wet, UpdateTime: timestamppb.New(f.UpdateTime)}
 	for _, area := range plans.GearAreas {
 		if feel, ok := f.Feels[area]; ok {
 			b.Feels = append(b.Feels, plansv1.GearAreaFeel_builder{Area: gearAreaToProto(area), Feel: gearFeelToProto(feel)}.Build())
@@ -183,7 +186,7 @@ func (s *Service) SetGearFeedback(ctx context.Context, req *plansv1.SetGearFeedb
 	if err != nil {
 		return nil, invalidArgument("invalid workout ID: %v", err)
 	}
-	f := &plans.GearFeedback{Feels: map[plans.GearArea]plans.GearFeel{}, Notes: strings.TrimSpace(req.GetFeedback().GetNotes())}
+	f := &plans.GearFeedback{Feels: map[plans.GearArea]plans.GearFeel{}, Notes: strings.TrimSpace(req.GetFeedback().GetNotes()), Wet: req.GetFeedback().GetWet()}
 	if len([]rune(f.Notes)) > maxGearNotesLength {
 		return nil, invalidArgument("feedback.notes must be at most %d characters", maxGearNotesLength)
 	}
@@ -234,6 +237,13 @@ const pavedShare = 0.6
 // run on.
 const snowOnGroundMeters = 0.03
 
+// The chance of rain in percent, and the rain in an hour in millimeters,
+// from which rain is likely, as plans.AdviseGear has them.
+const (
+	rainLikelyPercent = 50
+	rainLikelyMM      = 1.0
+)
+
 // sunnyUVIndex is the UV index from which sunglasses and a cap help.
 const sunnyUVIndex = 3
 
@@ -271,7 +281,12 @@ func gearAdvice(w *plans.Workout, hours []mapdata.Weather, timeKnown, paved bool
 		c.Dark = c.Dark || (timeKnown && !h.IsDay)
 		c.Sunny = c.Sunny || (h.IsDay && h.UVIndex >= sunnyUVIndex)
 	}
+	// Whether rain is likely in the workout's first hour. Without a start
+	// time, when it starts is unknown.
+	first := hours[0]
+	c.RainAtStart = first.PrecipitationProbability >= rainLikelyPercent || first.PrecipitationMM >= rainLikelyMM
 	if !timeKnown {
+		c.RainAtStart = c.MaxPrecipitationProbability >= rainLikelyPercent || c.PrecipitationMM >= rainLikelyMM
 		// The whole daytime is too wide a range to dress for: the hours
 		// from 9 to 18, when most runs without a start time are.
 		c.MinApparentCelsius, c.MaxApparentCelsius = daytimeApparentRange(hours)

@@ -89,17 +89,28 @@ type GearProfile struct {
 	ShortsMinApparentCelsius *float64
 	// When the profile was last set, zero if it never was.
 	UpdateTime time.Time
-	// What the user's feedback on their gear taught, by part of the body.
-	Comfort map[GearArea]GearComfort
+	// What the user's feedback on their gear taught, by part of the body,
+	// on dry and wet workouts.
+	Comfort map[ComfortKey]GearComfort
 }
 
-// offset returns how much colder than it feels to dress a part of the
-// body for, from the user's feedback.
-func (p *GearProfile) offset(area GearArea) float64 {
+// comfort returns what the user's feedback taught about a part of the body
+// in dry or wet conditions, and whether it taught anything. Wet conditions
+// go by the feedback of wet workouts, or else of dry ones, as what's warm
+// enough when it's dry is the least for the rain. Dry ones only go by dry
+// workouts': being cold in the rain doesn't mean a long sleeve isn't enough
+// on a dry day.
+func (p *GearProfile) comfort(area GearArea, wet bool) (GearComfort, bool) {
 	if p == nil {
-		return 0
+		return GearComfort{}, false
 	}
-	return p.Comfort[area].OffsetCelsius
+	if wet {
+		if c, ok := p.Comfort[ComfortKey{Area: area, Wet: true}]; ok {
+			return c, true
+		}
+	}
+	c, ok := p.Comfort[ComfortKey{Area: area}]
+	return c, ok
 }
 
 // shortsMin returns the apparent temperature from which runs are in
@@ -195,6 +206,9 @@ type GearConditions struct {
 	MaxPrecipitationProbability int
 	PrecipitationMM             float64
 	SnowfallCM                  float64
+	// Whether rain is likely at the start of the workout, rather than
+	// later. Without a start time, whether it's likely at all.
+	RainAtStart bool
 	// Whether there's snow on the ground.
 	SnowOnGround bool
 	// The strongest gusts in kilometers per hour.
@@ -316,27 +330,38 @@ func (a *gearAdviser) carrying(g Gear) bool {
 // feels returns the temperature to dress a part of the body for: what it
 // feels like, made colder or warmer by what the user's feedback taught.
 func (a *gearAdviser) feels(c GearConditions, area GearArea) float64 {
-	return c.MinApparentCelsius - a.profile.offset(area)
+	comfort, _ := a.profile.comfort(area, c.wet())
+	return c.MinApparentCelsius - comfort.OffsetCelsius
 }
 
-// comfortNote describes how the user's feedback changed the advice, e.g.
-// "dressed 3 °C colder for your hands, from your feedback", empty if it
-// didn't.
-func (p *GearProfile) comfortNote() string {
+// comfortNote describes how the user's feedback changed the advice in
+// dry or wet conditions, e.g. "dressed 3 °C colder for your hands, from
+// your feedback on wet runs", empty if it didn't.
+func (p *GearProfile) comfortNote(wet bool) string {
 	var parts []string
+	fromWet := false
 	for _, area := range GearAreas {
-		offset := p.offset(area)
+		c, _ := p.comfort(area, wet)
+		if wet && c.OffsetCelsius != 0 {
+			// The comfort came from wet workouts' feedback if they have any.
+			_, fromWetRatings := p.Comfort[ComfortKey{Area: area, Wet: true}]
+			fromWet = fromWet || fromWetRatings
+		}
 		switch {
-		case offset > 0:
-			parts = append(parts, fmt.Sprintf("%s °C colder for your %s", formatOffset(offset), area))
-		case offset < 0:
-			parts = append(parts, fmt.Sprintf("%s °C warmer for your %s", formatOffset(-offset), area))
+		case c.OffsetCelsius > 0:
+			parts = append(parts, fmt.Sprintf("%s °C colder for your %s", formatOffset(c.OffsetCelsius), area))
+		case c.OffsetCelsius < 0:
+			parts = append(parts, fmt.Sprintf("%s °C warmer for your %s", formatOffset(-c.OffsetCelsius), area))
 		}
 	}
 	if len(parts) == 0 {
 		return ""
 	}
-	return "dressed " + strings.Join(parts, ", ") + ", from your feedback"
+	source := "your feedback"
+	if fromWet {
+		source = "your feedback on wet workouts"
+	}
+	return "dressed " + strings.Join(parts, ", ") + ", from " + source
 }
 
 // formatOffset formats an offset in degrees, e.g. "3" or "1.5".
@@ -351,7 +376,7 @@ func formatOffset(v float64) string {
 func AdviseGear(c GearConditions, profile *GearProfile) GearAdvice {
 	a := &gearAdviser{profile: profile}
 	a.advice.Basis = c.basis()
-	if note := profile.comfortNote(); note != "" {
+	if note := profile.comfortNote(c.wet()); note != "" {
 		a.advice.Basis += "; " + note
 	}
 	if c.SkiTour {
@@ -397,6 +422,12 @@ func (c GearConditions) rainLikely() bool {
 	return c.MaxPrecipitationProbability >= rainLikelyPercent || c.PrecipitationMM >= rainLikelyMM
 }
 
+// wet reports whether the workout is wet, for which feedback on wet
+// workouts dresses it.
+func (c GearConditions) wet() bool {
+	return c.rainLikely()
+}
+
 func (c GearConditions) windy() bool {
 	return c.MaxGustsKMH >= windyGustsKMH
 }
@@ -435,8 +466,10 @@ func (a *gearAdviser) run(c GearConditions) {
 		a.wear("From 5 °C", GearTShirt)
 	}
 	switch {
-	case c.rainLikely() && feels < 15:
+	case c.rainLikely() && feels < 15 && (c.RainAtStart || c.Duration < vestDuration):
 		a.wear("Rain likely", GearRainJacket)
+	case c.rainLikely() && feels < 15:
+		a.carry("Rain likely later: put it on when it starts", GearRainJacket, GearWindJacket)
 	case c.rainLikely() || c.MaxPrecipitationProbability >= rainPossiblePercent:
 		a.carry("In case of rain", GearRainJacket, GearWindJacket)
 	case body < 5 && !a.wearing(GearRainJacket) && !a.wearing(GearWindJacket):

@@ -123,21 +123,21 @@ func TestComfortFrom(t *testing.T) {
 		row(GearFeelUnrated, GearFeelTooCold),
 		row(GearFeelTooWarm, GearFeelTooCold),
 	})
-	if got := comfort[GearAreaHands]; got.OffsetCelsius != 3 || got.Ratings != 3 {
+	if got := comfort[ComfortKey{Area: GearAreaHands}]; got.OffsetCelsius != 3 || got.Ratings != 3 {
 		t.Errorf("got hands %+v, want 3 °C colder from 3 ratings", got)
 	}
-	if got := comfort[GearAreaLegs]; got.OffsetCelsius != 0 || got.Ratings != 2 {
+	if got := comfort[ComfortKey{Area: GearAreaLegs}]; got.OffsetCelsius != 0 || got.Ratings != 2 {
 		t.Errorf("got legs %+v, want no offset from 2 ratings", got)
 	}
-	if _, ok := comfort[GearAreaHead]; ok {
-		t.Errorf("got head %+v without ratings", comfort[GearAreaHead])
+	if _, ok := comfort[ComfortKey{Area: GearAreaHead}]; ok {
+		t.Errorf("got head %+v without ratings", comfort[ComfortKey{Area: GearAreaHead}])
 	}
 	// The offset stops at 6 °C.
 	var cold []*gen.ListRecentGearFeedbackRow
 	for range 10 {
 		cold = append(cold, row(GearFeelTooCold, GearFeelUnrated))
 	}
-	if got := comfortFrom(cold)[GearAreaLegs]; got.OffsetCelsius != 6 {
+	if got := comfortFrom(cold)[ComfortKey{Area: GearAreaLegs}]; got.OffsetCelsius != 6 {
 		t.Errorf("got legs %+v, want 6 °C at most", got)
 	}
 }
@@ -147,9 +147,9 @@ func TestAdviseGearComfort(t *testing.T) {
 	c := GearConditions{TimeKnown: true, MinApparentCelsius: 11, MaxApparentCelsius: 12}
 	// At 11 °C it's shorts and no gloves, unless the legs and hands run
 	// cold: then it's as if it were 8 °C for them.
-	got := AdviseGear(c, &GearProfile{Comfort: map[GearArea]GearComfort{
-		GearAreaLegs:  {OffsetCelsius: 3, Ratings: 2},
-		GearAreaHands: {OffsetCelsius: 4.5, Ratings: 3},
+	got := AdviseGear(c, &GearProfile{Comfort: map[ComfortKey]GearComfort{
+		{Area: GearAreaLegs}:  {OffsetCelsius: 3, Ratings: 2},
+		{Area: GearAreaHands}: {OffsetCelsius: 4.5, Ratings: 3},
 	}})
 	if wear := gearOf(got.Wear); !slices.Equal(wear, []string{"tights", "t_shirt", "liner_gloves", "trail_shoes"}) {
 		t.Errorf("got wear %v, want tights and liner gloves", wear)
@@ -158,10 +158,62 @@ func TestAdviseGearComfort(t *testing.T) {
 		t.Errorf("got basis %q, want %q", got.Basis, want)
 	}
 	// Running warm, the top stays a t-shirt down to 2 °C.
-	got = AdviseGear(GearConditions{TimeKnown: true, MinApparentCelsius: 2, MaxApparentCelsius: 2}, &GearProfile{Comfort: map[GearArea]GearComfort{
-		GearAreaBody: {OffsetCelsius: -3, Ratings: 2},
+	got = AdviseGear(GearConditions{TimeKnown: true, MinApparentCelsius: 2, MaxApparentCelsius: 2}, &GearProfile{Comfort: map[ComfortKey]GearComfort{
+		{Area: GearAreaBody}: {OffsetCelsius: -3, Ratings: 2},
 	}})
 	if !slices.Contains(gearOf(got.Wear), "t_shirt") {
 		t.Errorf("got wear %v, want a t-shirt", gearOf(got.Wear))
+	}
+}
+
+func TestComfortWetAndDry(t *testing.T) {
+	t.Parallel()
+	text := func(feel GearFeel) pgtype.Text {
+		return pgtype.Text{String: string(feel), Valid: feel != GearFeelUnrated}
+	}
+	// The body was too cold twice in the rain, and just right on a dry day.
+	profile := &GearProfile{Comfort: comfortFrom([]*gen.ListRecentGearFeedbackRow{
+		{Body: text(GearFeelTooCold), Wet: true},
+		{Body: text(GearFeelJustRight)},
+		{Body: text(GearFeelTooCold), Wet: true},
+	})}
+	if got := profile.Comfort[ComfortKey{Area: GearAreaBody, Wet: true}]; got.OffsetCelsius != 3 || got.Ratings != 2 {
+		t.Errorf("got wet body %+v, want 3 °C colder from 2 ratings", got)
+	}
+	// On a dry day at 6 °C, it's a t-shirt as always: the rain's cold
+	// doesn't count.
+	dry := AdviseGear(GearConditions{TimeKnown: true, MinApparentCelsius: 6, MaxApparentCelsius: 6}, profile)
+	if !slices.Contains(gearOf(dry.Wear), "t_shirt") || strings.Contains(dry.Basis, "feedback") {
+		t.Errorf("got dry wear %v and basis %q, want a t-shirt as without feedback", gearOf(dry.Wear), dry.Basis)
+	}
+	// In the rain at 6 °C, it's as if it were 3 °C: a long sleeve.
+	wet := AdviseGear(GearConditions{TimeKnown: true, MinApparentCelsius: 6, MaxApparentCelsius: 6, MaxPrecipitationProbability: 80, RainAtStart: true}, profile)
+	if !slices.Contains(gearOf(wet.Wear), "long_sleeve") || !strings.HasSuffix(wet.Basis, "dressed 3 °C colder for your body, from your feedback on wet workouts") {
+		t.Errorf("got wet wear %v and basis %q, want a long sleeve from wet feedback", gearOf(wet.Wear), wet.Basis)
+	}
+	// Wet days without wet feedback go by dry days'.
+	dryOnly := &GearProfile{Comfort: map[ComfortKey]GearComfort{{Area: GearAreaHands}: {OffsetCelsius: 3, Ratings: 2}}}
+	wet = AdviseGear(GearConditions{TimeKnown: true, MinApparentCelsius: 9, MaxApparentCelsius: 9, MaxPrecipitationProbability: 80}, dryOnly)
+	if !slices.Contains(gearOf(wet.Wear), "liner_gloves") || !strings.HasSuffix(wet.Basis, "from your feedback") {
+		t.Errorf("got wet wear %v and basis %q, want liner gloves from dry feedback", gearOf(wet.Wear), wet.Basis)
+	}
+}
+
+func TestRainJacketLater(t *testing.T) {
+	t.Parallel()
+	// Rain is likely on a long run that starts dry: the jacket is carried,
+	// to put on when it starts. Raining from the start, it's worn.
+	later := AdviseGear(GearConditions{TimeKnown: true, MinApparentCelsius: 8, MaxApparentCelsius: 9, MaxPrecipitationProbability: 70, Duration: 2 * time.Hour}, nil)
+	if !slices.Contains(gearOf(later.Carry), "rain_jacket") || slices.Contains(gearOf(later.Wear), "rain_jacket") {
+		t.Errorf("got wear %v and carry %v, want the rain jacket carried", gearOf(later.Wear), gearOf(later.Carry))
+	}
+	now := AdviseGear(GearConditions{TimeKnown: true, MinApparentCelsius: 8, MaxApparentCelsius: 9, MaxPrecipitationProbability: 70, RainAtStart: true, Duration: 2 * time.Hour}, nil)
+	if !slices.Contains(gearOf(now.Wear), "rain_jacket") {
+		t.Errorf("got wear %v, want the rain jacket worn", gearOf(now.Wear))
+	}
+	// A short run with rain likely is in the jacket anyway.
+	short := AdviseGear(GearConditions{TimeKnown: true, MinApparentCelsius: 8, MaxApparentCelsius: 9, MaxPrecipitationProbability: 70, Duration: 45 * time.Minute}, nil)
+	if !slices.Contains(gearOf(short.Wear), "rain_jacket") {
+		t.Errorf("got wear %v, want the rain jacket worn", gearOf(short.Wear))
 	}
 }

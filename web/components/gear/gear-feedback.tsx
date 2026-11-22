@@ -51,25 +51,29 @@ export const areaName = (area: GearArea): string =>
  */
 export const formatComfort = (comfort: GearComfort): string => {
   const offset = comfort.offsetCelsius;
+  const name = `${areaName(comfort.area)}${comfort.wet ? " when wet" : ""}`;
   if (offset === 0) {
-    return `${areaName(comfort.area)}: as it feels`;
+    return `${name}: as it feels`;
   }
   const direction = offset > 0 ? "colder" : "warmer";
-  return `${areaName(comfort.area)}: dressed ${Math.abs(offset)} °C ${direction}`;
+  return `${name}: dressed ${Math.abs(offset)} °C ${direction}`;
 };
 
 interface FormProps {
   workoutId: string;
   stored: GearFeedback | undefined;
+  // Whether the forecast says it's wet, for new feedback.
+  forecastWet: boolean;
 }
 
 // Form rates each part of the body, starting from the stored feedback.
-const Form: React.FC<FormProps> = ({ workoutId, stored }) => {
+const Form: React.FC<FormProps> = ({ workoutId, stored, forecastWet }) => {
   const queryClient = useQueryClient();
   const [feels, setFeels] = useState<Map<GearArea, GearFeel>>(
     () => new Map(stored?.feels.map((rated) => [rated.area, rated.feel]) ?? [])
   );
   const [notes, setNotes] = useState(stored?.notes ?? "");
+  const [wet, setWet] = useState(stored?.wet ?? forecastWet);
   const save = useMutation(setGearFeedback, {
     onSuccess: async () => {
       // What to wear on other workouts depends on it.
@@ -90,6 +94,7 @@ const Form: React.FC<FormProps> = ({ workoutId, stored }) => {
               create(GearAreaFeelSchema, { area, feel })
             ),
             notes,
+            wet,
           },
           workoutId,
         });
@@ -132,6 +137,23 @@ const Form: React.FC<FormProps> = ({ workoutId, stored }) => {
           </div>
         ))}
       </div>
+      <label className="flex items-start gap-2 text-sm text-gray-700">
+        <input
+          type="checkbox"
+          className="mt-1"
+          checked={wet}
+          onChange={(event) => {
+            setWet(event.target.checked);
+          }}
+        />
+        <span>
+          It was wet
+          <span className="block text-xs text-gray-500">
+            Rain or soaking brush. Feedback on wet runs only changes what to
+            wear when rain is likely.
+          </span>
+        </span>
+      </label>
       <TextAreaField
         label="Notes"
         value={notes}
@@ -164,7 +186,16 @@ const Form: React.FC<FormProps> = ({ workoutId, stored }) => {
  * GearFeedbackCard asks how warm each part of the body was on a workout,
  * which adjusts what later workouts suggest to wear.
  */
-const GearFeedbackCard: React.FC<{ workoutId: string }> = ({ workoutId }) => {
+interface GearFeedbackCardProps {
+  workoutId: string;
+  // Whether the forecast says it's wet during the workout.
+  forecastWet: boolean;
+}
+
+const GearFeedbackCard: React.FC<GearFeedbackCardProps> = ({
+  workoutId,
+  forecastWet,
+}) => {
   const { data, isPending } = useQuery(getGearFeedback, { workoutId });
   return (
     <Card title="How did your gear feel?">
@@ -181,6 +212,7 @@ const GearFeedbackCard: React.FC<{ workoutId: string }> = ({ workoutId }) => {
              */
             workoutId={workoutId}
             stored={data?.feedback}
+            forecastWet={forecastWet}
           />
         )}
       </div>

@@ -1134,6 +1134,7 @@ type GearFeedback struct {
 	Head       pgtype.Text
 	Notes      string
 	UpdateTime pgtype.Timestamptz
+	Wet        bool
 }
 
 type GearProfile struct {
