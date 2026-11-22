@@ -55,6 +55,37 @@ const outdoors = (workout: Workout): boolean =>
   workout.type !== WorkoutType.REST && workout.type !== WorkoutType.STRENGTH;
 
 /**
+ * WET_PERCENT and WET_MM are the chance of rain, and the rain, from which
+ * the gear feedback of a workout starts as wet, like the server's advice.
+ */
+const WET_PERCENT = 50;
+const WET_MM = 1;
+
+/**
+ * GearFeedback asks how the gear felt, starting as wet if rain was likely
+ * during the workout, or during its day without a start time. Days past
+ * the forecast start dry.
+ */
+const GearFeedback: React.FC<{ workout: Workout }> = ({ workout }) => {
+  // The same query as the weather card's, so it's fetched once.
+  const weather = useQuery(
+    getWorkoutWeather,
+    { workoutId: workout.id },
+    { retry: false, staleTime: WEATHER_STALE_MS }
+  );
+  if (weather.isPending) {
+    return null;
+  }
+  const forecast = weather.data?.weather;
+  const during = forecast?.workout ?? forecast?.day;
+  const wet =
+    during !== undefined &&
+    (during.maxPrecipitationProbability >= WET_PERCENT ||
+      during.precipitationMm >= WET_MM);
+  return <GearFeedbackCard workoutId={workout.id} forecastWet={wet} />;
+};
+
+/**
  * Dressed reports whether a workout gets advice on what to wear, and so
  * feedback on how it felt: runs, races and ski tours.
  */
@@ -393,7 +424,7 @@ const WorkoutPage: React.FC = () => {
         <div className="flex min-w-0 flex-col gap-4">
           {/* Once a run or tour has started, how the gear felt. */}
           {dressed(workout) && workout.date <= today() && (
-            <GearFeedbackCard workoutId={workout.id} />
+            <GearFeedback workout={workout} />
           )}
           <WeatherCard workout={workout} />
           <WorkoutShareCard workout={workout} />

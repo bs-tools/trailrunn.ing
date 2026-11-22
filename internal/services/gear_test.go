@@ -3,6 +3,7 @@ package services_test
 import (
 	"context"
 	"slices"
+	"strings"
 	"testing"
 	"time"
 
@@ -196,6 +197,25 @@ func TestGearFeedback(t *testing.T) {
 	}
 	if stored, err := e.plans.GetGearFeedback(ctx, plansv1.GetGearFeedbackRequest_builder{WorkoutId: ws[1].GetId()}.Build()); err != nil || stored.HasFeedback() {
 		t.Errorf("GetGearFeedback after deleting: got %v, %v", stored.GetFeedback(), err)
+	}
+
+	// A wet run's ratings are learned for wet runs only: the next run is
+	// dry, so its advice is as before.
+	resp, err = e.plans.SetGearFeedback(ctx, plansv1.SetGearFeedbackRequest_builder{
+		WorkoutId: ws[1].GetId(),
+		Feedback: plansv1.GearFeedback_builder{
+			Wet:   true,
+			Feels: []*plansv1.GearAreaFeel{feel(plansv1.GearArea_GEAR_AREA_BODY, plansv1.GearFeel_GEAR_FEEL_TOO_COLD)},
+		}.Build(),
+	}.Build())
+	if err != nil || !resp.GetFeedback().GetWet() {
+		t.Fatalf("SetGearFeedback: got %v, %v, want it wet", resp.GetFeedback(), err)
+	}
+	if c := resp.GetComfort(); len(c) != 3 || !c[2].GetWet() || c[2].GetArea() != plansv1.GearArea_GEAR_AREA_BODY || c[2].GetOffsetCelsius() != 1.5 {
+		t.Errorf("got comfort %v, want the dry legs and hands, and the wet body", c)
+	}
+	if got := advice(); strings.Contains(got.GetBasis(), "body") {
+		t.Errorf("got basis %q on a dry run, want no change for the body", got.GetBasis())
 	}
 
 	// Ratings are of known parts of the body, once each.

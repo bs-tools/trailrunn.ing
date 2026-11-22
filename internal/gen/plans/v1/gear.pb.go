@@ -516,12 +516,16 @@ func (b0 GearAreaFeel_builder) Build() *GearAreaFeel {
 // How the gear felt on a workout. Each rating moves the temperature that
 // part of the body is dressed for on later workouts: "too cold" dresses it
 // as if 1.5 °C colder, "too warm" as if 1.5 °C warmer, up to 6 °C, and
-// "just right" keeps it. See GearProfile.comfort.
+// "just right" keeps it. Ratings of wet workouts only move it for wet ones,
+// where rain is likely, as being cold in the rain says nothing about dry
+// days; wet workouts go by dry ones' ratings until they have their own. See
+// GearProfile.comfort.
 type GearFeedback struct {
 	state                 protoimpl.MessageState `protogen:"opaque.v1"`
 	xxx_hidden_Feels      *[]*GearAreaFeel       `protobuf:"bytes,1,rep,name=feels,proto3"`
 	xxx_hidden_Notes      string                 `protobuf:"bytes,2,opt,name=notes,proto3"`
 	xxx_hidden_UpdateTime *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=update_time,json=updateTime,proto3"`
+	xxx_hidden_Wet        bool                   `protobuf:"varint,4,opt,name=wet,proto3"`
 	unknownFields         protoimpl.UnknownFields
 	sizeCache             protoimpl.SizeCache
 }
@@ -574,6 +578,13 @@ func (x *GearFeedback) GetUpdateTime() *timestamppb.Timestamp {
 	return nil
 }
 
+func (x *GearFeedback) GetWet() bool {
+	if x != nil {
+		return x.xxx_hidden_Wet
+	}
+	return false
+}
+
 func (x *GearFeedback) SetFeels(v []*GearAreaFeel) {
 	x.xxx_hidden_Feels = &v
 }
@@ -584,6 +595,10 @@ func (x *GearFeedback) SetNotes(v string) {
 
 func (x *GearFeedback) SetUpdateTime(v *timestamppb.Timestamp) {
 	x.xxx_hidden_UpdateTime = v
+}
+
+func (x *GearFeedback) SetWet(v bool) {
+	x.xxx_hidden_Wet = v
 }
 
 func (x *GearFeedback) HasUpdateTime() bool {
@@ -608,6 +623,10 @@ type GearFeedback_builder struct {
 	Notes string
 	// When the feedback was last set.
 	UpdateTime *timestamppb.Timestamp
+	// Whether it was wet during the workout: raining, or soaked from wet
+	// brush or snow. The web app sets it from the workout's forecast, as
+	// rain likely during it, and the user can change it.
+	Wet bool
 }
 
 func (b0 GearFeedback_builder) Build() *GearFeedback {
@@ -617,6 +636,7 @@ func (b0 GearFeedback_builder) Build() *GearFeedback {
 	x.xxx_hidden_Feels = &b.Feels
 	x.xxx_hidden_Notes = b.Notes
 	x.xxx_hidden_UpdateTime = b.UpdateTime
+	x.xxx_hidden_Wet = b.Wet
 	return m0
 }
 
@@ -626,6 +646,7 @@ type GearComfort struct {
 	xxx_hidden_Area          GearArea               `protobuf:"varint,1,opt,name=area,proto3,enum=plans.v1.GearArea"`
 	xxx_hidden_OffsetCelsius float64                `protobuf:"fixed64,2,opt,name=offset_celsius,json=offsetCelsius,proto3"`
 	xxx_hidden_Ratings       int32                  `protobuf:"varint,3,opt,name=ratings,proto3"`
+	xxx_hidden_Wet           bool                   `protobuf:"varint,4,opt,name=wet,proto3"`
 	unknownFields            protoimpl.UnknownFields
 	sizeCache                protoimpl.SizeCache
 }
@@ -676,6 +697,13 @@ func (x *GearComfort) GetRatings() int32 {
 	return 0
 }
 
+func (x *GearComfort) GetWet() bool {
+	if x != nil {
+		return x.xxx_hidden_Wet
+	}
+	return false
+}
+
 func (x *GearComfort) SetArea(v GearArea) {
 	x.xxx_hidden_Area = v
 }
@@ -688,6 +716,10 @@ func (x *GearComfort) SetRatings(v int32) {
 	x.xxx_hidden_Ratings = v
 }
 
+func (x *GearComfort) SetWet(v bool) {
+	x.xxx_hidden_Wet = v
+}
+
 type GearComfort_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -698,6 +730,9 @@ type GearComfort_builder struct {
 	OffsetCelsius float64
 	// How many workouts' feedback rated it.
 	Ratings int32
+	// Whether it's for wet workouts, from their feedback, rather than dry
+	// ones.
+	Wet bool
 }
 
 func (b0 GearComfort_builder) Build() *GearComfort {
@@ -707,6 +742,7 @@ func (b0 GearComfort_builder) Build() *GearComfort {
 	x.xxx_hidden_Area = b.Area
 	x.xxx_hidden_OffsetCelsius = b.OffsetCelsius
 	x.xxx_hidden_Ratings = b.Ratings
+	x.xxx_hidden_Wet = b.Wet
 	return m0
 }
 
@@ -1467,16 +1503,18 @@ const file_plans_v1_gear_proto_rawDesc = "" +
 	"\x1c_shorts_min_apparent_celsius\"^\n" +
 	"\fGearAreaFeel\x12&\n" +
 	"\x04area\x18\x01 \x01(\x0e2\x12.plans.v1.GearAreaR\x04area\x12&\n" +
-	"\x04feel\x18\x02 \x01(\x0e2\x12.plans.v1.GearFeelR\x04feel\"\x97\x01\n" +
+	"\x04feel\x18\x02 \x01(\x0e2\x12.plans.v1.GearFeelR\x04feel\"\xa9\x01\n" +
 	"\fGearFeedback\x12,\n" +
 	"\x05feels\x18\x01 \x03(\v2\x16.plans.v1.GearAreaFeelR\x05feels\x12\x14\n" +
 	"\x05notes\x18\x02 \x01(\tR\x05notes\x12C\n" +
 	"\vupdate_time\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampB\x06\xaa\x9f\x19\x02\b\x01R\n" +
-	"updateTime\"v\n" +
+	"updateTime\x12\x10\n" +
+	"\x03wet\x18\x04 \x01(\bR\x03wet\"\x88\x01\n" +
 	"\vGearComfort\x12&\n" +
 	"\x04area\x18\x01 \x01(\x0e2\x12.plans.v1.GearAreaR\x04area\x12%\n" +
 	"\x0eoffset_celsius\x18\x02 \x01(\x01R\roffsetCelsius\x12\x18\n" +
-	"\aratings\x18\x03 \x01(\x05R\aratings\"7\n" +
+	"\aratings\x18\x03 \x01(\x05R\aratings\x12\x10\n" +
+	"\x03wet\x18\x04 \x01(\bR\x03wet\"7\n" +
 	"\x16GetGearFeedbackRequest\x12\x1d\n" +
 	"\n" +
 	"workout_id\x18\x01 \x01(\tR\tworkoutId\"M\n" +

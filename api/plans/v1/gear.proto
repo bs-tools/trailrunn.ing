@@ -122,7 +122,10 @@ message GearAreaFeel {
 // How the gear felt on a workout. Each rating moves the temperature that
 // part of the body is dressed for on later workouts: "too cold" dresses it
 // as if 1.5 °C colder, "too warm" as if 1.5 °C warmer, up to 6 °C, and
-// "just right" keeps it. See GearProfile.comfort.
+// "just right" keeps it. Ratings of wet workouts only move it for wet ones,
+// where rain is likely, as being cold in the rain says nothing about dry
+// days; wet workouts go by dry ones' ratings until they have their own. See
+// GearProfile.comfort.
 message GearFeedback {
   // How warm each part of the body was, each at most once. Parts that
   // weren't rated are left out.
@@ -132,6 +135,10 @@ message GearFeedback {
   string notes = 2;
   // When the feedback was last set.
   google.protobuf.Timestamp update_time = 3 [(mcp.v1.field).output_only = true];
+  // Whether it was wet during the workout: raining, or soaked from wet
+  // brush or snow. The web app sets it from the workout's forecast, as
+  // rain likely during it, and the user can change it.
+  bool wet = 4;
 }
 
 // What the user's feedback taught about a part of the body.
@@ -143,6 +150,9 @@ message GearComfort {
   double offset_celsius = 2;
   // How many workouts' feedback rated it.
   int32 ratings = 3;
+  // Whether it's for wet workouts, from their feedback, rather than dry
+  // ones.
+  bool wet = 4;
 }
 
 message GetGearFeedbackRequest {

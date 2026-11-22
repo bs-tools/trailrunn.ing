@@ -308,8 +308,8 @@ where workout_id = $1 and user_id = $2;
 -- name: SetGearFeedback :many
 -- Sets the feedback on one of the user's workouts: no rows if it isn't
 -- theirs.
-insert into gear_feedback (workout_id, user_id, legs, body, hands, head, notes)
-select w.id, p.user_id, sqlc.narg(legs), sqlc.narg(body), sqlc.narg(hands), sqlc.narg(head), sqlc.arg(notes)
+insert into gear_feedback (workout_id, user_id, legs, body, hands, head, notes, wet)
+select w.id, p.user_id, sqlc.narg(legs), sqlc.narg(body), sqlc.narg(hands), sqlc.narg(head), sqlc.arg(notes), sqlc.arg(wet)
 from workouts w
 join training_plans p on p.id = w.plan_id
 where w.id = sqlc.arg(workout_id) and p.user_id = sqlc.arg(user_id)
@@ -319,6 +319,7 @@ on conflict (workout_id) do update set
   hands = excluded.hands,
   head = excluded.head,
   notes = excluded.notes,
+  wet = excluded.wet,
   update_time = now()
 returning *;
 
@@ -329,7 +330,7 @@ where workout_id = $1 and user_id = $2;
 -- name: ListRecentGearFeedback :many
 -- Lists the user's latest feedback on their gear, the latest workout
 -- first.
-select f.legs, f.body, f.hands, f.head from gear_feedback f
+select f.legs, f.body, f.hands, f.head, f.wet from gear_feedback f
 join workouts w on w.id = f.workout_id
 where f.user_id = $1
 order by w.date desc, f.update_time desc

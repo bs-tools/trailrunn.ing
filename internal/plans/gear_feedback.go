@@ -38,13 +38,23 @@ const (
 
 // GearFeedback is how the gear felt on a workout, by part of the body.
 type GearFeedback struct {
-	Feels      map[GearArea]GearFeel
-	Notes      string
+	Feels map[GearArea]GearFeel
+	Notes string
+	// Whether it was wet: raining, or wet underfoot and from above.
+	Wet        bool
 	UpdateTime time.Time
 }
 
+// ComfortKey is what feedback is learned for: a part of the body, on dry
+// or wet workouts. Feeling cold in the rain says nothing about dry days.
+type ComfortKey struct {
+	Area GearArea
+	Wet  bool
+}
+
 // GearComfort is what the user's feedback taught about a part of the
-// body: how much colder than it feels to dress it for.
+// body, on dry or wet workouts: how much colder than it feels to dress it
+// for.
 type GearComfort struct {
 	// In degrees Celsius: positive if the user runs cold there, so it's
 	// dressed for a colder temperature, negative if they run warm.
@@ -64,8 +74,8 @@ const (
 )
 
 // comfortFrom returns what feedback, the latest first, taught.
-func comfortFrom(rows []*gen.ListRecentGearFeedbackRow) map[GearArea]GearComfort {
-	comfort := make(map[GearArea]GearComfort)
+func comfortFrom(rows []*gen.ListRecentGearFeedbackRow) map[ComfortKey]GearComfort {
+	comfort := make(map[ComfortKey]GearComfort)
 	// Replayed from the oldest.
 	for i := len(rows) - 1; i >= 0; i-- {
 		row := rows[i]
@@ -73,7 +83,8 @@ func comfortFrom(rows []*gen.ListRecentGearFeedbackRow) map[GearArea]GearComfort
 			if !feel.Valid {
 				continue
 			}
-			c := comfort[area]
+			key := ComfortKey{Area: area, Wet: row.Wet}
+			c := comfort[key]
 			switch GearFeel(feel.String) {
 			case GearFeelTooCold:
 				c.OffsetCelsius += comfortStepCelsius
@@ -82,7 +93,7 @@ func comfortFrom(rows []*gen.ListRecentGearFeedbackRow) map[GearArea]GearComfort
 			}
 			c.OffsetCelsius = math.Max(-maxComfortOffsetCelsius, math.Min(maxComfortOffsetCelsius, c.OffsetCelsius))
 			c.Ratings++
-			comfort[area] = c
+			comfort[key] = c
 		}
 	}
 	return comfort
@@ -99,7 +110,7 @@ func queueGearFeedback(ctx context.Context, b *store.Batch, userID pgtype.UUID, 
 }
 
 // gearComfort reads what the user's feedback taught.
-func (r *Repository) gearComfort(ctx context.Context, userID pgtype.UUID) (map[GearArea]GearComfort, error) {
+func (r *Repository) gearComfort(ctx context.Context, userID pgtype.UUID) (map[ComfortKey]GearComfort, error) {
 	rows, err := r.q.ListRecentGearFeedback(ctx, userID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list gear feedback: %w", err)
@@ -149,6 +160,7 @@ func (r *Repository) SetGearFeedback(ctx context.Context, userID, workoutID pgty
 		Hands:     feel(GearAreaHands),
 		Head:      feel(GearAreaHead),
 		Notes:     f.Notes,
+		Wet:       f.Wet,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to set gear feedback: %w", err)
@@ -160,7 +172,7 @@ func (r *Repository) SetGearFeedback(ctx context.Context, userID, workoutID pgty
 }
 
 func gearFeedbackFromDB(row *gen.GearFeedback) *GearFeedback {
-	f := &GearFeedback{Feels: map[GearArea]GearFeel{}, Notes: row.Notes, UpdateTime: row.UpdateTime.Time}
+	f := &GearFeedback{Feels: map[GearArea]GearFeel{}, Notes: row.Notes, Wet: row.Wet, UpdateTime: row.UpdateTime.Time}
 	for area, feel := range map[GearArea]pgtype.Text{GearAreaLegs: row.Legs, GearAreaBody: row.Body, GearAreaHands: row.Hands, GearAreaHead: row.Head} {
 		if feel.Valid {
 			f.Feels[area] = GearFeel(feel.String)

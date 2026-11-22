@@ -418,7 +418,7 @@ func (q *Queries) GetCalendarToken(ctx context.Context, id pgtype.UUID) (pgtype.
 }
 
 const getGearFeedback = `-- name: GetGearFeedback :many
-select workout_id, user_id, legs, body, hands, head, notes, update_time from gear_feedback
+select workout_id, user_id, legs, body, hands, head, notes, update_time, wet from gear_feedback
 where workout_id = $1 and user_id = $2
 `
 
@@ -446,6 +446,7 @@ func (q *Queries) GetGearFeedback(ctx context.Context, arg *GetGearFeedbackParam
 			&i.Head,
 			&i.Notes,
 			&i.UpdateTime,
+			&i.Wet,
 		); err != nil {
 			return nil, err
 		}
@@ -666,7 +667,7 @@ func (q *Queries) ListPlanPeriods(ctx context.Context, planID pgtype.UUID) ([]*P
 }
 
 const listRecentGearFeedback = `-- name: ListRecentGearFeedback :many
-select f.legs, f.body, f.hands, f.head from gear_feedback f
+select f.legs, f.body, f.hands, f.head, f.wet from gear_feedback f
 join workouts w on w.id = f.workout_id
 where f.user_id = $1
 order by w.date desc, f.update_time desc
@@ -678,6 +679,7 @@ type ListRecentGearFeedbackRow struct {
 	Body  pgtype.Text
 	Hands pgtype.Text
 	Head  pgtype.Text
+	Wet   bool
 }
 
 // Lists the user's latest feedback on their gear, the latest workout
@@ -696,6 +698,7 @@ func (q *Queries) ListRecentGearFeedback(ctx context.Context, userID pgtype.UUID
 			&i.Body,
 			&i.Hands,
 			&i.Head,
+			&i.Wet,
 		); err != nil {
 			return nil, err
 		}
@@ -879,19 +882,20 @@ func (q *Queries) SetCalendarToken(ctx context.Context, arg *SetCalendarTokenPar
 }
 
 const setGearFeedback = `-- name: SetGearFeedback :many
-insert into gear_feedback (workout_id, user_id, legs, body, hands, head, notes)
-select w.id, p.user_id, $1, $2, $3, $4, $5
+insert into gear_feedback (workout_id, user_id, legs, body, hands, head, notes, wet)
+select w.id, p.user_id, $1, $2, $3, $4, $5, $6
 from workouts w
 join training_plans p on p.id = w.plan_id
-where w.id = $6 and p.user_id = $7
+where w.id = $7 and p.user_id = $8
 on conflict (workout_id) do update set
   legs = excluded.legs,
   body = excluded.body,
   hands = excluded.hands,
   head = excluded.head,
   notes = excluded.notes,
+  wet = excluded.wet,
   update_time = now()
-returning workout_id, user_id, legs, body, hands, head, notes, update_time
+returning workout_id, user_id, legs, body, hands, head, notes, update_time, wet
 `
 
 type SetGearFeedbackParams struct {
@@ -900,6 +904,7 @@ type SetGearFeedbackParams struct {
 	Hands     pgtype.Text
 	Head      pgtype.Text
 	Notes     string
+	Wet       bool
 	WorkoutID pgtype.UUID
 	UserID    pgtype.UUID
 }
@@ -913,6 +918,7 @@ func (q *Queries) SetGearFeedback(ctx context.Context, arg *SetGearFeedbackParam
 		arg.Hands,
 		arg.Head,
 		arg.Notes,
+		arg.Wet,
 		arg.WorkoutID,
 		arg.UserID,
 	)
@@ -932,6 +938,7 @@ func (q *Queries) SetGearFeedback(ctx context.Context, arg *SetGearFeedbackParam
 			&i.Head,
 			&i.Notes,
 			&i.UpdateTime,
+			&i.Wet,
 		); err != nil {
 			return nil, err
 		}
