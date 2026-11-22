@@ -1,6 +1,7 @@
 import AvalancheForecastView from "@components/forecast/avalanche-forecast";
 import TouringVerdictView from "@components/forecast/touring-verdict";
 import GearAdviceCard from "@components/gear/gear-advice";
+import GearFeedbackCard from "@components/gear/gear-feedback";
 import { useAerobicThreshold } from "@components/lactate/use-aerobic-threshold";
 import WorkoutLactateTest from "@components/lactate/workout-lactate-test";
 import Loading from "@components/loading";
@@ -52,6 +53,16 @@ import { Link, useNavigate, useParams } from "react-router";
  */
 const outdoors = (workout: Workout): boolean =>
   workout.type !== WorkoutType.REST && workout.type !== WorkoutType.STRENGTH;
+
+/**
+ * Dressed reports whether a workout gets advice on what to wear, and so
+ * feedback on how it felt: runs, races and ski tours.
+ */
+const dressed = (workout: Workout): boolean =>
+  workout.type === WorkoutType.BASE ||
+  workout.type === WorkoutType.INTENSITY ||
+  workout.type === WorkoutType.RACE ||
+  isSkiTour(workout);
 
 // FORECAST_DAYS is how many days ahead workouts have a forecast.
 const FORECAST_DAYS = 15;
@@ -380,6 +391,10 @@ const WorkoutPage: React.FC = () => {
           )}
         </div>
         <div className="flex min-w-0 flex-col gap-4">
+          {/* Once a run or tour has started, how the gear felt. */}
+          {dressed(workout) && workout.date <= today() && (
+            <GearFeedbackCard workoutId={workout.id} />
+          )}
           <WeatherCard workout={workout} />
           <WorkoutShareCard workout={workout} />
         </div>
