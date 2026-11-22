@@ -432,8 +432,10 @@ func (a *gearAdviser) run(c GearConditions) {
 		}
 	case c.Road:
 		a.wear("Mostly paved", GearRoadShoes, GearTrailShoes)
-	case c.rainLikely() && feels < 5:
-		a.wear("Cold and wet", GearWaterproofShoes, GearTrailShoes)
+	// Waterproof shoes only for those who have them: trail shoes do too,
+	// unlike in snow.
+	case c.rainLikely() && feels < 5 && a.profile.has(GearWaterproofShoes):
+		a.wear("Cold and wet", GearWaterproofShoes)
 	default:
 		a.wear("Trails", GearTrailShoes, GearRoadShoes)
 	}

@@ -1,5 +1,6 @@
 import AvalancheForecastView from "@components/forecast/avalanche-forecast";
 import TouringVerdictView from "@components/forecast/touring-verdict";
+import GearAdviceCard from "@components/gear/gear-advice";
 import { useAerobicThreshold } from "@components/lactate/use-aerobic-threshold";
 import WorkoutLactateTest from "@components/lactate/workout-lactate-test";
 import Loading from "@components/loading";
@@ -117,6 +118,17 @@ const WeatherCard: React.FC<{ workout: Workout }> = ({ workout }) => {
       >
         {content}
       </Card>
+      {weather.data?.weather?.gear !== undefined && (
+        <GearAdviceCard
+          advice={weather.data.weather.gear}
+          fueling={
+            weather.data.weather.fueling ??
+            (workout.details.case === "run"
+              ? workout.details.value.fueling?.amounts
+              : undefined)
+          }
+        />
+      )}
       {isSkiTour(workout) && weather.data?.weather !== undefined && (
         <Card title="Go or no-go">
           <TouringVerdictView verdict={weather.data.weather.touringVerdict} />
