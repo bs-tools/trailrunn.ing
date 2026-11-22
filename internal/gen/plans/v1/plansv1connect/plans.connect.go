@@ -78,6 +78,12 @@ const (
 	// TrainingPlanServiceSetSweatProfileProcedure is the procedure name of the TrainingPlanService's
 	// SetSweatProfile RPC.
 	TrainingPlanServiceSetSweatProfileProcedure = "/plans.v1.TrainingPlanService/SetSweatProfile"
+	// TrainingPlanServiceGetGearProfileProcedure is the procedure name of the TrainingPlanService's
+	// GetGearProfile RPC.
+	TrainingPlanServiceGetGearProfileProcedure = "/plans.v1.TrainingPlanService/GetGearProfile"
+	// TrainingPlanServiceSetGearProfileProcedure is the procedure name of the TrainingPlanService's
+	// SetGearProfile RPC.
+	TrainingPlanServiceSetGearProfileProcedure = "/plans.v1.TrainingPlanService/SetGearProfile"
 	// TrainingPlanServiceGetTouringLimitsProcedure is the procedure name of the TrainingPlanService's
 	// GetTouringLimits RPC.
 	TrainingPlanServiceGetTouringLimitsProcedure = "/plans.v1.TrainingPlanService/GetTouringLimits"
@@ -213,6 +219,20 @@ var (
 			Procedure:  TrainingPlanServiceSetSweatProfileProcedure,
 		}
 	})
+	trainingPlanServiceGetGearProfileSpec = sync.OnceValue(func() connect.Spec {
+		return connect.Spec{
+			StreamType: connect.StreamTypeUnary,
+			Schema:     v1.File_plans_v1_plans_proto.Services().ByName("TrainingPlanService").Methods().ByName("GetGearProfile"),
+			Procedure:  TrainingPlanServiceGetGearProfileProcedure,
+		}
+	})
+	trainingPlanServiceSetGearProfileSpec = sync.OnceValue(func() connect.Spec {
+		return connect.Spec{
+			StreamType: connect.StreamTypeUnary,
+			Schema:     v1.File_plans_v1_plans_proto.Services().ByName("TrainingPlanService").Methods().ByName("SetGearProfile"),
+			Procedure:  TrainingPlanServiceSetGearProfileProcedure,
+		}
+	})
 	trainingPlanServiceGetTouringLimitsSpec = sync.OnceValue(func() connect.Spec {
 		return connect.Spec{
 			StreamType: connect.StreamTypeUnary,
@@ -290,6 +310,13 @@ type TrainingPlanServiceClient interface {
 	// app's settings, from a sweat test; only change it when they give their
 	// results.
 	SetSweatProfile(context.Context, *v1.SetSweatProfileRequest) (*v1.SetSweatProfileResponse, error)
+	// Get the running and touring gear the user has, which what to wear and
+	// carry on workouts comes from.
+	GetGearProfile(context.Context, *v1.GetGearProfileRequest) (*v1.GetGearProfileResponse, error)
+	// Replace the running and touring gear the user has. The user usually
+	// does this in the web app, on the equipment page; only change it when
+	// they say what they have.
+	SetGearProfile(context.Context, *v1.SetGearProfileRequest) (*v1.SetGearProfileResponse, error)
 	// Get the user's own limits for ski touring, which the forecasts of ski
 	// tours are checked against for a go, caution or no-go verdict.
 	GetTouringLimits(context.Context, *v1.GetTouringLimitsRequest) (*v1.GetTouringLimitsResponse, error)
@@ -366,6 +393,13 @@ type TrainingPlanServiceHandler interface {
 	// app's settings, from a sweat test; only change it when they give their
 	// results.
 	SetSweatProfile(context.Context, *v1.SetSweatProfileRequest) (*v1.SetSweatProfileResponse, error)
+	// Get the running and touring gear the user has, which what to wear and
+	// carry on workouts comes from.
+	GetGearProfile(context.Context, *v1.GetGearProfileRequest) (*v1.GetGearProfileResponse, error)
+	// Replace the running and touring gear the user has. The user usually
+	// does this in the web app, on the equipment page; only change it when
+	// they say what they have.
+	SetGearProfile(context.Context, *v1.SetGearProfileRequest) (*v1.SetGearProfileResponse, error)
 	// Get the user's own limits for ski touring, which the forecasts of ski
 	// tours are checked against for a go, caution or no-go verdict.
 	GetTouringLimits(context.Context, *v1.GetTouringLimitsRequest) (*v1.GetTouringLimitsResponse, error)
@@ -398,6 +432,8 @@ func RegisterTrainingPlanServiceHandler(server *connect.Server, svc TrainingPlan
 		connect.Method{Spec: trainingPlanServiceGetWorkoutWeatherSpec(), Handler: adapter.getWorkoutWeather},
 		connect.Method{Spec: trainingPlanServiceGetSweatProfileSpec(), Handler: adapter.getSweatProfile},
 		connect.Method{Spec: trainingPlanServiceSetSweatProfileSpec(), Handler: adapter.setSweatProfile},
+		connect.Method{Spec: trainingPlanServiceGetGearProfileSpec(), Handler: adapter.getGearProfile},
+		connect.Method{Spec: trainingPlanServiceSetGearProfileSpec(), Handler: adapter.setGearProfile},
 		connect.Method{Spec: trainingPlanServiceGetTouringLimitsSpec(), Handler: adapter.getTouringLimits},
 		connect.Method{Spec: trainingPlanServiceSetTouringLimitsSpec(), Handler: adapter.setTouringLimits},
 	)
@@ -476,6 +512,14 @@ func (UnimplementedTrainingPlanServiceHandler) GetSweatProfile(context.Context, 
 
 func (UnimplementedTrainingPlanServiceHandler) SetSweatProfile(context.Context, *v1.SetSweatProfileRequest) (*v1.SetSweatProfileResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, "plans.v1.TrainingPlanService.SetSweatProfile is not implemented")
+}
+
+func (UnimplementedTrainingPlanServiceHandler) GetGearProfile(context.Context, *v1.GetGearProfileRequest) (*v1.GetGearProfileResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, "plans.v1.TrainingPlanService.GetGearProfile is not implemented")
+}
+
+func (UnimplementedTrainingPlanServiceHandler) SetGearProfile(context.Context, *v1.SetGearProfileRequest) (*v1.SetGearProfileResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, "plans.v1.TrainingPlanService.SetGearProfile is not implemented")
 }
 
 func (UnimplementedTrainingPlanServiceHandler) GetTouringLimits(context.Context, *v1.GetTouringLimitsRequest) (*v1.GetTouringLimitsResponse, error) {
@@ -629,6 +673,22 @@ func (c *trainingPlanServiceClient) GetSweatProfile(ctx context.Context, req *v1
 func (c *trainingPlanServiceClient) SetSweatProfile(ctx context.Context, req *v1.SetSweatProfileRequest) (*v1.SetSweatProfileResponse, error) {
 	var res v1.SetSweatProfileResponse
 	if err := c.client.CallUnary(ctx, trainingPlanServiceSetSweatProfileSpec(), req, &res); err != nil {
+		return nil, err
+	}
+	return &res, nil
+}
+
+func (c *trainingPlanServiceClient) GetGearProfile(ctx context.Context, req *v1.GetGearProfileRequest) (*v1.GetGearProfileResponse, error) {
+	var res v1.GetGearProfileResponse
+	if err := c.client.CallUnary(ctx, trainingPlanServiceGetGearProfileSpec(), req, &res); err != nil {
+		return nil, err
+	}
+	return &res, nil
+}
+
+func (c *trainingPlanServiceClient) SetGearProfile(ctx context.Context, req *v1.SetGearProfileRequest) (*v1.SetGearProfileResponse, error) {
+	var res v1.SetGearProfileResponse
+	if err := c.client.CallUnary(ctx, trainingPlanServiceSetGearProfileSpec(), req, &res); err != nil {
 		return nil, err
 	}
 	return &res, nil
@@ -862,6 +922,30 @@ func (h trainingPlanServiceHandler) setSweatProfile(ctx context.Context, _ conne
 		return err
 	}
 	res, err := h.svc.SetSweatProfile(ctx, &req)
+	if err != nil {
+		return err
+	}
+	return stream.Send(res)
+}
+
+func (h trainingPlanServiceHandler) getGearProfile(ctx context.Context, _ connect.Spec, stream connect.ServerStream) error {
+	var req v1.GetGearProfileRequest
+	if err := stream.Receive(&req); err != nil {
+		return err
+	}
+	res, err := h.svc.GetGearProfile(ctx, &req)
+	if err != nil {
+		return err
+	}
+	return stream.Send(res)
+}
+
+func (h trainingPlanServiceHandler) setGearProfile(ctx context.Context, _ connect.Spec, stream connect.ServerStream) error {
+	var req v1.SetGearProfileRequest
+	if err := stream.Receive(&req); err != nil {
+		return err
+	}
+	res, err := h.svc.SetGearProfile(ctx, &req)
 	if err != nil {
 		return err
 	}

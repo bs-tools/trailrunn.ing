@@ -58,8 +58,8 @@ const GROUPS: NavGroup[] = [
         to: "/exercises",
       },
       {
-        description: "What you have to train with at home",
-        label: "Home equipment",
+        description: "What you train, run and tour with",
+        label: "Equipment",
         to: "/equipment",
       },
       {

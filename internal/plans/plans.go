@@ -131,6 +131,9 @@ type Workout struct {
 	// The user's sweat profile, read with the workout, for the sodium of
 	// runs. Nil if they haven't set one.
 	Sweat *SweatProfile
+	// The user's gear profile, read with the workout, for what to wear and
+	// carry on it.
+	Gear *GearProfile
 	// The token of the workout's share link, empty if it isn't shared.
 	ShareToken string
 	// The exercises of a strength workout, in order. Nil for other types.

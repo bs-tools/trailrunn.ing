@@ -1,4 +1,5 @@
 import { create } from "@bufbuild/protobuf";
+import GearProfileCard from "@components/gear/gear-profile";
 import Loading from "@components/loading";
 import Card from "@components/ui/card";
 import { PageHeader } from "@components/ui/misc";
@@ -15,6 +16,7 @@ import {
 } from "gen/plans/v1/exercises-ExerciseService_connectquery";
 import type { GetHomeEquipmentResponse } from "gen/plans/v1/exercises_pb";
 import { ExerciseService } from "gen/plans/v1/exercises_pb";
+import { getGearProfile } from "gen/plans/v1/plans-TrainingPlanService_connectquery";
 import { TrainingPlanService } from "gen/plans/v1/plans_pb";
 import { invalidateServices } from "helpers/query";
 import { EQUIPMENT_LABELS, formatWeight } from "helpers/strength";
@@ -255,11 +257,12 @@ const EquipmentPage: React.FC = () => {
     getHomeEquipment,
     {}
   );
+  const gear = useQuery(getGearProfile, {});
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col">
       <PageHeader
-        title="Home equipment"
-        subtitle="What you have to train with. Strength workouts are planned with it, and warn you when an exercise needs something you don't have."
+        title="Equipment"
+        subtitle="What you have to train and run with. Strength workouts are planned with your home equipment, and runs and ski tours suggest what to wear and carry from your gear."
       />
       {isPending && <Loading />}
       {isError && (
@@ -271,6 +274,20 @@ const EquipmentPage: React.FC = () => {
         />
       )}
       {data !== undefined && <EquipmentForm initial={data} />}
+      <div className="mt-6">
+        {gear.isPending && <Loading />}
+        {gear.isError && (
+          <QueryError
+            error={gear.error}
+            onRetry={() => {
+              void gear.refetch();
+            }}
+          />
+        )}
+        {gear.data !== undefined && (
+          <GearProfileCard profile={gear.data.profile} />
+        )}
+      </div>
     </div>
   );
 };

@@ -1,0 +1,139 @@
+syntax = "proto3";
+
+package plans.v1;
+
+import "google/protobuf/timestamp.proto";
+import "mcp/v1/options.proto";
+
+// Gear is a piece of running or ski touring gear.
+enum Gear {
+  GEAR_UNSPECIFIED = 0;
+  // Running shorts.
+  GEAR_SHORTS = 1;
+  // Running tights.
+  GEAR_TIGHTS = 2;
+  // Warm, fleece-lined tights for the cold.
+  GEAR_THERMAL_TIGHTS = 3;
+  // Waterproof pants.
+  GEAR_RAIN_PANTS = 4;
+  GEAR_T_SHIRT = 5;
+  // A long sleeve running shirt.
+  GEAR_LONG_SLEEVE = 6;
+  // A thermal base layer top, like merino.
+  GEAR_BASE_LAYER = 7;
+  // A fleece or other mid layer.
+  GEAR_FLEECE = 8;
+  // A light windproof jacket.
+  GEAR_WIND_JACKET = 9;
+  // A light waterproof running jacket.
+  GEAR_RAIN_JACKET = 10;
+  // A puffy jacket, of down or synthetic insulation.
+  GEAR_INSULATED_JACKET = 11;
+  // A cap or visor.
+  GEAR_CAP = 12;
+  // A warm hat.
+  GEAR_TOQUE = 13;
+  // A neck tube, like a Buff, also worn as a headband.
+  GEAR_BUFF = 14;
+  GEAR_SUNGLASSES = 15;
+  // Thin gloves.
+  GEAR_LINER_GLOVES = 16;
+  // Running gloves.
+  GEAR_GLOVES = 17;
+  // Thick gloves or mittens for the deep cold.
+  GEAR_THICK_GLOVES = 18;
+  GEAR_ROAD_SHOES = 19;
+  GEAR_TRAIL_SHOES = 20;
+  // Waterproof trail shoes, like Gore-Tex.
+  GEAR_WATERPROOF_SHOES = 21;
+  // Traction devices for ice and packed snow.
+  GEAR_MICROSPIKES = 22;
+  // A running vest or pack.
+  GEAR_RUNNING_VEST = 23;
+  // A running belt for a phone, a flask and food.
+  GEAR_RUNNING_BELT = 24;
+  GEAR_HEADLAMP = 25;
+  // Running or trekking poles.
+  GEAR_POLES = 26;
+  // Breathable softshell pants for ski touring.
+  GEAR_SOFTSHELL_PANTS = 27;
+  // Waterproof shell pants.
+  GEAR_SHELL_PANTS = 28;
+  // A waterproof, windproof shell jacket for ski touring.
+  GEAR_SHELL_JACKET = 29;
+  // Warm ski gloves or mittens.
+  GEAR_SKI_GLOVES = 30;
+  GEAR_GOGGLES = 31;
+  GEAR_HELMET = 32;
+  // An avalanche transceiver, or beacon.
+  GEAR_AVALANCHE_TRANSCEIVER = 33;
+  // An avalanche shovel.
+  GEAR_SHOVEL = 34;
+  // An avalanche probe.
+  GEAR_PROBE = 35;
+  // Ski crampons, or harscheisen, for hard snow on the climb.
+  GEAR_SKI_CRAMPONS = 36;
+}
+
+// The running and touring gear the user has, and how they like to dress,
+// which what to wear and carry on workouts comes from, see
+// WorkoutWeather.gear.
+message GearProfile {
+  // The gear the user has, each at most once. Empty if they haven't said,
+  // when any gear is suggested.
+  repeated Gear gear = 1;
+  // The apparent (feels like) temperature in degrees Celsius from which the
+  // user runs in shorts rather than tights, from -10 to 25. Unset for 10.
+  optional double shorts_min_apparent_celsius = 2;
+  // When the profile was last set. Unset if it never was.
+  google.protobuf.Timestamp update_time = 3 [(mcp.v1.field).output_only = true];
+}
+
+// A piece of gear to wear or carry on a workout.
+message GearItem {
+  Gear gear = 1;
+  // Why, e.g. "Below 5 °C" or "Rain likely".
+  string reason = 2;
+  // Whether the user doesn't have it: the conditions call for it, and
+  // nothing in their gear does instead. Suggest it, or what they could use.
+  bool missing = 3;
+}
+
+// What to wear and carry on a workout, from the forecast during it, the
+// workout, and the user's gear. Runs are dressed for the coldest it feels:
+// shorts from the user's temperature for them, tights below it and thermal
+// tights below -5 °C; a t-shirt from 5 °C, a long sleeve below it, and a
+// base layer and wind jacket below -5 °C; gloves below 8 °C and a toque
+// below 0 °C. A rain jacket is worn when rain is likely, and carried when
+// it's possible or below 5 °C. Shoes are for the surface, snow and wet; a
+// headlamp is for the dark, and a vest or belt carries the rest, with the
+// fluid and fuel of the run's fueling plan. Ski tours are dressed in light
+// layers for the climb, with warm layers, avalanche rescue gear and a
+// headlamp carried.
+message GearAdvice {
+  // The conditions it's for, e.g. "Feels like 2 to 6 °C, rain likely
+  // (80%), gusts to 40 km/h, in the dark".
+  string basis = 1;
+  // What to wear, from the legs up, then shoes and what carries the rest.
+  repeated GearItem wear = 2;
+  // What to carry, besides the fluid and fuel of the fueling plan, see
+  // WorkoutWeather.fueling.
+  repeated GearItem carry = 3;
+}
+
+message GetGearProfileRequest {}
+
+message GetGearProfileResponse {
+  // The user's gear profile, empty if they haven't set one.
+  GearProfile profile = 1;
+}
+
+message SetGearProfileRequest {
+  // The user's gear profile, replacing the earlier one.
+  GearProfile profile = 1;
+}
+
+message SetGearProfileResponse {
+  // The user's gear profile.
+  GearProfile profile = 1;
+}
