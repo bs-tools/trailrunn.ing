@@ -154,6 +154,23 @@ export const getSweatProfile = TrainingPlanService.method.getSweatProfile;
 export const setSweatProfile = TrainingPlanService.method.setSweatProfile;
 
 /**
+ * Get the running and touring gear the user has, which what to wear and
+ * carry on workouts comes from.
+ *
+ * @generated from rpc plans.v1.TrainingPlanService.GetGearProfile
+ */
+export const getGearProfile = TrainingPlanService.method.getGearProfile;
+
+/**
+ * Replace the running and touring gear the user has. The user usually
+ * does this in the web app, on the equipment page; only change it when
+ * they say what they have.
+ *
+ * @generated from rpc plans.v1.TrainingPlanService.SetGearProfile
+ */
+export const setGearProfile = TrainingPlanService.method.setGearProfile;
+
+/**
  * Get the user's own limits for ski touring, which the forecasts of ski
  * tours are checked against for a go, caution or no-go verdict.
  *

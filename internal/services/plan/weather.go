@@ -144,11 +144,13 @@ func (s *Service) workoutWeather(ctx context.Context, userID pgtype.UUID, workou
 	// The paths of the workouts' routes, for where they start and how much
 	// of them is in forest, by route ID. Workouts often share a route.
 	paths := make(map[pgtype.UUID][]geo.Point)
+	// Whether the routes are mostly paved, for road or trail shoes.
+	paved := make(map[pgtype.UUID]bool)
 	for _, w := range workouts {
 		if indoors(w) {
 			continue
 		}
-		path, err := s.routePath(ctx, userID, w.RouteID, paths)
+		path, err := s.routePath(ctx, userID, w.RouteID, paths, paved)
 		if err != nil {
 			return nil, err
 		}
@@ -203,6 +205,8 @@ func (s *Service) workoutWeather(ctx context.Context, userID pgtype.UUID, workou
 			Day:            summarizeDay(daytime),
 		}
 		during, start, end := duringWorkout(w, all)
+		// The amounts of the run's fueling plan, for what carries them.
+		var fueling *plans.FuelAmounts
 		// Gusts are checked during the workout if its time is known, and
 		// otherwise during the daytime it could be done in.
 		if gusts := b.Day.GetMaxWindGustsKmh(); len(during) == 0 && gusts >= highWindGustsKmh {
@@ -223,10 +227,23 @@ func (s *Service) workoutWeather(ctx context.Context, userID pgtype.UUID, workou
 				}
 				if amounts, ok := w.FuelAmounts(&hottest); ok {
 					b.Fueling = fuelAmountsToProto(amounts)
+					fueling = &amounts
 				}
 			}
 		}
 		if hourly {
+			// What to wear and carry, for the workout's hours if they're
+			// known. Without a start time, its fueling has no forecast.
+			gearHours, timeKnown := during, len(during) > 0
+			if !timeKnown {
+				gearHours = daytime
+				if amounts, ok := w.FuelAmounts(nil); ok {
+					fueling = &amounts
+				}
+			}
+			if advice, ok := gearAdvice(w, gearHours, timeKnown, paved[w.RouteID], fueling); ok {
+				b.Gear = gearAdviceToProto(advice)
+			}
 			// The daytime, and the hours of the workout outside it, like
 			// an early start.
 			for _, h := range all {
@@ -352,7 +369,7 @@ func touringConditions(hours []mapdata.Weather) plans.TouringConditions {
 
 // routePath returns the path of a route, nil for no route or a route that
 // was deleted, keeping the paths it got in paths.
-func (s *Service) routePath(ctx context.Context, userID, routeID pgtype.UUID, paths map[pgtype.UUID][]geo.Point) ([]geo.Point, error) {
+func (s *Service) routePath(ctx context.Context, userID, routeID pgtype.UUID, paths map[pgtype.UUID][]geo.Point, paved map[pgtype.UUID]bool) ([]geo.Point, error) {
 	if !routeID.Valid {
 		return nil, nil
 	}
@@ -369,6 +386,9 @@ func (s *Service) routePath(ctx context.Context, userID, routeID pgtype.UUID, pa
 	}
 	path, _ := route.Path()
 	paths[routeID] = path
+	if distance := route.Stats.DistanceMeters; distance > 0 {
+		paved[routeID] = route.Stats.TerrainMeters[geo.TerrainPaved]/distance >= pavedShare
+	}
 	return path, nil
 }
 

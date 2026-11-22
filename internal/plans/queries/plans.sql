@@ -284,3 +284,18 @@ select u.id, coalesce(nullif(u.time_zone, ''), (
 ), '')::text as timezone
 from users u
 where u.calendar_token = $1;
+
+-- name: GetGearProfile :many
+-- Gets the user's gear profile: no rows if they haven't set one. It's a
+-- :many query so a batch can read it without failing.
+select * from gear_profiles
+where user_id = $1;
+
+-- name: SetGearProfile :one
+insert into gear_profiles (user_id, gear, shorts_min_apparent_celsius)
+values ($1, $2, $3)
+on conflict (user_id) do update set
+  gear = excluded.gear,
+  shorts_min_apparent_celsius = excluded.shorts_min_apparent_celsius,
+  update_time = now()
+returning *;

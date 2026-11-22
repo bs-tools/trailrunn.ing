@@ -1125,6 +1125,13 @@ type GarminWorkout struct {
 	CreateTime       pgtype.Timestamptz
 }
 
+type GearProfile struct {
+	UserID                   pgtype.UUID
+	Gear                     []string
+	ShortsMinApparentCelsius pgtype.Float8
+	UpdateTime               pgtype.Timestamptz
+}
+
 type HomeEquipment struct {
 	UserID     pgtype.UUID
 	Equipment  json.RawMessage

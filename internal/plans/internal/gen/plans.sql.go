@@ -402,6 +402,38 @@ func (q *Queries) GetCalendarToken(ctx context.Context, id pgtype.UUID) (pgtype.
 	return calendar_token, err
 }
 
+const getGearProfile = `-- name: GetGearProfile :many
+select user_id, gear, shorts_min_apparent_celsius, update_time from gear_profiles
+where user_id = $1
+`
+
+// Gets the user's gear profile: no rows if they haven't set one. It's a
+// :many query so a batch can read it without failing.
+func (q *Queries) GetGearProfile(ctx context.Context, userID pgtype.UUID) ([]*GearProfile, error) {
+	rows, err := q.db.Query(ctx, getGearProfile, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []*GearProfile
+	for rows.Next() {
+		var i GearProfile
+		if err := rows.Scan(
+			&i.UserID,
+			&i.Gear,
+			&i.ShortsMinApparentCelsius,
+			&i.UpdateTime,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getTrainingPlan = `-- name: GetTrainingPlan :one
 select id, user_id, name, description, start_date, end_date, goal_race_ids, create_time, update_time from training_plans
 where id = $1 and user_id = $2
@@ -747,6 +779,34 @@ type SetCalendarTokenParams struct {
 func (q *Queries) SetCalendarToken(ctx context.Context, arg *SetCalendarTokenParams) error {
 	_, err := q.db.Exec(ctx, setCalendarToken, arg.Token, arg.UserID)
 	return err
+}
+
+const setGearProfile = `-- name: SetGearProfile :one
+insert into gear_profiles (user_id, gear, shorts_min_apparent_celsius)
+values ($1, $2, $3)
+on conflict (user_id) do update set
+  gear = excluded.gear,
+  shorts_min_apparent_celsius = excluded.shorts_min_apparent_celsius,
+  update_time = now()
+returning user_id, gear, shorts_min_apparent_celsius, update_time
+`
+
+type SetGearProfileParams struct {
+	UserID                   pgtype.UUID
+	Gear                     []string
+	ShortsMinApparentCelsius pgtype.Float8
+}
+
+func (q *Queries) SetGearProfile(ctx context.Context, arg *SetGearProfileParams) (*GearProfile, error) {
+	row := q.db.QueryRow(ctx, setGearProfile, arg.UserID, arg.Gear, arg.ShortsMinApparentCelsius)
+	var i GearProfile
+	err := row.Scan(
+		&i.UserID,
+		&i.Gear,
+		&i.ShortsMinApparentCelsius,
+		&i.UpdateTime,
+	)
+	return &i, err
 }
 
 const shareWorkout = `-- name: ShareWorkout :one
