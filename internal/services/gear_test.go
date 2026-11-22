@@ -107,3 +107,111 @@ func TestGearAdvice(t *testing.T) {
 		t.Errorf("got gear %v, %v for a strength workout", got.GetWeather().GetGear(), err)
 	}
 }
+
+func TestGearFeedback(t *testing.T) {
+	t.Parallel()
+	e := newEnv(t)
+	ctx := context.Background()
+	today := time.Now().UTC().Truncate(24 * time.Hour)
+	plan, err := e.plans.CreateTrainingPlan(ctx, plansv1.CreateTrainingPlanRequest_builder{
+		Plan: plansv1.TrainingPlan_builder{Name: "Build", StartDate: today.AddDate(0, 0, -10).Format(time.DateOnly), EndDate: today.AddDate(0, 0, 30).Format(time.DateOnly)}.Build(),
+	}.Build())
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Two past runs to rate, and one to come, from 05:00 for 90 minutes:
+	// it feels like 10 to 12 °C, see fakeMapData.HourlyForecast.
+	location := geov1.LatLng_builder{Lat: 0.3, Lng: 0.01}.Build()
+	run := func(days int) *plansv1.Workout {
+		return plansv1.Workout_builder{Date: today.AddDate(0, 0, days).Format(time.DateOnly), StartTime: "05:00", Title: "Run", Location: location, Run: plansv1.RunWorkout_builder{
+			Intensity: plansv1.RunIntensity_RUN_INTENSITY_BASE, TargetDurationSeconds: 5400,
+		}.Build()}.Build()
+	}
+	created, err := e.plans.CreateWorkouts(ctx, plansv1.CreateWorkoutsRequest_builder{
+		PlanId: plan.GetPlan().GetId(), Workouts: []*plansv1.Workout{run(-3), run(-2), run(2)},
+	}.Build())
+	if err != nil {
+		t.Fatalf("CreateWorkouts: %v", err)
+	}
+	ws := created.GetWorkouts()
+	feel := func(area plansv1.GearArea, f plansv1.GearFeel) *plansv1.GearAreaFeel {
+		return plansv1.GearAreaFeel_builder{Area: area, Feel: f}.Build()
+	}
+	set := func(workout *plansv1.Workout, notes string, feels ...*plansv1.GearAreaFeel) (*plansv1.SetGearFeedbackResponse, error) {
+		return e.plans.SetGearFeedback(ctx, plansv1.SetGearFeedbackRequest_builder{
+			WorkoutId: workout.GetId(),
+			Feedback:  plansv1.GearFeedback_builder{Feels: feels, Notes: notes}.Build(),
+		}.Build())
+	}
+	advice := func() *plansv1.GearAdvice {
+		t.Helper()
+		got, err := e.plans.GetWorkoutWeather(ctx, plansv1.GetWorkoutWeatherRequest_builder{WorkoutId: ws[2].GetId()}.Build())
+		if err != nil {
+			t.Fatalf("GetWorkoutWeather: %v", err)
+		}
+		return got.GetWeather().GetGear()
+	}
+	if wear := gearNames(advice().GetWear()); !slices.Contains(wear, plansv1.Gear_GEAR_SHORTS) || slices.Contains(wear, plansv1.Gear_GEAR_LINER_GLOVES) {
+		t.Fatalf("got wear %v before feedback, want shorts and no gloves", wear)
+	}
+
+	// Legs and hands were too cold on both runs: they're now dressed 3 °C
+	// colder, so for 7 °C: tights and liner gloves.
+	if _, err := set(ws[0], "", feel(plansv1.GearArea_GEAR_AREA_LEGS, plansv1.GearFeel_GEAR_FEEL_TOO_COLD), feel(plansv1.GearArea_GEAR_AREA_HANDS, plansv1.GearFeel_GEAR_FEEL_TOO_COLD)); err != nil {
+		t.Fatalf("SetGearFeedback: %v", err)
+	}
+	resp, err := set(ws[1], " Cold hands at the start ",
+		feel(plansv1.GearArea_GEAR_AREA_HANDS, plansv1.GearFeel_GEAR_FEEL_TOO_COLD),
+		feel(plansv1.GearArea_GEAR_AREA_LEGS, plansv1.GearFeel_GEAR_FEEL_TOO_COLD),
+		feel(plansv1.GearArea_GEAR_AREA_BODY, plansv1.GearFeel_GEAR_FEEL_JUST_RIGHT))
+	if err != nil {
+		t.Fatalf("SetGearFeedback: %v", err)
+	}
+	if f := resp.GetFeedback(); f.GetNotes() != "Cold hands at the start" || len(f.GetFeels()) != 3 || f.GetFeels()[0].GetArea() != plansv1.GearArea_GEAR_AREA_LEGS {
+		t.Errorf("got feedback %v, want three areas in order, and trimmed notes", f)
+	}
+	comfort := resp.GetComfort()
+	if len(comfort) != 3 || comfort[0].GetOffsetCelsius() != 3 || comfort[1].GetOffsetCelsius() != 0 || comfort[2].GetRatings() != 2 {
+		t.Errorf("got comfort %v, want legs and hands 3 °C colder and the body as it is", comfort)
+	}
+	got := advice()
+	if wear := gearNames(got.GetWear()); !slices.Contains(wear, plansv1.Gear_GEAR_TIGHTS) || !slices.Contains(wear, plansv1.Gear_GEAR_LINER_GLOVES) {
+		t.Errorf("got wear %v after feedback, want tights and liner gloves", wear)
+	}
+	if want := "Feels like 10 to 12 °C, snow on the ground; dressed 3 °C colder for your legs, 3 °C colder for your hands, from your feedback"; got.GetBasis() != want {
+		t.Errorf("got basis %q, want %q", got.GetBasis(), want)
+	}
+	if p, err := e.plans.GetGearProfile(ctx, &plansv1.GetGearProfileRequest{}); err != nil || len(p.GetProfile().GetComfort()) != 3 {
+		t.Errorf("GetGearProfile: got %v, %v, want what feedback taught", p.GetProfile(), err)
+	}
+	stored, err := e.plans.GetGearFeedback(ctx, plansv1.GetGearFeedbackRequest_builder{WorkoutId: ws[1].GetId()}.Build())
+	if err != nil || len(stored.GetFeedback().GetFeels()) != 3 {
+		t.Errorf("GetGearFeedback: got %v, %v", stored.GetFeedback(), err)
+	}
+
+	// Feedback without ratings or notes is deleted, and taught nothing.
+	resp, err = set(ws[1], "")
+	if err != nil || resp.HasFeedback() || resp.GetComfort()[0].GetOffsetCelsius() != 1.5 {
+		t.Errorf("got %v, %v after deleting, want the first run's feedback only", resp, err)
+	}
+	if stored, err := e.plans.GetGearFeedback(ctx, plansv1.GetGearFeedbackRequest_builder{WorkoutId: ws[1].GetId()}.Build()); err != nil || stored.HasFeedback() {
+		t.Errorf("GetGearFeedback after deleting: got %v, %v", stored.GetFeedback(), err)
+	}
+
+	// Ratings are of known parts of the body, once each.
+	for name, feels := range map[string][]*plansv1.GearAreaFeel{
+		"no area":     {feel(plansv1.GearArea_GEAR_AREA_UNSPECIFIED, plansv1.GearFeel_GEAR_FEEL_TOO_COLD)},
+		"no feel":     {feel(plansv1.GearArea_GEAR_AREA_LEGS, plansv1.GearFeel_GEAR_FEEL_UNSPECIFIED)},
+		"rated twice": {feel(plansv1.GearArea_GEAR_AREA_LEGS, plansv1.GearFeel_GEAR_FEEL_TOO_COLD), feel(plansv1.GearArea_GEAR_AREA_LEGS, plansv1.GearFeel_GEAR_FEEL_TOO_WARM)},
+	} {
+		if _, err := set(ws[0], "", feels...); connect.CodeOf(err) != connect.CodeInvalidArgument {
+			t.Errorf("%s: got %v, want InvalidArgument", name, err)
+		}
+	}
+	// Only the user's own workouts.
+	_, err = e.plans.SetGearFeedback(ctx, plansv1.SetGearFeedbackRequest_builder{
+		WorkoutId: "00000000-0000-0000-0000-000000000001",
+		Feedback:  plansv1.GearFeedback_builder{Notes: "Warm"}.Build(),
+	}.Build())
+	wantCode(t, err, connect.CodeNotFound)
+}

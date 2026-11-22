@@ -5,6 +5,9 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/bs-tools/trailrunn.ing/internal/plans/internal/gen"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 // gearOf returns the gear of items, missing gear marked with a "!".
@@ -102,5 +105,63 @@ func TestAdviseGear(t *testing.T) {
 				t.Errorf("%s: %s has no reason", tc.name, item.Gear)
 			}
 		}
+	}
+}
+
+func TestComfortFrom(t *testing.T) {
+	t.Parallel()
+	text := func(feel GearFeel) pgtype.Text {
+		return pgtype.Text{String: string(feel), Valid: feel != GearFeelUnrated}
+	}
+	row := func(legs, hands GearFeel) *gen.ListRecentGearFeedbackRow {
+		return &gen.ListRecentGearFeedbackRow{Legs: text(legs), Hands: text(hands)}
+	}
+	// The latest first: hands were too cold twice, then just right, so
+	// they keep their adjustment. Legs were too warm once, then too cold.
+	comfort := comfortFrom([]*gen.ListRecentGearFeedbackRow{
+		row(GearFeelTooCold, GearFeelJustRight),
+		row(GearFeelUnrated, GearFeelTooCold),
+		row(GearFeelTooWarm, GearFeelTooCold),
+	})
+	if got := comfort[GearAreaHands]; got.OffsetCelsius != 3 || got.Ratings != 3 {
+		t.Errorf("got hands %+v, want 3 °C colder from 3 ratings", got)
+	}
+	if got := comfort[GearAreaLegs]; got.OffsetCelsius != 0 || got.Ratings != 2 {
+		t.Errorf("got legs %+v, want no offset from 2 ratings", got)
+	}
+	if _, ok := comfort[GearAreaHead]; ok {
+		t.Errorf("got head %+v without ratings", comfort[GearAreaHead])
+	}
+	// The offset stops at 6 °C.
+	var cold []*gen.ListRecentGearFeedbackRow
+	for range 10 {
+		cold = append(cold, row(GearFeelTooCold, GearFeelUnrated))
+	}
+	if got := comfortFrom(cold)[GearAreaLegs]; got.OffsetCelsius != 6 {
+		t.Errorf("got legs %+v, want 6 °C at most", got)
+	}
+}
+
+func TestAdviseGearComfort(t *testing.T) {
+	t.Parallel()
+	c := GearConditions{TimeKnown: true, MinApparentCelsius: 11, MaxApparentCelsius: 12}
+	// At 11 °C it's shorts and no gloves, unless the legs and hands run
+	// cold: then it's as if it were 8 °C for them.
+	got := AdviseGear(c, &GearProfile{Comfort: map[GearArea]GearComfort{
+		GearAreaLegs:  {OffsetCelsius: 3, Ratings: 2},
+		GearAreaHands: {OffsetCelsius: 4.5, Ratings: 3},
+	}})
+	if wear := gearOf(got.Wear); !slices.Equal(wear, []string{"tights", "t_shirt", "liner_gloves", "trail_shoes"}) {
+		t.Errorf("got wear %v, want tights and liner gloves", wear)
+	}
+	if want := "Feels like 11 to 12 °C; dressed 3 °C colder for your legs, 4.5 °C colder for your hands, from your feedback"; got.Basis != want {
+		t.Errorf("got basis %q, want %q", got.Basis, want)
+	}
+	// Running warm, the top stays a t-shirt down to 2 °C.
+	got = AdviseGear(GearConditions{TimeKnown: true, MinApparentCelsius: 2, MaxApparentCelsius: 2}, &GearProfile{Comfort: map[GearArea]GearComfort{
+		GearAreaBody: {OffsetCelsius: -3, Ratings: 2},
+	}})
+	if !slices.Contains(gearOf(got.Wear), "t_shirt") {
+		t.Errorf("got wear %v, want a t-shirt", gearOf(got.Wear))
 	}
 }

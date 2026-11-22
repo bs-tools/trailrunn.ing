@@ -271,6 +271,21 @@ func (q *Queries) CreateWorkouts(ctx context.Context, arg *CreateWorkoutsParams)
 	return items, nil
 }
 
+const deleteGearFeedback = `-- name: DeleteGearFeedback :exec
+delete from gear_feedback
+where workout_id = $1 and user_id = $2
+`
+
+type DeleteGearFeedbackParams struct {
+	WorkoutID pgtype.UUID
+	UserID    pgtype.UUID
+}
+
+func (q *Queries) DeleteGearFeedback(ctx context.Context, arg *DeleteGearFeedbackParams) error {
+	_, err := q.db.Exec(ctx, deleteGearFeedback, arg.WorkoutID, arg.UserID)
+	return err
+}
+
 const deletePlanPeriods = `-- name: DeletePlanPeriods :execrows
 delete from plan_periods
 where plan_id = $1 and id = any($2::uuid[])
@@ -400,6 +415,46 @@ func (q *Queries) GetCalendarToken(ctx context.Context, id pgtype.UUID) (pgtype.
 	var calendar_token pgtype.Text
 	err := row.Scan(&calendar_token)
 	return calendar_token, err
+}
+
+const getGearFeedback = `-- name: GetGearFeedback :many
+select workout_id, user_id, legs, body, hands, head, notes, update_time from gear_feedback
+where workout_id = $1 and user_id = $2
+`
+
+type GetGearFeedbackParams struct {
+	WorkoutID pgtype.UUID
+	UserID    pgtype.UUID
+}
+
+// Gets the feedback on a workout's gear: no rows if there's none.
+func (q *Queries) GetGearFeedback(ctx context.Context, arg *GetGearFeedbackParams) ([]*GearFeedback, error) {
+	rows, err := q.db.Query(ctx, getGearFeedback, arg.WorkoutID, arg.UserID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []*GearFeedback
+	for rows.Next() {
+		var i GearFeedback
+		if err := rows.Scan(
+			&i.WorkoutID,
+			&i.UserID,
+			&i.Legs,
+			&i.Body,
+			&i.Hands,
+			&i.Head,
+			&i.Notes,
+			&i.UpdateTime,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getGearProfile = `-- name: GetGearProfile :many
@@ -610,6 +665,48 @@ func (q *Queries) ListPlanPeriods(ctx context.Context, planID pgtype.UUID) ([]*P
 	return items, nil
 }
 
+const listRecentGearFeedback = `-- name: ListRecentGearFeedback :many
+select f.legs, f.body, f.hands, f.head from gear_feedback f
+join workouts w on w.id = f.workout_id
+where f.user_id = $1
+order by w.date desc, f.update_time desc
+limit 50
+`
+
+type ListRecentGearFeedbackRow struct {
+	Legs  pgtype.Text
+	Body  pgtype.Text
+	Hands pgtype.Text
+	Head  pgtype.Text
+}
+
+// Lists the user's latest feedback on their gear, the latest workout
+// first.
+func (q *Queries) ListRecentGearFeedback(ctx context.Context, userID pgtype.UUID) ([]*ListRecentGearFeedbackRow, error) {
+	rows, err := q.db.Query(ctx, listRecentGearFeedback, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []*ListRecentGearFeedbackRow
+	for rows.Next() {
+		var i ListRecentGearFeedbackRow
+		if err := rows.Scan(
+			&i.Legs,
+			&i.Body,
+			&i.Hands,
+			&i.Head,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listTrainingPlans = `-- name: ListTrainingPlans :many
 select id, user_id, name, description, start_date, end_date, goal_race_ids, create_time, update_time from training_plans
 where user_id = $1
@@ -779,6 +876,71 @@ type SetCalendarTokenParams struct {
 func (q *Queries) SetCalendarToken(ctx context.Context, arg *SetCalendarTokenParams) error {
 	_, err := q.db.Exec(ctx, setCalendarToken, arg.Token, arg.UserID)
 	return err
+}
+
+const setGearFeedback = `-- name: SetGearFeedback :many
+insert into gear_feedback (workout_id, user_id, legs, body, hands, head, notes)
+select w.id, p.user_id, $1, $2, $3, $4, $5
+from workouts w
+join training_plans p on p.id = w.plan_id
+where w.id = $6 and p.user_id = $7
+on conflict (workout_id) do update set
+  legs = excluded.legs,
+  body = excluded.body,
+  hands = excluded.hands,
+  head = excluded.head,
+  notes = excluded.notes,
+  update_time = now()
+returning workout_id, user_id, legs, body, hands, head, notes, update_time
+`
+
+type SetGearFeedbackParams struct {
+	Legs      pgtype.Text
+	Body      pgtype.Text
+	Hands     pgtype.Text
+	Head      pgtype.Text
+	Notes     string
+	WorkoutID pgtype.UUID
+	UserID    pgtype.UUID
+}
+
+// Sets the feedback on one of the user's workouts: no rows if it isn't
+// theirs.
+func (q *Queries) SetGearFeedback(ctx context.Context, arg *SetGearFeedbackParams) ([]*GearFeedback, error) {
+	rows, err := q.db.Query(ctx, setGearFeedback,
+		arg.Legs,
+		arg.Body,
+		arg.Hands,
+		arg.Head,
+		arg.Notes,
+		arg.WorkoutID,
+		arg.UserID,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []*GearFeedback
+	for rows.Next() {
+		var i GearFeedback
+		if err := rows.Scan(
+			&i.WorkoutID,
+			&i.UserID,
+			&i.Legs,
+			&i.Body,
+			&i.Hands,
+			&i.Head,
+			&i.Notes,
+			&i.UpdateTime,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const setGearProfile = `-- name: SetGearProfile :one

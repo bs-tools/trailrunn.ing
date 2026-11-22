@@ -8598,7 +8598,7 @@ const file_plans_v1_plans_proto_rawDesc = "" +
 	"\x12WeatherWarningKind\x12$\n" +
 	" WEATHER_WARNING_KIND_UNSPECIFIED\x10\x00\x12'\n" +
 	"#WEATHER_WARNING_KIND_WIND_IN_FOREST\x10\x01\x12)\n" +
-	"%WEATHER_WARNING_KIND_AVALANCHE_DANGER\x10\x022\xb7\x0f\n" +
+	"%WEATHER_WARNING_KIND_AVALANCHE_DANGER\x10\x022\xe7\x10\n" +
 	"\x13TrainingPlanService\x12_\n" +
 	"\x12CreateTrainingPlan\x12#.plans.v1.CreateTrainingPlanRequest\x1a$.plans.v1.CreateTrainingPlanResponse\x12V\n" +
 	"\x0fGetTrainingPlan\x12 .plans.v1.GetTrainingPlanRequest\x1a!.plans.v1.GetTrainingPlanResponse\x12\\\n" +
@@ -8620,7 +8620,9 @@ const file_plans_v1_plans_proto_rawDesc = "" +
 	"\x0fGetSweatProfile\x12 .plans.v1.GetSweatProfileRequest\x1a!.plans.v1.GetSweatProfileResponse\x12V\n" +
 	"\x0fSetSweatProfile\x12 .plans.v1.SetSweatProfileRequest\x1a!.plans.v1.SetSweatProfileResponse\x12S\n" +
 	"\x0eGetGearProfile\x12\x1f.plans.v1.GetGearProfileRequest\x1a .plans.v1.GetGearProfileResponse\x12S\n" +
-	"\x0eSetGearProfile\x12\x1f.plans.v1.SetGearProfileRequest\x1a .plans.v1.SetGearProfileResponse\x12Y\n" +
+	"\x0eSetGearProfile\x12\x1f.plans.v1.SetGearProfileRequest\x1a .plans.v1.SetGearProfileResponse\x12V\n" +
+	"\x0fGetGearFeedback\x12 .plans.v1.GetGearFeedbackRequest\x1a!.plans.v1.GetGearFeedbackResponse\x12V\n" +
+	"\x0fSetGearFeedback\x12 .plans.v1.SetGearFeedbackRequest\x1a!.plans.v1.SetGearFeedbackResponse\x12Y\n" +
 	"\x10GetTouringLimits\x12!.plans.v1.GetTouringLimitsRequest\x1a\".plans.v1.GetTouringLimitsResponse\x12Y\n" +
 	"\x10SetTouringLimits\x12!.plans.v1.SetTouringLimitsRequest\x1a\".plans.v1.SetTouringLimitsResponseB\x9c\x01\n" +
 	"\fcom.plans.v1B\n" +
@@ -8720,8 +8722,12 @@ var file_plans_v1_plans_proto_goTypes = []any{
 	(v1.AvalancheDanger)(0),            // 88: geo.v1.AvalancheDanger
 	(*GetGearProfileRequest)(nil),      // 89: plans.v1.GetGearProfileRequest
 	(*SetGearProfileRequest)(nil),      // 90: plans.v1.SetGearProfileRequest
-	(*GetGearProfileResponse)(nil),     // 91: plans.v1.GetGearProfileResponse
-	(*SetGearProfileResponse)(nil),     // 92: plans.v1.SetGearProfileResponse
+	(*GetGearFeedbackRequest)(nil),     // 91: plans.v1.GetGearFeedbackRequest
+	(*SetGearFeedbackRequest)(nil),     // 92: plans.v1.SetGearFeedbackRequest
+	(*GetGearProfileResponse)(nil),     // 93: plans.v1.GetGearProfileResponse
+	(*SetGearProfileResponse)(nil),     // 94: plans.v1.SetGearProfileResponse
+	(*GetGearFeedbackResponse)(nil),    // 95: plans.v1.GetGearFeedbackResponse
+	(*SetGearFeedbackResponse)(nil),    // 96: plans.v1.SetGearFeedbackResponse
 }
 var file_plans_v1_plans_proto_depIdxs = []int32{
 	79,  // 0: plans.v1.TrainingPlan.create_time:type_name -> google.protobuf.Timestamp
@@ -8832,32 +8838,36 @@ var file_plans_v1_plans_proto_depIdxs = []int32{
 	60,  // 105: plans.v1.TrainingPlanService.SetSweatProfile:input_type -> plans.v1.SetSweatProfileRequest
 	89,  // 106: plans.v1.TrainingPlanService.GetGearProfile:input_type -> plans.v1.GetGearProfileRequest
 	90,  // 107: plans.v1.TrainingPlanService.SetGearProfile:input_type -> plans.v1.SetGearProfileRequest
-	63,  // 108: plans.v1.TrainingPlanService.GetTouringLimits:input_type -> plans.v1.GetTouringLimitsRequest
-	65,  // 109: plans.v1.TrainingPlanService.SetTouringLimits:input_type -> plans.v1.SetTouringLimitsRequest
-	34,  // 110: plans.v1.TrainingPlanService.CreateTrainingPlan:output_type -> plans.v1.CreateTrainingPlanResponse
-	36,  // 111: plans.v1.TrainingPlanService.GetTrainingPlan:output_type -> plans.v1.GetTrainingPlanResponse
-	38,  // 112: plans.v1.TrainingPlanService.ListTrainingPlans:output_type -> plans.v1.ListTrainingPlansResponse
-	40,  // 113: plans.v1.TrainingPlanService.UpdateTrainingPlan:output_type -> plans.v1.UpdateTrainingPlanResponse
-	42,  // 114: plans.v1.TrainingPlanService.DeleteTrainingPlan:output_type -> plans.v1.DeleteTrainingPlanResponse
-	44,  // 115: plans.v1.TrainingPlanService.SetPlanPeriods:output_type -> plans.v1.SetPlanPeriodsResponse
-	46,  // 116: plans.v1.TrainingPlanService.DeletePlanPeriods:output_type -> plans.v1.DeletePlanPeriodsResponse
-	48,  // 117: plans.v1.TrainingPlanService.ListWorkouts:output_type -> plans.v1.ListWorkoutsResponse
-	50,  // 118: plans.v1.TrainingPlanService.GetWorkout:output_type -> plans.v1.GetWorkoutResponse
-	70,  // 119: plans.v1.TrainingPlanService.CreateWorkouts:output_type -> plans.v1.CreateWorkoutsResponse
-	72,  // 120: plans.v1.TrainingPlanService.UpdateWorkout:output_type -> plans.v1.UpdateWorkoutResponse
-	74,  // 121: plans.v1.TrainingPlanService.DeleteWorkouts:output_type -> plans.v1.DeleteWorkoutsResponse
-	76,  // 122: plans.v1.TrainingPlanService.SetStrengthLog:output_type -> plans.v1.SetStrengthLogResponse
-	78,  // 123: plans.v1.TrainingPlanService.DeleteStrengthLog:output_type -> plans.v1.DeleteStrengthLogResponse
-	56,  // 124: plans.v1.TrainingPlanService.ListWorkoutWeather:output_type -> plans.v1.ListWorkoutWeatherResponse
-	68,  // 125: plans.v1.TrainingPlanService.GetWorkoutWeather:output_type -> plans.v1.GetWorkoutWeatherResponse
-	59,  // 126: plans.v1.TrainingPlanService.GetSweatProfile:output_type -> plans.v1.GetSweatProfileResponse
-	61,  // 127: plans.v1.TrainingPlanService.SetSweatProfile:output_type -> plans.v1.SetSweatProfileResponse
-	91,  // 128: plans.v1.TrainingPlanService.GetGearProfile:output_type -> plans.v1.GetGearProfileResponse
-	92,  // 129: plans.v1.TrainingPlanService.SetGearProfile:output_type -> plans.v1.SetGearProfileResponse
-	64,  // 130: plans.v1.TrainingPlanService.GetTouringLimits:output_type -> plans.v1.GetTouringLimitsResponse
-	66,  // 131: plans.v1.TrainingPlanService.SetTouringLimits:output_type -> plans.v1.SetTouringLimitsResponse
-	110, // [110:132] is the sub-list for method output_type
-	88,  // [88:110] is the sub-list for method input_type
+	91,  // 108: plans.v1.TrainingPlanService.GetGearFeedback:input_type -> plans.v1.GetGearFeedbackRequest
+	92,  // 109: plans.v1.TrainingPlanService.SetGearFeedback:input_type -> plans.v1.SetGearFeedbackRequest
+	63,  // 110: plans.v1.TrainingPlanService.GetTouringLimits:input_type -> plans.v1.GetTouringLimitsRequest
+	65,  // 111: plans.v1.TrainingPlanService.SetTouringLimits:input_type -> plans.v1.SetTouringLimitsRequest
+	34,  // 112: plans.v1.TrainingPlanService.CreateTrainingPlan:output_type -> plans.v1.CreateTrainingPlanResponse
+	36,  // 113: plans.v1.TrainingPlanService.GetTrainingPlan:output_type -> plans.v1.GetTrainingPlanResponse
+	38,  // 114: plans.v1.TrainingPlanService.ListTrainingPlans:output_type -> plans.v1.ListTrainingPlansResponse
+	40,  // 115: plans.v1.TrainingPlanService.UpdateTrainingPlan:output_type -> plans.v1.UpdateTrainingPlanResponse
+	42,  // 116: plans.v1.TrainingPlanService.DeleteTrainingPlan:output_type -> plans.v1.DeleteTrainingPlanResponse
+	44,  // 117: plans.v1.TrainingPlanService.SetPlanPeriods:output_type -> plans.v1.SetPlanPeriodsResponse
+	46,  // 118: plans.v1.TrainingPlanService.DeletePlanPeriods:output_type -> plans.v1.DeletePlanPeriodsResponse
+	48,  // 119: plans.v1.TrainingPlanService.ListWorkouts:output_type -> plans.v1.ListWorkoutsResponse
+	50,  // 120: plans.v1.TrainingPlanService.GetWorkout:output_type -> plans.v1.GetWorkoutResponse
+	70,  // 121: plans.v1.TrainingPlanService.CreateWorkouts:output_type -> plans.v1.CreateWorkoutsResponse
+	72,  // 122: plans.v1.TrainingPlanService.UpdateWorkout:output_type -> plans.v1.UpdateWorkoutResponse
+	74,  // 123: plans.v1.TrainingPlanService.DeleteWorkouts:output_type -> plans.v1.DeleteWorkoutsResponse
+	76,  // 124: plans.v1.TrainingPlanService.SetStrengthLog:output_type -> plans.v1.SetStrengthLogResponse
+	78,  // 125: plans.v1.TrainingPlanService.DeleteStrengthLog:output_type -> plans.v1.DeleteStrengthLogResponse
+	56,  // 126: plans.v1.TrainingPlanService.ListWorkoutWeather:output_type -> plans.v1.ListWorkoutWeatherResponse
+	68,  // 127: plans.v1.TrainingPlanService.GetWorkoutWeather:output_type -> plans.v1.GetWorkoutWeatherResponse
+	59,  // 128: plans.v1.TrainingPlanService.GetSweatProfile:output_type -> plans.v1.GetSweatProfileResponse
+	61,  // 129: plans.v1.TrainingPlanService.SetSweatProfile:output_type -> plans.v1.SetSweatProfileResponse
+	93,  // 130: plans.v1.TrainingPlanService.GetGearProfile:output_type -> plans.v1.GetGearProfileResponse
+	94,  // 131: plans.v1.TrainingPlanService.SetGearProfile:output_type -> plans.v1.SetGearProfileResponse
+	95,  // 132: plans.v1.TrainingPlanService.GetGearFeedback:output_type -> plans.v1.GetGearFeedbackResponse
+	96,  // 133: plans.v1.TrainingPlanService.SetGearFeedback:output_type -> plans.v1.SetGearFeedbackResponse
+	64,  // 134: plans.v1.TrainingPlanService.GetTouringLimits:output_type -> plans.v1.GetTouringLimitsResponse
+	66,  // 135: plans.v1.TrainingPlanService.SetTouringLimits:output_type -> plans.v1.SetTouringLimitsResponse
+	112, // [112:136] is the sub-list for method output_type
+	88,  // [88:112] is the sub-list for method input_type
 	88,  // [88:88] is the sub-list for extension type_name
 	88,  // [88:88] is the sub-list for extension extendee
 	0,   // [0:88] is the sub-list for field type_name

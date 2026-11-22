@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"math"
 	"slices"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/bs-tools/trailrunn.ing/internal/plans/internal/gen"
@@ -87,6 +89,17 @@ type GearProfile struct {
 	ShortsMinApparentCelsius *float64
 	// When the profile was last set, zero if it never was.
 	UpdateTime time.Time
+	// What the user's feedback on their gear taught, by part of the body.
+	Comfort map[GearArea]GearComfort
+}
+
+// offset returns how much colder than it feels to dress a part of the
+// body for, from the user's feedback.
+func (p *GearProfile) offset(area GearArea) float64 {
+	if p == nil {
+		return 0
+	}
+	return p.Comfort[area].OffsetCelsius
 }
 
 // shortsMin returns the apparent temperature from which runs are in
@@ -111,7 +124,11 @@ func (r *Repository) GetGearProfile(ctx context.Context, userID pgtype.UUID) (*G
 	if err != nil {
 		return nil, fmt.Errorf("failed to get gear profile: %w", err)
 	}
-	return gearProfileFromDB(rows), nil
+	p := gearProfileFromDB(rows)
+	if p.Comfort, err = r.gearComfort(ctx, userID); err != nil {
+		return nil, err
+	}
+	return p, nil
 }
 
 // SetGearProfile replaces the user's gear profile.
@@ -128,7 +145,11 @@ func (r *Repository) SetGearProfile(ctx context.Context, userID pgtype.UUID, p *
 	if err != nil {
 		return nil, fmt.Errorf("failed to set gear profile: %w", err)
 	}
-	return gearProfileFromDB([]*gen.GearProfile{row}), nil
+	set := gearProfileFromDB([]*gen.GearProfile{row})
+	if set.Comfort, err = r.gearComfort(ctx, userID); err != nil {
+		return nil, err
+	}
+	return set, nil
 }
 
 // queueGearProfile queues reading the user's gear profile into profile,
@@ -292,6 +313,37 @@ func (a *gearAdviser) carrying(g Gear) bool {
 	return slices.ContainsFunc(a.advice.Carry, func(i GearItem) bool { return i.Gear == g })
 }
 
+// feels returns the temperature to dress a part of the body for: what it
+// feels like, made colder or warmer by what the user's feedback taught.
+func (a *gearAdviser) feels(c GearConditions, area GearArea) float64 {
+	return c.MinApparentCelsius - a.profile.offset(area)
+}
+
+// comfortNote describes how the user's feedback changed the advice, e.g.
+// "dressed 3 °C colder for your hands, from your feedback", empty if it
+// didn't.
+func (p *GearProfile) comfortNote() string {
+	var parts []string
+	for _, area := range GearAreas {
+		offset := p.offset(area)
+		switch {
+		case offset > 0:
+			parts = append(parts, fmt.Sprintf("%s °C colder for your %s", formatOffset(offset), area))
+		case offset < 0:
+			parts = append(parts, fmt.Sprintf("%s °C warmer for your %s", formatOffset(-offset), area))
+		}
+	}
+	if len(parts) == 0 {
+		return ""
+	}
+	return "dressed " + strings.Join(parts, ", ") + ", from your feedback"
+}
+
+// formatOffset formats an offset in degrees, e.g. "3" or "1.5".
+func formatOffset(v float64) string {
+	return strconv.FormatFloat(v, 'f', -1, 64)
+}
+
 // AdviseGear returns what to wear and carry in the conditions, from the
 // gear the user has. Runs follow common layering rules, with the user's
 // temperature for shorts; ski tours dress for the climb and carry layers
@@ -299,6 +351,9 @@ func (a *gearAdviser) carrying(g Gear) bool {
 func AdviseGear(c GearConditions, profile *GearProfile) GearAdvice {
 	a := &gearAdviser{profile: profile}
 	a.advice.Basis = c.basis()
+	if note := profile.comfortNote(); note != "" {
+		a.advice.Basis += "; " + note
+	}
 	if c.SkiTour {
 		a.skiTour(c)
 	} else {
@@ -350,12 +405,15 @@ func (c GearConditions) windy() bool {
 // and wind, shoes for the ground, and something to carry it all in.
 func (a *gearAdviser) run(c GearConditions) {
 	feels := c.MinApparentCelsius
+	// Each part of the body is dressed for the temperature the user's
+	// feedback says it feels like to them.
+	legs, body, hands, head := a.feels(c, GearAreaLegs), a.feels(c, GearAreaBody), a.feels(c, GearAreaHands), a.feels(c, GearAreaHead)
 	// Legs.
 	shortsMin := a.profile.shortsMin()
 	switch {
-	case feels >= shortsMin:
+	case legs >= shortsMin:
 		a.wear(fmt.Sprintf("From %.0f °C", shortsMin), GearShorts)
-	case feels < -5:
+	case legs < -5:
 		a.wear("Below −5 °C", GearThermalTights, GearTights)
 	default:
 		a.wear(fmt.Sprintf("Below %.0f °C", shortsMin), GearTights, GearThermalTights)
@@ -366,12 +424,12 @@ func (a *gearAdviser) run(c GearConditions) {
 
 	// Body.
 	switch {
-	case feels < -5:
+	case body < -5:
 		a.wear("Below −5 °C", GearBaseLayer, GearLongSleeve)
 		a.wear("Below −5 °C, over the base layer", GearWindJacket, GearRainJacket)
-	case feels < 5:
+	case body < 5:
 		a.wear("Below 5 °C", GearLongSleeve, GearBaseLayer)
-	case feels < 10 && (c.windy() || c.rainLikely()):
+	case body < 10 && (c.windy() || c.rainLikely()):
 		a.wear("Cool and wet or windy", GearLongSleeve, GearTShirt)
 	default:
 		a.wear("From 5 °C", GearTShirt)
@@ -381,32 +439,32 @@ func (a *gearAdviser) run(c GearConditions) {
 		a.wear("Rain likely", GearRainJacket)
 	case c.rainLikely() || c.MaxPrecipitationProbability >= rainPossiblePercent:
 		a.carry("In case of rain", GearRainJacket, GearWindJacket)
-	case feels < 5 && !a.wearing(GearRainJacket) && !a.wearing(GearWindJacket):
+	case body < 5 && !a.wearing(GearRainJacket) && !a.wearing(GearWindJacket):
 		a.carry("A warm, windproof layer for the cold", GearRainJacket, GearWindJacket)
 	}
-	if c.windy() && feels < 10 && !a.wearing(GearRainJacket) && !a.wearing(GearWindJacket) {
+	if c.windy() && body < 10 && !a.wearing(GearRainJacket) && !a.wearing(GearWindJacket) {
 		a.wear("Windy and cool", GearWindJacket, GearRainJacket)
 	}
-	if feels < 5 && c.Duration >= longDuration {
+	if body < 5 && c.Duration >= longDuration {
 		a.carry("Long and cold: for a stop or an injury", GearInsulatedJacket, GearFleece)
 	}
 
 	// Hands and head.
 	switch {
-	case feels < -10:
+	case hands < -10:
 		a.wear("Below −10 °C", GearThickGloves, GearGloves)
-	case feels < 0:
+	case hands < 0:
 		a.wear("Below 0 °C", GearGloves, GearThickGloves, GearLinerGloves)
-	case feels < 8:
+	case hands < 8:
 		a.wear("Below 8 °C", GearLinerGloves, GearGloves)
 	}
 	switch {
-	case feels < 0:
+	case head < 0:
 		a.wear("Below 0 °C", GearToque, GearBuff)
-	case feels < 5 && c.windy():
+	case head < 5 && c.windy():
 		a.wear("Cold wind on the ears", GearBuff, GearToque)
 	}
-	if feels < 5 && !a.wearing(GearBuff) {
+	if head < 5 && !a.wearing(GearBuff) {
 		a.carryOptional("For the neck or ears if it's colder than it feels", GearBuff)
 	}
 	switch {
@@ -461,10 +519,12 @@ func (a *gearAdviser) run(c GearConditions) {
 // skiTour advises a ski tour: light layers for the climb, warm and
 // windproof ones for the descent and stops, and avalanche safety gear.
 func (a *gearAdviser) skiTour(c GearConditions) {
-	feels := c.MinApparentCelsius
+	body, legs, head := a.feels(c, GearAreaBody), a.feels(c, GearAreaLegs), a.feels(c, GearAreaHead)
 	a.wear("Wicks sweat on the climb", GearBaseLayer, GearLongSleeve)
-	if feels < -10 {
+	if body < -10 {
 		a.wear("Below −10 °C", GearFleece, GearInsulatedJacket)
+	}
+	if legs < -10 {
 		a.wear("Below −10 °C, under the pants", GearThermalTights, GearTights)
 	}
 	switch {
@@ -474,7 +534,7 @@ func (a *gearAdviser) skiTour(c GearConditions) {
 		a.wear("Breathable on the climb", GearSoftshellPants, GearShellPants)
 	}
 	a.wear("Light gloves for the climb", GearLinerGloves, GearGloves)
-	if feels < -5 {
+	if head < -5 {
 		a.wear("Below −5 °C", GearToque, GearBuff)
 	} else {
 		a.carry("For the descent and stops", GearToque, GearBuff)
@@ -485,11 +545,11 @@ func (a *gearAdviser) skiTour(c GearConditions) {
 
 	a.carry("For the descent and stops", GearShellJacket, GearRainJacket)
 	a.carry("For stops, and in case of an injury", GearInsulatedJacket, GearFleece)
-	if !a.wearing(GearFleece) && feels < 0 {
+	if !a.wearing(GearFleece) && body < 0 {
 		a.carryOptional("An extra layer below 0 °C", GearFleece)
 	}
 	a.carry("Warm gloves for the descent", GearSkiGloves, GearThickGloves)
-	if c.windy() || c.SnowfallCM >= 1 || feels < -10 {
+	if c.windy() || c.SnowfallCM >= 1 || head < -10 {
 		a.carry("Wind, snow or cold on the descent", GearGoggles)
 	}
 	a.carryOptional("For the descent", GearHelmet)

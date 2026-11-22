@@ -11,6 +11,7 @@ import (
 	"github.com/bs-tools/trailrunn.ing/internal/geo"
 	"github.com/bs-tools/trailrunn.ing/internal/mapdata"
 	"github.com/bs-tools/trailrunn.ing/internal/plans"
+	"github.com/bs-tools/trailrunn.ing/internal/store"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -88,7 +89,130 @@ func gearProfileToProto(p *plans.GearProfile) *plansv1.GearProfile {
 	if !p.UpdateTime.IsZero() {
 		b.UpdateTime = timestamppb.New(p.UpdateTime)
 	}
+	b.Comfort = gearComfortToProto(p.Comfort)
 	return b.Build()
+}
+
+var gearAreas = map[plansv1.GearArea]plans.GearArea{
+	plansv1.GearArea_GEAR_AREA_LEGS:  plans.GearAreaLegs,
+	plansv1.GearArea_GEAR_AREA_BODY:  plans.GearAreaBody,
+	plansv1.GearArea_GEAR_AREA_HANDS: plans.GearAreaHands,
+	plansv1.GearArea_GEAR_AREA_HEAD:  plans.GearAreaHead,
+}
+
+var gearFeels = map[plansv1.GearFeel]plans.GearFeel{
+	plansv1.GearFeel_GEAR_FEEL_TOO_COLD:   plans.GearFeelTooCold,
+	plansv1.GearFeel_GEAR_FEEL_JUST_RIGHT: plans.GearFeelJustRight,
+	plansv1.GearFeel_GEAR_FEEL_TOO_WARM:   plans.GearFeelTooWarm,
+}
+
+func gearAreaToProto(area plans.GearArea) plansv1.GearArea {
+	for k, v := range gearAreas {
+		if v == area {
+			return k
+		}
+	}
+	return plansv1.GearArea_GEAR_AREA_UNSPECIFIED
+}
+
+func gearFeelToProto(feel plans.GearFeel) plansv1.GearFeel {
+	for k, v := range gearFeels {
+		if v == feel {
+			return k
+		}
+	}
+	return plansv1.GearFeel_GEAR_FEEL_UNSPECIFIED
+}
+
+// gearComfortToProto lists what feedback taught, in the order of the
+// parts of the body.
+func gearComfortToProto(comfort map[plans.GearArea]plans.GearComfort) []*plansv1.GearComfort {
+	var result []*plansv1.GearComfort
+	for _, area := range plans.GearAreas {
+		c, ok := comfort[area]
+		if !ok {
+			continue
+		}
+		result = append(result, plansv1.GearComfort_builder{
+			Area:          gearAreaToProto(area),
+			OffsetCelsius: c.OffsetCelsius,
+			Ratings:       int32(c.Ratings),
+		}.Build())
+	}
+	return result
+}
+
+func gearFeedbackToProto(f *plans.GearFeedback) *plansv1.GearFeedback {
+	if f == nil {
+		return nil
+	}
+	b := plansv1.GearFeedback_builder{Notes: f.Notes, UpdateTime: timestamppb.New(f.UpdateTime)}
+	for _, area := range plans.GearAreas {
+		if feel, ok := f.Feels[area]; ok {
+			b.Feels = append(b.Feels, plansv1.GearAreaFeel_builder{Area: gearAreaToProto(area), Feel: gearFeelToProto(feel)}.Build())
+		}
+	}
+	return b.Build()
+}
+
+// maxGearNotesLength bounds the notes of gear feedback.
+const maxGearNotesLength = 500
+
+func (s *Service) GetGearFeedback(ctx context.Context, req *plansv1.GetGearFeedbackRequest) (*plansv1.GetGearFeedbackResponse, error) {
+	userID, ok := authn.GetUserID(ctx)
+	if !ok {
+		return nil, connect.NewError(connect.CodeUnauthenticated, "")
+	}
+	workoutID, err := store.StringToUUID(req.GetWorkoutId())
+	if err != nil {
+		return nil, invalidArgument("invalid workout ID: %v", err)
+	}
+	f, err := s.plans.GetGearFeedback(ctx, userID, workoutID)
+	if err != nil {
+		return nil, s.toConnectError(ctx, err, "failed to get gear feedback")
+	}
+	return plansv1.GetGearFeedbackResponse_builder{Feedback: gearFeedbackToProto(f)}.Build(), nil
+}
+
+func (s *Service) SetGearFeedback(ctx context.Context, req *plansv1.SetGearFeedbackRequest) (*plansv1.SetGearFeedbackResponse, error) {
+	userID, ok := authn.GetUserID(ctx)
+	if !ok {
+		return nil, connect.NewError(connect.CodeUnauthenticated, "")
+	}
+	workoutID, err := store.StringToUUID(req.GetWorkoutId())
+	if err != nil {
+		return nil, invalidArgument("invalid workout ID: %v", err)
+	}
+	f := &plans.GearFeedback{Feels: map[plans.GearArea]plans.GearFeel{}, Notes: strings.TrimSpace(req.GetFeedback().GetNotes())}
+	if len([]rune(f.Notes)) > maxGearNotesLength {
+		return nil, invalidArgument("feedback.notes must be at most %d characters", maxGearNotesLength)
+	}
+	for i, af := range req.GetFeedback().GetFeels() {
+		area, ok := gearAreas[af.GetArea()]
+		if !ok {
+			return nil, invalidArgument("feedback.feels[%d].area must be LEGS, BODY, HANDS or HEAD", i)
+		}
+		feel, ok := gearFeels[af.GetFeel()]
+		if !ok {
+			return nil, invalidArgument("feedback.feels[%d].feel must be TOO_COLD, JUST_RIGHT or TOO_WARM", i)
+		}
+		if _, dup := f.Feels[area]; dup {
+			return nil, invalidArgument("feedback.feels[%d]: %s is rated twice", i, af.GetArea())
+		}
+		f.Feels[area] = feel
+	}
+	set, err := s.plans.SetGearFeedback(ctx, userID, workoutID, f)
+	if err != nil {
+		return nil, s.toConnectError(ctx, err, "failed to set gear feedback")
+	}
+	profile, err := s.plans.GetGearProfile(ctx, userID)
+	if err != nil {
+		return nil, s.toConnectError(ctx, err, "failed to get gear profile")
+	}
+	return plansv1.SetGearFeedbackResponse_builder{
+		Feedback: gearFeedbackToProto(set),
+		Comfort:  gearComfortToProto(profile.Comfort),
+	}.Build(), nil
 }
 
 func gearAdviceToProto(a plans.GearAdvice) *plansv1.GearAdvice {

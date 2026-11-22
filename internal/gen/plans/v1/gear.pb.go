@@ -198,6 +198,109 @@ func (x Gear) Number() protoreflect.EnumNumber {
 	return protoreflect.EnumNumber(x)
 }
 
+// GearArea is a part of the body gear keeps warm.
+type GearArea int32
+
+const (
+	GearArea_GEAR_AREA_UNSPECIFIED GearArea = 0
+	// Shorts or tights.
+	GearArea_GEAR_AREA_LEGS GearArea = 1
+	// Shirts, layers and jackets.
+	GearArea_GEAR_AREA_BODY GearArea = 2
+	// Gloves.
+	GearArea_GEAR_AREA_HANDS GearArea = 3
+	// Toques, buffs and caps.
+	GearArea_GEAR_AREA_HEAD GearArea = 4
+)
+
+// Enum value maps for GearArea.
+var (
+	GearArea_name = map[int32]string{
+		0: "GEAR_AREA_UNSPECIFIED",
+		1: "GEAR_AREA_LEGS",
+		2: "GEAR_AREA_BODY",
+		3: "GEAR_AREA_HANDS",
+		4: "GEAR_AREA_HEAD",
+	}
+	GearArea_value = map[string]int32{
+		"GEAR_AREA_UNSPECIFIED": 0,
+		"GEAR_AREA_LEGS":        1,
+		"GEAR_AREA_BODY":        2,
+		"GEAR_AREA_HANDS":       3,
+		"GEAR_AREA_HEAD":        4,
+	}
+)
+
+func (x GearArea) Enum() *GearArea {
+	p := new(GearArea)
+	*p = x
+	return p
+}
+
+func (x GearArea) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (GearArea) Descriptor() protoreflect.EnumDescriptor {
+	return file_plans_v1_gear_proto_enumTypes[1].Descriptor()
+}
+
+func (GearArea) Type() protoreflect.EnumType {
+	return &file_plans_v1_gear_proto_enumTypes[1]
+}
+
+func (x GearArea) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// GearFeel is how warm a part of the body was during a workout.
+type GearFeel int32
+
+const (
+	GearFeel_GEAR_FEEL_UNSPECIFIED GearFeel = 0
+	GearFeel_GEAR_FEEL_TOO_COLD    GearFeel = 1
+	GearFeel_GEAR_FEEL_JUST_RIGHT  GearFeel = 2
+	GearFeel_GEAR_FEEL_TOO_WARM    GearFeel = 3
+)
+
+// Enum value maps for GearFeel.
+var (
+	GearFeel_name = map[int32]string{
+		0: "GEAR_FEEL_UNSPECIFIED",
+		1: "GEAR_FEEL_TOO_COLD",
+		2: "GEAR_FEEL_JUST_RIGHT",
+		3: "GEAR_FEEL_TOO_WARM",
+	}
+	GearFeel_value = map[string]int32{
+		"GEAR_FEEL_UNSPECIFIED": 0,
+		"GEAR_FEEL_TOO_COLD":    1,
+		"GEAR_FEEL_JUST_RIGHT":  2,
+		"GEAR_FEEL_TOO_WARM":    3,
+	}
+)
+
+func (x GearFeel) Enum() *GearFeel {
+	p := new(GearFeel)
+	*p = x
+	return p
+}
+
+func (x GearFeel) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (GearFeel) Descriptor() protoreflect.EnumDescriptor {
+	return file_plans_v1_gear_proto_enumTypes[2].Descriptor()
+}
+
+func (GearFeel) Type() protoreflect.EnumType {
+	return &file_plans_v1_gear_proto_enumTypes[2]
+}
+
+func (x GearFeel) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
 // The running and touring gear the user has, and how they like to dress,
 // which what to wear and carry on workouts comes from, see
 // WorkoutWeather.gear.
@@ -206,6 +309,7 @@ type GearProfile struct {
 	xxx_hidden_Gear                     []Gear                 `protobuf:"varint,1,rep,packed,name=gear,proto3,enum=plans.v1.Gear"`
 	xxx_hidden_ShortsMinApparentCelsius float64                `protobuf:"fixed64,2,opt,name=shorts_min_apparent_celsius,json=shortsMinApparentCelsius,proto3,oneof"`
 	xxx_hidden_UpdateTime               *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=update_time,json=updateTime,proto3"`
+	xxx_hidden_Comfort                  *[]*GearComfort        `protobuf:"bytes,4,rep,name=comfort,proto3"`
 	XXX_raceDetectHookData              protoimpl.RaceDetectHookData
 	XXX_presence                        [1]uint32
 	unknownFields                       protoimpl.UnknownFields
@@ -258,17 +362,30 @@ func (x *GearProfile) GetUpdateTime() *timestamppb.Timestamp {
 	return nil
 }
 
+func (x *GearProfile) GetComfort() []*GearComfort {
+	if x != nil {
+		if x.xxx_hidden_Comfort != nil {
+			return *x.xxx_hidden_Comfort
+		}
+	}
+	return nil
+}
+
 func (x *GearProfile) SetGear(v []Gear) {
 	x.xxx_hidden_Gear = v
 }
 
 func (x *GearProfile) SetShortsMinApparentCelsius(v float64) {
 	x.xxx_hidden_ShortsMinApparentCelsius = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 3)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 4)
 }
 
 func (x *GearProfile) SetUpdateTime(v *timestamppb.Timestamp) {
 	x.xxx_hidden_UpdateTime = v
+}
+
+func (x *GearProfile) SetComfort(v []*GearComfort) {
+	x.xxx_hidden_Comfort = &v
 }
 
 func (x *GearProfile) HasShortsMinApparentCelsius() bool {
@@ -305,6 +422,9 @@ type GearProfile_builder struct {
 	ShortsMinApparentCelsius *float64
 	// When the profile was last set. Unset if it never was.
 	UpdateTime *timestamppb.Timestamp
+	// What the user's feedback on their gear taught, for each part of the
+	// body they rated, see SetGearFeedback.
+	Comfort []*GearComfort
 }
 
 func (b0 GearProfile_builder) Build() *GearProfile {
@@ -313,10 +433,577 @@ func (b0 GearProfile_builder) Build() *GearProfile {
 	_, _ = b, x
 	x.xxx_hidden_Gear = b.Gear
 	if b.ShortsMinApparentCelsius != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 3)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 4)
 		x.xxx_hidden_ShortsMinApparentCelsius = *b.ShortsMinApparentCelsius
 	}
 	x.xxx_hidden_UpdateTime = b.UpdateTime
+	x.xxx_hidden_Comfort = &b.Comfort
+	return m0
+}
+
+// How warm a part of the body was.
+type GearAreaFeel struct {
+	state           protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Area GearArea               `protobuf:"varint,1,opt,name=area,proto3,enum=plans.v1.GearArea"`
+	xxx_hidden_Feel GearFeel               `protobuf:"varint,2,opt,name=feel,proto3,enum=plans.v1.GearFeel"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *GearAreaFeel) Reset() {
+	*x = GearAreaFeel{}
+	mi := &file_plans_v1_gear_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GearAreaFeel) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GearAreaFeel) ProtoMessage() {}
+
+func (x *GearAreaFeel) ProtoReflect() protoreflect.Message {
+	mi := &file_plans_v1_gear_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *GearAreaFeel) GetArea() GearArea {
+	if x != nil {
+		return x.xxx_hidden_Area
+	}
+	return GearArea_GEAR_AREA_UNSPECIFIED
+}
+
+func (x *GearAreaFeel) GetFeel() GearFeel {
+	if x != nil {
+		return x.xxx_hidden_Feel
+	}
+	return GearFeel_GEAR_FEEL_UNSPECIFIED
+}
+
+func (x *GearAreaFeel) SetArea(v GearArea) {
+	x.xxx_hidden_Area = v
+}
+
+func (x *GearAreaFeel) SetFeel(v GearFeel) {
+	x.xxx_hidden_Feel = v
+}
+
+type GearAreaFeel_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Area GearArea
+	Feel GearFeel
+}
+
+func (b0 GearAreaFeel_builder) Build() *GearAreaFeel {
+	m0 := &GearAreaFeel{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Area = b.Area
+	x.xxx_hidden_Feel = b.Feel
+	return m0
+}
+
+// How the gear felt on a workout. Each rating moves the temperature that
+// part of the body is dressed for on later workouts: "too cold" dresses it
+// as if 1.5 °C colder, "too warm" as if 1.5 °C warmer, up to 6 °C, and
+// "just right" keeps it. See GearProfile.comfort.
+type GearFeedback struct {
+	state                 protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Feels      *[]*GearAreaFeel       `protobuf:"bytes,1,rep,name=feels,proto3"`
+	xxx_hidden_Notes      string                 `protobuf:"bytes,2,opt,name=notes,proto3"`
+	xxx_hidden_UpdateTime *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=update_time,json=updateTime,proto3"`
+	unknownFields         protoimpl.UnknownFields
+	sizeCache             protoimpl.SizeCache
+}
+
+func (x *GearFeedback) Reset() {
+	*x = GearFeedback{}
+	mi := &file_plans_v1_gear_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GearFeedback) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GearFeedback) ProtoMessage() {}
+
+func (x *GearFeedback) ProtoReflect() protoreflect.Message {
+	mi := &file_plans_v1_gear_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *GearFeedback) GetFeels() []*GearAreaFeel {
+	if x != nil {
+		if x.xxx_hidden_Feels != nil {
+			return *x.xxx_hidden_Feels
+		}
+	}
+	return nil
+}
+
+func (x *GearFeedback) GetNotes() string {
+	if x != nil {
+		return x.xxx_hidden_Notes
+	}
+	return ""
+}
+
+func (x *GearFeedback) GetUpdateTime() *timestamppb.Timestamp {
+	if x != nil {
+		return x.xxx_hidden_UpdateTime
+	}
+	return nil
+}
+
+func (x *GearFeedback) SetFeels(v []*GearAreaFeel) {
+	x.xxx_hidden_Feels = &v
+}
+
+func (x *GearFeedback) SetNotes(v string) {
+	x.xxx_hidden_Notes = v
+}
+
+func (x *GearFeedback) SetUpdateTime(v *timestamppb.Timestamp) {
+	x.xxx_hidden_UpdateTime = v
+}
+
+func (x *GearFeedback) HasUpdateTime() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_UpdateTime != nil
+}
+
+func (x *GearFeedback) ClearUpdateTime() {
+	x.xxx_hidden_UpdateTime = nil
+}
+
+type GearFeedback_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// How warm each part of the body was, each at most once. Parts that
+	// weren't rated are left out.
+	Feels []*GearAreaFeel
+	// Notes, e.g. "Hands cold for the first 20 minutes". At most 500
+	// characters.
+	Notes string
+	// When the feedback was last set.
+	UpdateTime *timestamppb.Timestamp
+}
+
+func (b0 GearFeedback_builder) Build() *GearFeedback {
+	m0 := &GearFeedback{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Feels = &b.Feels
+	x.xxx_hidden_Notes = b.Notes
+	x.xxx_hidden_UpdateTime = b.UpdateTime
+	return m0
+}
+
+// What the user's feedback taught about a part of the body.
+type GearComfort struct {
+	state                    protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Area          GearArea               `protobuf:"varint,1,opt,name=area,proto3,enum=plans.v1.GearArea"`
+	xxx_hidden_OffsetCelsius float64                `protobuf:"fixed64,2,opt,name=offset_celsius,json=offsetCelsius,proto3"`
+	xxx_hidden_Ratings       int32                  `protobuf:"varint,3,opt,name=ratings,proto3"`
+	unknownFields            protoimpl.UnknownFields
+	sizeCache                protoimpl.SizeCache
+}
+
+func (x *GearComfort) Reset() {
+	*x = GearComfort{}
+	mi := &file_plans_v1_gear_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GearComfort) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GearComfort) ProtoMessage() {}
+
+func (x *GearComfort) ProtoReflect() protoreflect.Message {
+	mi := &file_plans_v1_gear_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *GearComfort) GetArea() GearArea {
+	if x != nil {
+		return x.xxx_hidden_Area
+	}
+	return GearArea_GEAR_AREA_UNSPECIFIED
+}
+
+func (x *GearComfort) GetOffsetCelsius() float64 {
+	if x != nil {
+		return x.xxx_hidden_OffsetCelsius
+	}
+	return 0
+}
+
+func (x *GearComfort) GetRatings() int32 {
+	if x != nil {
+		return x.xxx_hidden_Ratings
+	}
+	return 0
+}
+
+func (x *GearComfort) SetArea(v GearArea) {
+	x.xxx_hidden_Area = v
+}
+
+func (x *GearComfort) SetOffsetCelsius(v float64) {
+	x.xxx_hidden_OffsetCelsius = v
+}
+
+func (x *GearComfort) SetRatings(v int32) {
+	x.xxx_hidden_Ratings = v
+}
+
+type GearComfort_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Area GearArea
+	// How much colder than it feels the part is dressed for, in degrees
+	// Celsius: positive if the user runs cold there, negative if they run
+	// warm. From -6 to 6.
+	OffsetCelsius float64
+	// How many workouts' feedback rated it.
+	Ratings int32
+}
+
+func (b0 GearComfort_builder) Build() *GearComfort {
+	m0 := &GearComfort{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Area = b.Area
+	x.xxx_hidden_OffsetCelsius = b.OffsetCelsius
+	x.xxx_hidden_Ratings = b.Ratings
+	return m0
+}
+
+type GetGearFeedbackRequest struct {
+	state                protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_WorkoutId string                 `protobuf:"bytes,1,opt,name=workout_id,json=workoutId,proto3"`
+	unknownFields        protoimpl.UnknownFields
+	sizeCache            protoimpl.SizeCache
+}
+
+func (x *GetGearFeedbackRequest) Reset() {
+	*x = GetGearFeedbackRequest{}
+	mi := &file_plans_v1_gear_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetGearFeedbackRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetGearFeedbackRequest) ProtoMessage() {}
+
+func (x *GetGearFeedbackRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_plans_v1_gear_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *GetGearFeedbackRequest) GetWorkoutId() string {
+	if x != nil {
+		return x.xxx_hidden_WorkoutId
+	}
+	return ""
+}
+
+func (x *GetGearFeedbackRequest) SetWorkoutId(v string) {
+	x.xxx_hidden_WorkoutId = v
+}
+
+type GetGearFeedbackRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// The ID of the workout.
+	WorkoutId string
+}
+
+func (b0 GetGearFeedbackRequest_builder) Build() *GetGearFeedbackRequest {
+	m0 := &GetGearFeedbackRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_WorkoutId = b.WorkoutId
+	return m0
+}
+
+type GetGearFeedbackResponse struct {
+	state               protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Feedback *GearFeedback          `protobuf:"bytes,1,opt,name=feedback,proto3"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
+}
+
+func (x *GetGearFeedbackResponse) Reset() {
+	*x = GetGearFeedbackResponse{}
+	mi := &file_plans_v1_gear_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetGearFeedbackResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetGearFeedbackResponse) ProtoMessage() {}
+
+func (x *GetGearFeedbackResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_plans_v1_gear_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *GetGearFeedbackResponse) GetFeedback() *GearFeedback {
+	if x != nil {
+		return x.xxx_hidden_Feedback
+	}
+	return nil
+}
+
+func (x *GetGearFeedbackResponse) SetFeedback(v *GearFeedback) {
+	x.xxx_hidden_Feedback = v
+}
+
+func (x *GetGearFeedbackResponse) HasFeedback() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Feedback != nil
+}
+
+func (x *GetGearFeedbackResponse) ClearFeedback() {
+	x.xxx_hidden_Feedback = nil
+}
+
+type GetGearFeedbackResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// The feedback, unset if there's none.
+	Feedback *GearFeedback
+}
+
+func (b0 GetGearFeedbackResponse_builder) Build() *GetGearFeedbackResponse {
+	m0 := &GetGearFeedbackResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Feedback = b.Feedback
+	return m0
+}
+
+type SetGearFeedbackRequest struct {
+	state                protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_WorkoutId string                 `protobuf:"bytes,1,opt,name=workout_id,json=workoutId,proto3"`
+	xxx_hidden_Feedback  *GearFeedback          `protobuf:"bytes,2,opt,name=feedback,proto3"`
+	unknownFields        protoimpl.UnknownFields
+	sizeCache            protoimpl.SizeCache
+}
+
+func (x *SetGearFeedbackRequest) Reset() {
+	*x = SetGearFeedbackRequest{}
+	mi := &file_plans_v1_gear_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SetGearFeedbackRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetGearFeedbackRequest) ProtoMessage() {}
+
+func (x *SetGearFeedbackRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_plans_v1_gear_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *SetGearFeedbackRequest) GetWorkoutId() string {
+	if x != nil {
+		return x.xxx_hidden_WorkoutId
+	}
+	return ""
+}
+
+func (x *SetGearFeedbackRequest) GetFeedback() *GearFeedback {
+	if x != nil {
+		return x.xxx_hidden_Feedback
+	}
+	return nil
+}
+
+func (x *SetGearFeedbackRequest) SetWorkoutId(v string) {
+	x.xxx_hidden_WorkoutId = v
+}
+
+func (x *SetGearFeedbackRequest) SetFeedback(v *GearFeedback) {
+	x.xxx_hidden_Feedback = v
+}
+
+func (x *SetGearFeedbackRequest) HasFeedback() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Feedback != nil
+}
+
+func (x *SetGearFeedbackRequest) ClearFeedback() {
+	x.xxx_hidden_Feedback = nil
+}
+
+type SetGearFeedbackRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// The ID of the workout, a run, race or ski tour, usually done.
+	WorkoutId string
+	// The feedback, replacing the earlier one. Empty to delete it.
+	Feedback *GearFeedback
+}
+
+func (b0 SetGearFeedbackRequest_builder) Build() *SetGearFeedbackRequest {
+	m0 := &SetGearFeedbackRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_WorkoutId = b.WorkoutId
+	x.xxx_hidden_Feedback = b.Feedback
+	return m0
+}
+
+type SetGearFeedbackResponse struct {
+	state               protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Feedback *GearFeedback          `protobuf:"bytes,1,opt,name=feedback,proto3"`
+	xxx_hidden_Comfort  *[]*GearComfort        `protobuf:"bytes,2,rep,name=comfort,proto3"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
+}
+
+func (x *SetGearFeedbackResponse) Reset() {
+	*x = SetGearFeedbackResponse{}
+	mi := &file_plans_v1_gear_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SetGearFeedbackResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetGearFeedbackResponse) ProtoMessage() {}
+
+func (x *SetGearFeedbackResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_plans_v1_gear_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *SetGearFeedbackResponse) GetFeedback() *GearFeedback {
+	if x != nil {
+		return x.xxx_hidden_Feedback
+	}
+	return nil
+}
+
+func (x *SetGearFeedbackResponse) GetComfort() []*GearComfort {
+	if x != nil {
+		if x.xxx_hidden_Comfort != nil {
+			return *x.xxx_hidden_Comfort
+		}
+	}
+	return nil
+}
+
+func (x *SetGearFeedbackResponse) SetFeedback(v *GearFeedback) {
+	x.xxx_hidden_Feedback = v
+}
+
+func (x *SetGearFeedbackResponse) SetComfort(v []*GearComfort) {
+	x.xxx_hidden_Comfort = &v
+}
+
+func (x *SetGearFeedbackResponse) HasFeedback() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Feedback != nil
+}
+
+func (x *SetGearFeedbackResponse) ClearFeedback() {
+	x.xxx_hidden_Feedback = nil
+}
+
+type SetGearFeedbackResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// The feedback, unset if it was deleted.
+	Feedback *GearFeedback
+	// What the user's feedback now teaches.
+	Comfort []*GearComfort
+}
+
+func (b0 SetGearFeedbackResponse_builder) Build() *SetGearFeedbackResponse {
+	m0 := &SetGearFeedbackResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Feedback = b.Feedback
+	x.xxx_hidden_Comfort = &b.Comfort
 	return m0
 }
 
@@ -332,7 +1019,7 @@ type GearItem struct {
 
 func (x *GearItem) Reset() {
 	*x = GearItem{}
-	mi := &file_plans_v1_gear_proto_msgTypes[1]
+	mi := &file_plans_v1_gear_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -344,7 +1031,7 @@ func (x *GearItem) String() string {
 func (*GearItem) ProtoMessage() {}
 
 func (x *GearItem) ProtoReflect() protoreflect.Message {
-	mi := &file_plans_v1_gear_proto_msgTypes[1]
+	mi := &file_plans_v1_gear_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -431,7 +1118,7 @@ type GearAdvice struct {
 
 func (x *GearAdvice) Reset() {
 	*x = GearAdvice{}
-	mi := &file_plans_v1_gear_proto_msgTypes[2]
+	mi := &file_plans_v1_gear_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -443,7 +1130,7 @@ func (x *GearAdvice) String() string {
 func (*GearAdvice) ProtoMessage() {}
 
 func (x *GearAdvice) ProtoReflect() protoreflect.Message {
-	mi := &file_plans_v1_gear_proto_msgTypes[2]
+	mi := &file_plans_v1_gear_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -495,7 +1182,9 @@ type GearAdvice_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
 	// The conditions it's for, e.g. "Feels like 2 to 6 °C, rain likely
-	// (80%), gusts to 40 km/h, in the dark".
+	// (80%), gusts to 40 km/h, in the dark", and how the user's feedback
+	// changed it, e.g. "dressed 3 °C colder for your hands, from your
+	// feedback".
 	Basis string
 	// What to wear, from the legs up, then shoes and what carries the rest.
 	Wear []*GearItem
@@ -522,7 +1211,7 @@ type GetGearProfileRequest struct {
 
 func (x *GetGearProfileRequest) Reset() {
 	*x = GetGearProfileRequest{}
-	mi := &file_plans_v1_gear_proto_msgTypes[3]
+	mi := &file_plans_v1_gear_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -534,7 +1223,7 @@ func (x *GetGearProfileRequest) String() string {
 func (*GetGearProfileRequest) ProtoMessage() {}
 
 func (x *GetGearProfileRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_plans_v1_gear_proto_msgTypes[3]
+	mi := &file_plans_v1_gear_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -566,7 +1255,7 @@ type GetGearProfileResponse struct {
 
 func (x *GetGearProfileResponse) Reset() {
 	*x = GetGearProfileResponse{}
-	mi := &file_plans_v1_gear_proto_msgTypes[4]
+	mi := &file_plans_v1_gear_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -578,7 +1267,7 @@ func (x *GetGearProfileResponse) String() string {
 func (*GetGearProfileResponse) ProtoMessage() {}
 
 func (x *GetGearProfileResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_plans_v1_gear_proto_msgTypes[4]
+	mi := &file_plans_v1_gear_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -635,7 +1324,7 @@ type SetGearProfileRequest struct {
 
 func (x *SetGearProfileRequest) Reset() {
 	*x = SetGearProfileRequest{}
-	mi := &file_plans_v1_gear_proto_msgTypes[5]
+	mi := &file_plans_v1_gear_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -647,7 +1336,7 @@ func (x *SetGearProfileRequest) String() string {
 func (*SetGearProfileRequest) ProtoMessage() {}
 
 func (x *SetGearProfileRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_plans_v1_gear_proto_msgTypes[5]
+	mi := &file_plans_v1_gear_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -704,7 +1393,7 @@ type SetGearProfileResponse struct {
 
 func (x *SetGearProfileResponse) Reset() {
 	*x = SetGearProfileResponse{}
-	mi := &file_plans_v1_gear_proto_msgTypes[6]
+	mi := &file_plans_v1_gear_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -716,7 +1405,7 @@ func (x *SetGearProfileResponse) String() string {
 func (*SetGearProfileResponse) ProtoMessage() {}
 
 func (x *SetGearProfileResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_plans_v1_gear_proto_msgTypes[6]
+	mi := &file_plans_v1_gear_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -768,13 +1457,38 @@ var File_plans_v1_gear_proto protoreflect.FileDescriptor
 
 const file_plans_v1_gear_proto_rawDesc = "" +
 	"\n" +
-	"\x13plans/v1/gear.proto\x12\bplans.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x14mcp/v1/options.proto\"\xda\x01\n" +
+	"\x13plans/v1/gear.proto\x12\bplans.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x14mcp/v1/options.proto\"\x93\x02\n" +
 	"\vGearProfile\x12\"\n" +
 	"\x04gear\x18\x01 \x03(\x0e2\x0e.plans.v1.GearR\x04gear\x12B\n" +
 	"\x1bshorts_min_apparent_celsius\x18\x02 \x01(\x01H\x00R\x18shortsMinApparentCelsius\x88\x01\x01\x12C\n" +
 	"\vupdate_time\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampB\x06\xaa\x9f\x19\x02\b\x01R\n" +
-	"updateTimeB\x1e\n" +
-	"\x1c_shorts_min_apparent_celsius\"`\n" +
+	"updateTime\x127\n" +
+	"\acomfort\x18\x04 \x03(\v2\x15.plans.v1.GearComfortB\x06\xaa\x9f\x19\x02\b\x01R\acomfortB\x1e\n" +
+	"\x1c_shorts_min_apparent_celsius\"^\n" +
+	"\fGearAreaFeel\x12&\n" +
+	"\x04area\x18\x01 \x01(\x0e2\x12.plans.v1.GearAreaR\x04area\x12&\n" +
+	"\x04feel\x18\x02 \x01(\x0e2\x12.plans.v1.GearFeelR\x04feel\"\x97\x01\n" +
+	"\fGearFeedback\x12,\n" +
+	"\x05feels\x18\x01 \x03(\v2\x16.plans.v1.GearAreaFeelR\x05feels\x12\x14\n" +
+	"\x05notes\x18\x02 \x01(\tR\x05notes\x12C\n" +
+	"\vupdate_time\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampB\x06\xaa\x9f\x19\x02\b\x01R\n" +
+	"updateTime\"v\n" +
+	"\vGearComfort\x12&\n" +
+	"\x04area\x18\x01 \x01(\x0e2\x12.plans.v1.GearAreaR\x04area\x12%\n" +
+	"\x0eoffset_celsius\x18\x02 \x01(\x01R\roffsetCelsius\x12\x18\n" +
+	"\aratings\x18\x03 \x01(\x05R\aratings\"7\n" +
+	"\x16GetGearFeedbackRequest\x12\x1d\n" +
+	"\n" +
+	"workout_id\x18\x01 \x01(\tR\tworkoutId\"M\n" +
+	"\x17GetGearFeedbackResponse\x122\n" +
+	"\bfeedback\x18\x01 \x01(\v2\x16.plans.v1.GearFeedbackR\bfeedback\"k\n" +
+	"\x16SetGearFeedbackRequest\x12\x1d\n" +
+	"\n" +
+	"workout_id\x18\x01 \x01(\tR\tworkoutId\x122\n" +
+	"\bfeedback\x18\x02 \x01(\v2\x16.plans.v1.GearFeedbackR\bfeedback\"~\n" +
+	"\x17SetGearFeedbackResponse\x122\n" +
+	"\bfeedback\x18\x01 \x01(\v2\x16.plans.v1.GearFeedbackR\bfeedback\x12/\n" +
+	"\acomfort\x18\x02 \x03(\v2\x15.plans.v1.GearComfortR\acomfort\"`\n" +
 	"\bGearItem\x12\"\n" +
 	"\x04gear\x18\x01 \x01(\x0e2\x0e.plans.v1.GearR\x04gear\x12\x16\n" +
 	"\x06reason\x18\x02 \x01(\tR\x06reason\x12\x18\n" +
@@ -832,36 +1546,66 @@ const file_plans_v1_gear_proto_rawDesc = "" +
 	"\vGEAR_SHOVEL\x10\"\x12\x0e\n" +
 	"\n" +
 	"GEAR_PROBE\x10#\x12\x15\n" +
-	"\x11GEAR_SKI_CRAMPONS\x10$B\x9b\x01\n" +
+	"\x11GEAR_SKI_CRAMPONS\x10$*v\n" +
+	"\bGearArea\x12\x19\n" +
+	"\x15GEAR_AREA_UNSPECIFIED\x10\x00\x12\x12\n" +
+	"\x0eGEAR_AREA_LEGS\x10\x01\x12\x12\n" +
+	"\x0eGEAR_AREA_BODY\x10\x02\x12\x13\n" +
+	"\x0fGEAR_AREA_HANDS\x10\x03\x12\x12\n" +
+	"\x0eGEAR_AREA_HEAD\x10\x04*o\n" +
+	"\bGearFeel\x12\x19\n" +
+	"\x15GEAR_FEEL_UNSPECIFIED\x10\x00\x12\x16\n" +
+	"\x12GEAR_FEEL_TOO_COLD\x10\x01\x12\x18\n" +
+	"\x14GEAR_FEEL_JUST_RIGHT\x10\x02\x12\x16\n" +
+	"\x12GEAR_FEEL_TOO_WARM\x10\x03B\x9b\x01\n" +
 	"\fcom.plans.v1B\tGearProtoP\x01Z?github.com/bs-tools/trailrunn.ing/internal/gen/plans/v1;plansv1\xa2\x02\x03PXX\xaa\x02\bPlans.V1\xca\x02\bPlans\\V1\xe2\x02\x14Plans\\V1\\GPBMetadata\xea\x02\tPlans::V1b\x06proto3"
 
-var file_plans_v1_gear_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_plans_v1_gear_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_plans_v1_gear_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
+var file_plans_v1_gear_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_plans_v1_gear_proto_goTypes = []any{
-	(Gear)(0),                      // 0: plans.v1.Gear
-	(*GearProfile)(nil),            // 1: plans.v1.GearProfile
-	(*GearItem)(nil),               // 2: plans.v1.GearItem
-	(*GearAdvice)(nil),             // 3: plans.v1.GearAdvice
-	(*GetGearProfileRequest)(nil),  // 4: plans.v1.GetGearProfileRequest
-	(*GetGearProfileResponse)(nil), // 5: plans.v1.GetGearProfileResponse
-	(*SetGearProfileRequest)(nil),  // 6: plans.v1.SetGearProfileRequest
-	(*SetGearProfileResponse)(nil), // 7: plans.v1.SetGearProfileResponse
-	(*timestamppb.Timestamp)(nil),  // 8: google.protobuf.Timestamp
+	(Gear)(0),                       // 0: plans.v1.Gear
+	(GearArea)(0),                   // 1: plans.v1.GearArea
+	(GearFeel)(0),                   // 2: plans.v1.GearFeel
+	(*GearProfile)(nil),             // 3: plans.v1.GearProfile
+	(*GearAreaFeel)(nil),            // 4: plans.v1.GearAreaFeel
+	(*GearFeedback)(nil),            // 5: plans.v1.GearFeedback
+	(*GearComfort)(nil),             // 6: plans.v1.GearComfort
+	(*GetGearFeedbackRequest)(nil),  // 7: plans.v1.GetGearFeedbackRequest
+	(*GetGearFeedbackResponse)(nil), // 8: plans.v1.GetGearFeedbackResponse
+	(*SetGearFeedbackRequest)(nil),  // 9: plans.v1.SetGearFeedbackRequest
+	(*SetGearFeedbackResponse)(nil), // 10: plans.v1.SetGearFeedbackResponse
+	(*GearItem)(nil),                // 11: plans.v1.GearItem
+	(*GearAdvice)(nil),              // 12: plans.v1.GearAdvice
+	(*GetGearProfileRequest)(nil),   // 13: plans.v1.GetGearProfileRequest
+	(*GetGearProfileResponse)(nil),  // 14: plans.v1.GetGearProfileResponse
+	(*SetGearProfileRequest)(nil),   // 15: plans.v1.SetGearProfileRequest
+	(*SetGearProfileResponse)(nil),  // 16: plans.v1.SetGearProfileResponse
+	(*timestamppb.Timestamp)(nil),   // 17: google.protobuf.Timestamp
 }
 var file_plans_v1_gear_proto_depIdxs = []int32{
-	0, // 0: plans.v1.GearProfile.gear:type_name -> plans.v1.Gear
-	8, // 1: plans.v1.GearProfile.update_time:type_name -> google.protobuf.Timestamp
-	0, // 2: plans.v1.GearItem.gear:type_name -> plans.v1.Gear
-	2, // 3: plans.v1.GearAdvice.wear:type_name -> plans.v1.GearItem
-	2, // 4: plans.v1.GearAdvice.carry:type_name -> plans.v1.GearItem
-	1, // 5: plans.v1.GetGearProfileResponse.profile:type_name -> plans.v1.GearProfile
-	1, // 6: plans.v1.SetGearProfileRequest.profile:type_name -> plans.v1.GearProfile
-	1, // 7: plans.v1.SetGearProfileResponse.profile:type_name -> plans.v1.GearProfile
-	8, // [8:8] is the sub-list for method output_type
-	8, // [8:8] is the sub-list for method input_type
-	8, // [8:8] is the sub-list for extension type_name
-	8, // [8:8] is the sub-list for extension extendee
-	0, // [0:8] is the sub-list for field type_name
+	0,  // 0: plans.v1.GearProfile.gear:type_name -> plans.v1.Gear
+	17, // 1: plans.v1.GearProfile.update_time:type_name -> google.protobuf.Timestamp
+	6,  // 2: plans.v1.GearProfile.comfort:type_name -> plans.v1.GearComfort
+	1,  // 3: plans.v1.GearAreaFeel.area:type_name -> plans.v1.GearArea
+	2,  // 4: plans.v1.GearAreaFeel.feel:type_name -> plans.v1.GearFeel
+	4,  // 5: plans.v1.GearFeedback.feels:type_name -> plans.v1.GearAreaFeel
+	17, // 6: plans.v1.GearFeedback.update_time:type_name -> google.protobuf.Timestamp
+	1,  // 7: plans.v1.GearComfort.area:type_name -> plans.v1.GearArea
+	5,  // 8: plans.v1.GetGearFeedbackResponse.feedback:type_name -> plans.v1.GearFeedback
+	5,  // 9: plans.v1.SetGearFeedbackRequest.feedback:type_name -> plans.v1.GearFeedback
+	5,  // 10: plans.v1.SetGearFeedbackResponse.feedback:type_name -> plans.v1.GearFeedback
+	6,  // 11: plans.v1.SetGearFeedbackResponse.comfort:type_name -> plans.v1.GearComfort
+	0,  // 12: plans.v1.GearItem.gear:type_name -> plans.v1.Gear
+	11, // 13: plans.v1.GearAdvice.wear:type_name -> plans.v1.GearItem
+	11, // 14: plans.v1.GearAdvice.carry:type_name -> plans.v1.GearItem
+	3,  // 15: plans.v1.GetGearProfileResponse.profile:type_name -> plans.v1.GearProfile
+	3,  // 16: plans.v1.SetGearProfileRequest.profile:type_name -> plans.v1.GearProfile
+	3,  // 17: plans.v1.SetGearProfileResponse.profile:type_name -> plans.v1.GearProfile
+	18, // [18:18] is the sub-list for method output_type
+	18, // [18:18] is the sub-list for method input_type
+	18, // [18:18] is the sub-list for extension type_name
+	18, // [18:18] is the sub-list for extension extendee
+	0,  // [0:18] is the sub-list for field type_name
 }
 
 func init() { file_plans_v1_gear_proto_init() }
@@ -875,8 +1619,8 @@ func file_plans_v1_gear_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_plans_v1_gear_proto_rawDesc), len(file_plans_v1_gear_proto_rawDesc)),
-			NumEnums:      1,
-			NumMessages:   7,
+			NumEnums:      3,
+			NumMessages:   14,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

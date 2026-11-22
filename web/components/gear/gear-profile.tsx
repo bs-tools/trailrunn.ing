@@ -10,6 +10,7 @@ import { TrainingPlanService } from "gen/plans/v1/plans_pb";
 import { invalidateServices } from "helpers/query";
 import React, { useState } from "react";
 
+import { formatComfort } from "./gear-feedback";
 import { GEAR_GROUPS, gearLabel } from "./gear-labels";
 
 // DEFAULT_SHORTS_CELSIUS is the server's default temperature for shorts.
@@ -97,6 +98,24 @@ const GearProfileCard: React.FC<GearProfileCardProps> = ({ profile }) => {
             </div>
           </fieldset>
         ))}
+        {(profile?.comfort.length ?? 0) > 0 && (
+          <div className="rounded-md bg-gray-50 p-3 text-sm text-gray-700">
+            <p className="font-medium text-gray-900">
+              Learned from your feedback
+            </p>
+            <ul className="mt-1 list-disc pl-5">
+              {profile?.comfort.map((comfort) => (
+                <li key={comfort.area}>
+                  {formatComfort(comfort)}, from {comfort.ratings}{" "}
+                  {comfort.ratings === 1 ? "rating" : "ratings"}
+                </li>
+              ))}
+            </ul>
+            <p className="mt-1 text-xs text-gray-500">
+              Rate how your gear felt on a workout&apos;s page after it.
+            </p>
+          </div>
+        )}
         <div className="max-w-xs">
           <TextField
             label="Shorts from (feels like °C)"

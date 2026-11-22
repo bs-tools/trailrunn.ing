@@ -628,6 +628,7 @@ type workoutReader struct {
 	home         *HomeEquipment
 	sweat        *SweatProfile
 	gear         *GearProfile
+	gearFeedback []*gen.ListRecentGearFeedbackRow
 }
 
 // queue queues the queries of the strength exercises and logs of the
@@ -636,6 +637,7 @@ func (wr *workoutReader) queue(ctx context.Context, b *store.Batch, f workoutFil
 	queueHomeEquipment(ctx, b, f.userID, &wr.home)
 	queueSweatProfile(ctx, b, f.userID, &wr.sweat)
 	queueGearProfile(ctx, b, f.userID, &wr.gear)
+	queueGearFeedback(ctx, b, f.userID, &wr.gearFeedback)
 	b.Read(func(db store.Querier) error {
 		var err error
 		wr.exercises, err = gen.New(db).ListWorkoutExercises(ctx, &gen.ListWorkoutExercisesParams{
@@ -740,6 +742,9 @@ func (wr *workoutReader) workouts() []*Workout {
 			CompleteTime: l.CompleteTime.Time,
 			Exercises:    logExercises[l.ID],
 		}
+	}
+	if wr.gear != nil {
+		wr.gear.Comfort = comfortFrom(wr.gearFeedback)
 	}
 	result := make([]*Workout, len(wr.rows))
 	for i, row := range wr.rows {
