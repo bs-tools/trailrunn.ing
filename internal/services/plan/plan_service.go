@@ -30,6 +30,8 @@ type PlanRepository interface {
 	SetSweatProfile(ctx context.Context, userID pgtype.UUID, p *plans.SweatProfile) (*plans.SweatProfile, error)
 	GetGearProfile(ctx context.Context, userID pgtype.UUID) (*plans.GearProfile, error)
 	SetGearProfile(ctx context.Context, userID pgtype.UUID, p *plans.GearProfile) (*plans.GearProfile, error)
+	GetGearFeedback(ctx context.Context, userID, workoutID pgtype.UUID) (*plans.GearFeedback, error)
+	SetGearFeedback(ctx context.Context, userID, workoutID pgtype.UUID, f *plans.GearFeedback) (*plans.GearFeedback, error)
 	GetTouringLimits(ctx context.Context, userID pgtype.UUID) (*plans.TouringLimits, error)
 	SetTouringLimits(ctx context.Context, userID pgtype.UUID, l *plans.TouringLimits) (*plans.TouringLimits, error)
 	CreateTrainingPlan(ctx context.Context, plan *plans.TrainingPlan) (*plans.TrainingPlan, error)

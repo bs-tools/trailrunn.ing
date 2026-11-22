@@ -1125,6 +1125,17 @@ type GarminWorkout struct {
 	CreateTime       pgtype.Timestamptz
 }
 
+type GearFeedback struct {
+	WorkoutID  pgtype.UUID
+	UserID     pgtype.UUID
+	Legs       pgtype.Text
+	Body       pgtype.Text
+	Hands      pgtype.Text
+	Head       pgtype.Text
+	Notes      string
+	UpdateTime pgtype.Timestamptz
+}
+
 type GearProfile struct {
 	UserID                   pgtype.UUID
 	Gear                     []string

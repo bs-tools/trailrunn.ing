@@ -171,6 +171,22 @@ export const getGearProfile = TrainingPlanService.method.getGearProfile;
 export const setGearProfile = TrainingPlanService.method.setGearProfile;
 
 /**
+ * Get how the gear felt on a workout.
+ *
+ * @generated from rpc plans.v1.TrainingPlanService.GetGearFeedback
+ */
+export const getGearFeedback = TrainingPlanService.method.getGearFeedback;
+
+/**
+ * Set how the gear felt on a workout, which adjusts what's suggested to
+ * wear on later workouts. The user usually does this on the workout's
+ * page after it; only set it when they say how their gear felt.
+ *
+ * @generated from rpc plans.v1.TrainingPlanService.SetGearFeedback
+ */
+export const setGearFeedback = TrainingPlanService.method.setGearFeedback;
+
+/**
  * Get the user's own limits for ski touring, which the forecasts of ski
  * tours are checked against for a go, caution or no-go verdict.
  *

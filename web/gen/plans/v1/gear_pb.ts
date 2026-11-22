@@ -13,7 +13,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file plans/v1/gear.proto.
  */
 export const file_plans_v1_gear: GenFile = /*@__PURE__*/
-  fileDesc("ChNwbGFucy92MS9nZWFyLnByb3RvEghwbGFucy52MSKuAQoLR2VhclByb2ZpbGUSHAoEZ2VhchgBIAMoDjIOLnBsYW5zLnYxLkdlYXISKAobc2hvcnRzX21pbl9hcHBhcmVudF9jZWxzaXVzGAIgASgBSACIAQESNwoLdXBkYXRlX3RpbWUYAyABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wQgaqnxkCCAFCHgocX3Nob3J0c19taW5fYXBwYXJlbnRfY2Vsc2l1cyJJCghHZWFySXRlbRIcCgRnZWFyGAEgASgOMg4ucGxhbnMudjEuR2VhchIOCgZyZWFzb24YAiABKAkSDwoHbWlzc2luZxgDIAEoCCJgCgpHZWFyQWR2aWNlEg0KBWJhc2lzGAEgASgJEiAKBHdlYXIYAiADKAsyEi5wbGFucy52MS5HZWFySXRlbRIhCgVjYXJyeRgDIAMoCzISLnBsYW5zLnYxLkdlYXJJdGVtIhcKFUdldEdlYXJQcm9maWxlUmVxdWVzdCJAChZHZXRHZWFyUHJvZmlsZVJlc3BvbnNlEiYKB3Byb2ZpbGUYASABKAsyFS5wbGFucy52MS5HZWFyUHJvZmlsZSI/ChVTZXRHZWFyUHJvZmlsZVJlcXVlc3QSJgoHcHJvZmlsZRgBIAEoCzIVLnBsYW5zLnYxLkdlYXJQcm9maWxlIkAKFlNldEdlYXJQcm9maWxlUmVzcG9uc2USJgoHcHJvZmlsZRgBIAEoCzIVLnBsYW5zLnYxLkdlYXJQcm9maWxlKoYGCgRHZWFyEhQKEEdFQVJfVU5TUEVDSUZJRUQQABIPCgtHRUFSX1NIT1JUUxABEg8KC0dFQVJfVElHSFRTEAISFwoTR0VBUl9USEVSTUFMX1RJR0hUUxADEhMKD0dFQVJfUkFJTl9QQU5UUxAEEhAKDEdFQVJfVF9TSElSVBAFEhQKEEdFQVJfTE9OR19TTEVFVkUQBhITCg9HRUFSX0JBU0VfTEFZRVIQBxIPCgtHRUFSX0ZMRUVDRRAIEhQKEEdFQVJfV0lORF9KQUNLRVQQCRIUChBHRUFSX1JBSU5fSkFDS0VUEAoSGQoVR0VBUl9JTlNVTEFURURfSkFDS0VUEAsSDAoIR0VBUl9DQVAQDBIOCgpHRUFSX1RPUVVFEA0SDQoJR0VBUl9CVUZGEA4SEwoPR0VBUl9TVU5HTEFTU0VTEA8SFQoRR0VBUl9MSU5FUl9HTE9WRVMQEBIPCgtHRUFSX0dMT1ZFUxAREhUKEUdFQVJfVEhJQ0tfR0xPVkVTEBISEwoPR0VBUl9ST0FEX1NIT0VTEBMSFAoQR0VBUl9UUkFJTF9TSE9FUxAUEhkKFUdFQVJfV0FURVJQUk9PRl9TSE9FUxAVEhQKEEdFQVJfTUlDUk9TUElLRVMQFhIVChFHRUFSX1JVTk5JTkdfVkVTVBAXEhUKEUdFQVJfUlVOTklOR19CRUxUEBgSEQoNR0VBUl9IRUFETEFNUBAZEg4KCkdFQVJfUE9MRVMQGhIYChRHRUFSX1NPRlRTSEVMTF9QQU5UUxAbEhQKEEdFQVJfU0hFTExfUEFOVFMQHBIVChFHRUFSX1NIRUxMX0pBQ0tFVBAdEhMKD0dFQVJfU0tJX0dMT1ZFUxAeEhAKDEdFQVJfR09HR0xFUxAfEg8KC0dFQVJfSEVMTUVUECASHgoaR0VBUl9BVkFMQU5DSEVfVFJBTlNDRUlWRVIQIRIPCgtHRUFSX1NIT1ZFTBAiEg4KCkdFQVJfUFJPQkUQIxIVChFHRUFSX1NLSV9DUkFNUE9OUxAkQpsBCgxjb20ucGxhbnMudjFCCUdlYXJQcm90b1ABWj9naXRodWIuY29tL2JzLXRvb2xzL3RyYWlscnVubi5pbmcvaW50ZXJuYWwvZ2VuL3BsYW5zL3YxO3BsYW5zdjGiAgNQWFiqAghQbGFucy5WMcoCCFBsYW5zXFYx4gIUUGxhbnNcVjFcR1BCTWV0YWRhdGHqAglQbGFuczo6VjFiBnByb3RvMw", [file_google_protobuf_timestamp, file_mcp_v1_options]);
+  fileDesc("ChNwbGFucy92MS9nZWFyLnByb3RvEghwbGFucy52MSLeAQoLR2VhclByb2ZpbGUSHAoEZ2VhchgBIAMoDjIOLnBsYW5zLnYxLkdlYXISKAobc2hvcnRzX21pbl9hcHBhcmVudF9jZWxzaXVzGAIgASgBSACIAQESNwoLdXBkYXRlX3RpbWUYAyABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wQgaqnxkCCAESLgoHY29tZm9ydBgEIAMoCzIVLnBsYW5zLnYxLkdlYXJDb21mb3J0QgaqnxkCCAFCHgocX3Nob3J0c19taW5fYXBwYXJlbnRfY2Vsc2l1cyJSCgxHZWFyQXJlYUZlZWwSIAoEYXJlYRgBIAEoDjISLnBsYW5zLnYxLkdlYXJBcmVhEiAKBGZlZWwYAiABKA4yEi5wbGFucy52MS5HZWFyRmVlbCJ9CgxHZWFyRmVlZGJhY2sSJQoFZmVlbHMYASADKAsyFi5wbGFucy52MS5HZWFyQXJlYUZlZWwSDQoFbm90ZXMYAiABKAkSNwoLdXBkYXRlX3RpbWUYAyABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wQgaqnxkCCAEiWAoLR2VhckNvbWZvcnQSIAoEYXJlYRgBIAEoDjISLnBsYW5zLnYxLkdlYXJBcmVhEhYKDm9mZnNldF9jZWxzaXVzGAIgASgBEg8KB3JhdGluZ3MYAyABKAUiLAoWR2V0R2VhckZlZWRiYWNrUmVxdWVzdBISCgp3b3Jrb3V0X2lkGAEgASgJIkMKF0dldEdlYXJGZWVkYmFja1Jlc3BvbnNlEigKCGZlZWRiYWNrGAEgASgLMhYucGxhbnMudjEuR2VhckZlZWRiYWNrIlYKFlNldEdlYXJGZWVkYmFja1JlcXVlc3QSEgoKd29ya291dF9pZBgBIAEoCRIoCghmZWVkYmFjaxgCIAEoCzIWLnBsYW5zLnYxLkdlYXJGZWVkYmFjayJrChdTZXRHZWFyRmVlZGJhY2tSZXNwb25zZRIoCghmZWVkYmFjaxgBIAEoCzIWLnBsYW5zLnYxLkdlYXJGZWVkYmFjaxImCgdjb21mb3J0GAIgAygLMhUucGxhbnMudjEuR2VhckNvbWZvcnQiSQoIR2Vhckl0ZW0SHAoEZ2VhchgBIAEoDjIOLnBsYW5zLnYxLkdlYXISDgoGcmVhc29uGAIgASgJEg8KB21pc3NpbmcYAyABKAgiYAoKR2VhckFkdmljZRINCgViYXNpcxgBIAEoCRIgCgR3ZWFyGAIgAygLMhIucGxhbnMudjEuR2Vhckl0ZW0SIQoFY2FycnkYAyADKAsyEi5wbGFucy52MS5HZWFySXRlbSIXChVHZXRHZWFyUHJvZmlsZVJlcXVlc3QiQAoWR2V0R2VhclByb2ZpbGVSZXNwb25zZRImCgdwcm9maWxlGAEgASgLMhUucGxhbnMudjEuR2VhclByb2ZpbGUiPwoVU2V0R2VhclByb2ZpbGVSZXF1ZXN0EiYKB3Byb2ZpbGUYASABKAsyFS5wbGFucy52MS5HZWFyUHJvZmlsZSJAChZTZXRHZWFyUHJvZmlsZVJlc3BvbnNlEiYKB3Byb2ZpbGUYASABKAsyFS5wbGFucy52MS5HZWFyUHJvZmlsZSqGBgoER2VhchIUChBHRUFSX1VOU1BFQ0lGSUVEEAASDwoLR0VBUl9TSE9SVFMQARIPCgtHRUFSX1RJR0hUUxACEhcKE0dFQVJfVEhFUk1BTF9USUdIVFMQAxITCg9HRUFSX1JBSU5fUEFOVFMQBBIQCgxHRUFSX1RfU0hJUlQQBRIUChBHRUFSX0xPTkdfU0xFRVZFEAYSEwoPR0VBUl9CQVNFX0xBWUVSEAcSDwoLR0VBUl9GTEVFQ0UQCBIUChBHRUFSX1dJTkRfSkFDS0VUEAkSFAoQR0VBUl9SQUlOX0pBQ0tFVBAKEhkKFUdFQVJfSU5TVUxBVEVEX0pBQ0tFVBALEgwKCEdFQVJfQ0FQEAwSDgoKR0VBUl9UT1FVRRANEg0KCUdFQVJfQlVGRhAOEhMKD0dFQVJfU1VOR0xBU1NFUxAPEhUKEUdFQVJfTElORVJfR0xPVkVTEBASDwoLR0VBUl9HTE9WRVMQERIVChFHRUFSX1RISUNLX0dMT1ZFUxASEhMKD0dFQVJfUk9BRF9TSE9FUxATEhQKEEdFQVJfVFJBSUxfU0hPRVMQFBIZChVHRUFSX1dBVEVSUFJPT0ZfU0hPRVMQFRIUChBHRUFSX01JQ1JPU1BJS0VTEBYSFQoRR0VBUl9SVU5OSU5HX1ZFU1QQFxIVChFHRUFSX1JVTk5JTkdfQkVMVBAYEhEKDUdFQVJfSEVBRExBTVAQGRIOCgpHRUFSX1BPTEVTEBoSGAoUR0VBUl9TT0ZUU0hFTExfUEFOVFMQGxIUChBHRUFSX1NIRUxMX1BBTlRTEBwSFQoRR0VBUl9TSEVMTF9KQUNLRVQQHRITCg9HRUFSX1NLSV9HTE9WRVMQHhIQCgxHRUFSX0dPR0dMRVMQHxIPCgtHRUFSX0hFTE1FVBAgEh4KGkdFQVJfQVZBTEFOQ0hFX1RSQU5TQ0VJVkVSECESDwoLR0VBUl9TSE9WRUwQIhIOCgpHRUFSX1BST0JFECMSFQoRR0VBUl9TS0lfQ1JBTVBPTlMQJCp2CghHZWFyQXJlYRIZChVHRUFSX0FSRUFfVU5TUEVDSUZJRUQQABISCg5HRUFSX0FSRUFfTEVHUxABEhIKDkdFQVJfQVJFQV9CT0RZEAISEwoPR0VBUl9BUkVBX0hBTkRTEAMSEgoOR0VBUl9BUkVBX0hFQUQQBCpvCghHZWFyRmVlbBIZChVHRUFSX0ZFRUxfVU5TUEVDSUZJRUQQABIWChJHRUFSX0ZFRUxfVE9PX0NPTEQQARIYChRHRUFSX0ZFRUxfSlVTVF9SSUdIVBACEhYKEkdFQVJfRkVFTF9UT09fV0FSTRADQpsBCgxjb20ucGxhbnMudjFCCUdlYXJQcm90b1ABWj9naXRodWIuY29tL2JzLXRvb2xzL3RyYWlscnVubi5pbmcvaW50ZXJuYWwvZ2VuL3BsYW5zL3YxO3BsYW5zdjGiAgNQWFiqAghQbGFucy5WMcoCCFBsYW5zXFYx4gIUUGxhbnNcVjFcR1BCTWV0YWRhdGHqAglQbGFuczo6VjFiBnByb3RvMw", [file_google_protobuf_timestamp, file_mcp_v1_options]);
 
 /**
  * The running and touring gear the user has, and how they like to dress,
@@ -45,6 +45,14 @@ export type GearProfile = Message<"plans.v1.GearProfile"> & {
    * @generated from field: google.protobuf.Timestamp update_time = 3;
    */
   updateTime?: Timestamp | undefined;
+
+  /**
+   * What the user's feedback on their gear taught, for each part of the
+   * body they rated, see SetGearFeedback.
+   *
+   * @generated from field: repeated plans.v1.GearComfort comfort = 4;
+   */
+  comfort: GearComfort[];
 };
 
 /**
@@ -53,6 +61,195 @@ export type GearProfile = Message<"plans.v1.GearProfile"> & {
  */
 export const GearProfileSchema: GenMessage<GearProfile> = /*@__PURE__*/
   messageDesc(file_plans_v1_gear, 0);
+
+/**
+ * How warm a part of the body was.
+ *
+ * @generated from message plans.v1.GearAreaFeel
+ */
+export type GearAreaFeel = Message<"plans.v1.GearAreaFeel"> & {
+  /**
+   * @generated from field: plans.v1.GearArea area = 1;
+   */
+  area: GearArea;
+
+  /**
+   * @generated from field: plans.v1.GearFeel feel = 2;
+   */
+  feel: GearFeel;
+};
+
+/**
+ * Describes the message plans.v1.GearAreaFeel.
+ * Use `create(GearAreaFeelSchema)` to create a new message.
+ */
+export const GearAreaFeelSchema: GenMessage<GearAreaFeel> = /*@__PURE__*/
+  messageDesc(file_plans_v1_gear, 1);
+
+/**
+ * How the gear felt on a workout. Each rating moves the temperature that
+ * part of the body is dressed for on later workouts: "too cold" dresses it
+ * as if 1.5 °C colder, "too warm" as if 1.5 °C warmer, up to 6 °C, and
+ * "just right" keeps it. See GearProfile.comfort.
+ *
+ * @generated from message plans.v1.GearFeedback
+ */
+export type GearFeedback = Message<"plans.v1.GearFeedback"> & {
+  /**
+   * How warm each part of the body was, each at most once. Parts that
+   * weren't rated are left out.
+   *
+   * @generated from field: repeated plans.v1.GearAreaFeel feels = 1;
+   */
+  feels: GearAreaFeel[];
+
+  /**
+   * Notes, e.g. "Hands cold for the first 20 minutes". At most 500
+   * characters.
+   *
+   * @generated from field: string notes = 2;
+   */
+  notes: string;
+
+  /**
+   * When the feedback was last set.
+   *
+   * @generated from field: google.protobuf.Timestamp update_time = 3;
+   */
+  updateTime?: Timestamp | undefined;
+};
+
+/**
+ * Describes the message plans.v1.GearFeedback.
+ * Use `create(GearFeedbackSchema)` to create a new message.
+ */
+export const GearFeedbackSchema: GenMessage<GearFeedback> = /*@__PURE__*/
+  messageDesc(file_plans_v1_gear, 2);
+
+/**
+ * What the user's feedback taught about a part of the body.
+ *
+ * @generated from message plans.v1.GearComfort
+ */
+export type GearComfort = Message<"plans.v1.GearComfort"> & {
+  /**
+   * @generated from field: plans.v1.GearArea area = 1;
+   */
+  area: GearArea;
+
+  /**
+   * How much colder than it feels the part is dressed for, in degrees
+   * Celsius: positive if the user runs cold there, negative if they run
+   * warm. From -6 to 6.
+   *
+   * @generated from field: double offset_celsius = 2;
+   */
+  offsetCelsius: number;
+
+  /**
+   * How many workouts' feedback rated it.
+   *
+   * @generated from field: int32 ratings = 3;
+   */
+  ratings: number;
+};
+
+/**
+ * Describes the message plans.v1.GearComfort.
+ * Use `create(GearComfortSchema)` to create a new message.
+ */
+export const GearComfortSchema: GenMessage<GearComfort> = /*@__PURE__*/
+  messageDesc(file_plans_v1_gear, 3);
+
+/**
+ * @generated from message plans.v1.GetGearFeedbackRequest
+ */
+export type GetGearFeedbackRequest = Message<"plans.v1.GetGearFeedbackRequest"> & {
+  /**
+   * The ID of the workout.
+   *
+   * @generated from field: string workout_id = 1;
+   */
+  workoutId: string;
+};
+
+/**
+ * Describes the message plans.v1.GetGearFeedbackRequest.
+ * Use `create(GetGearFeedbackRequestSchema)` to create a new message.
+ */
+export const GetGearFeedbackRequestSchema: GenMessage<GetGearFeedbackRequest> = /*@__PURE__*/
+  messageDesc(file_plans_v1_gear, 4);
+
+/**
+ * @generated from message plans.v1.GetGearFeedbackResponse
+ */
+export type GetGearFeedbackResponse = Message<"plans.v1.GetGearFeedbackResponse"> & {
+  /**
+   * The feedback, unset if there's none.
+   *
+   * @generated from field: plans.v1.GearFeedback feedback = 1;
+   */
+  feedback?: GearFeedback | undefined;
+};
+
+/**
+ * Describes the message plans.v1.GetGearFeedbackResponse.
+ * Use `create(GetGearFeedbackResponseSchema)` to create a new message.
+ */
+export const GetGearFeedbackResponseSchema: GenMessage<GetGearFeedbackResponse> = /*@__PURE__*/
+  messageDesc(file_plans_v1_gear, 5);
+
+/**
+ * @generated from message plans.v1.SetGearFeedbackRequest
+ */
+export type SetGearFeedbackRequest = Message<"plans.v1.SetGearFeedbackRequest"> & {
+  /**
+   * The ID of the workout, a run, race or ski tour, usually done.
+   *
+   * @generated from field: string workout_id = 1;
+   */
+  workoutId: string;
+
+  /**
+   * The feedback, replacing the earlier one. Empty to delete it.
+   *
+   * @generated from field: plans.v1.GearFeedback feedback = 2;
+   */
+  feedback?: GearFeedback | undefined;
+};
+
+/**
+ * Describes the message plans.v1.SetGearFeedbackRequest.
+ * Use `create(SetGearFeedbackRequestSchema)` to create a new message.
+ */
+export const SetGearFeedbackRequestSchema: GenMessage<SetGearFeedbackRequest> = /*@__PURE__*/
+  messageDesc(file_plans_v1_gear, 6);
+
+/**
+ * @generated from message plans.v1.SetGearFeedbackResponse
+ */
+export type SetGearFeedbackResponse = Message<"plans.v1.SetGearFeedbackResponse"> & {
+  /**
+   * The feedback, unset if it was deleted.
+   *
+   * @generated from field: plans.v1.GearFeedback feedback = 1;
+   */
+  feedback?: GearFeedback | undefined;
+
+  /**
+   * What the user's feedback now teaches.
+   *
+   * @generated from field: repeated plans.v1.GearComfort comfort = 2;
+   */
+  comfort: GearComfort[];
+};
+
+/**
+ * Describes the message plans.v1.SetGearFeedbackResponse.
+ * Use `create(SetGearFeedbackResponseSchema)` to create a new message.
+ */
+export const SetGearFeedbackResponseSchema: GenMessage<SetGearFeedbackResponse> = /*@__PURE__*/
+  messageDesc(file_plans_v1_gear, 7);
 
 /**
  * A piece of gear to wear or carry on a workout.
@@ -86,7 +283,7 @@ export type GearItem = Message<"plans.v1.GearItem"> & {
  * Use `create(GearItemSchema)` to create a new message.
  */
 export const GearItemSchema: GenMessage<GearItem> = /*@__PURE__*/
-  messageDesc(file_plans_v1_gear, 1);
+  messageDesc(file_plans_v1_gear, 8);
 
 /**
  * What to wear and carry on a workout, from the forecast during it, the
@@ -106,7 +303,9 @@ export const GearItemSchema: GenMessage<GearItem> = /*@__PURE__*/
 export type GearAdvice = Message<"plans.v1.GearAdvice"> & {
   /**
    * The conditions it's for, e.g. "Feels like 2 to 6 °C, rain likely
-   * (80%), gusts to 40 km/h, in the dark".
+   * (80%), gusts to 40 km/h, in the dark", and how the user's feedback
+   * changed it, e.g. "dressed 3 °C colder for your hands, from your
+   * feedback".
    *
    * @generated from field: string basis = 1;
    */
@@ -133,7 +332,7 @@ export type GearAdvice = Message<"plans.v1.GearAdvice"> & {
  * Use `create(GearAdviceSchema)` to create a new message.
  */
 export const GearAdviceSchema: GenMessage<GearAdvice> = /*@__PURE__*/
-  messageDesc(file_plans_v1_gear, 2);
+  messageDesc(file_plans_v1_gear, 9);
 
 /**
  * @generated from message plans.v1.GetGearProfileRequest
@@ -146,7 +345,7 @@ export type GetGearProfileRequest = Message<"plans.v1.GetGearProfileRequest"> & 
  * Use `create(GetGearProfileRequestSchema)` to create a new message.
  */
 export const GetGearProfileRequestSchema: GenMessage<GetGearProfileRequest> = /*@__PURE__*/
-  messageDesc(file_plans_v1_gear, 3);
+  messageDesc(file_plans_v1_gear, 10);
 
 /**
  * @generated from message plans.v1.GetGearProfileResponse
@@ -165,7 +364,7 @@ export type GetGearProfileResponse = Message<"plans.v1.GetGearProfileResponse"> 
  * Use `create(GetGearProfileResponseSchema)` to create a new message.
  */
 export const GetGearProfileResponseSchema: GenMessage<GetGearProfileResponse> = /*@__PURE__*/
-  messageDesc(file_plans_v1_gear, 4);
+  messageDesc(file_plans_v1_gear, 11);
 
 /**
  * @generated from message plans.v1.SetGearProfileRequest
@@ -184,7 +383,7 @@ export type SetGearProfileRequest = Message<"plans.v1.SetGearProfileRequest"> & 
  * Use `create(SetGearProfileRequestSchema)` to create a new message.
  */
 export const SetGearProfileRequestSchema: GenMessage<SetGearProfileRequest> = /*@__PURE__*/
-  messageDesc(file_plans_v1_gear, 5);
+  messageDesc(file_plans_v1_gear, 12);
 
 /**
  * @generated from message plans.v1.SetGearProfileResponse
@@ -203,7 +402,7 @@ export type SetGearProfileResponse = Message<"plans.v1.SetGearProfileResponse"> 
  * Use `create(SetGearProfileResponseSchema)` to create a new message.
  */
 export const SetGearProfileResponseSchema: GenMessage<SetGearProfileResponse> = /*@__PURE__*/
-  messageDesc(file_plans_v1_gear, 6);
+  messageDesc(file_plans_v1_gear, 13);
 
 /**
  * Gear is a piece of running or ski touring gear.
@@ -460,4 +659,83 @@ export enum Gear {
  */
 export const GearSchema: GenEnum<Gear> = /*@__PURE__*/
   enumDesc(file_plans_v1_gear, 0);
+
+/**
+ * GearArea is a part of the body gear keeps warm.
+ *
+ * @generated from enum plans.v1.GearArea
+ */
+export enum GearArea {
+  /**
+   * @generated from enum value: GEAR_AREA_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * Shorts or tights.
+   *
+   * @generated from enum value: GEAR_AREA_LEGS = 1;
+   */
+  LEGS = 1,
+
+  /**
+   * Shirts, layers and jackets.
+   *
+   * @generated from enum value: GEAR_AREA_BODY = 2;
+   */
+  BODY = 2,
+
+  /**
+   * Gloves.
+   *
+   * @generated from enum value: GEAR_AREA_HANDS = 3;
+   */
+  HANDS = 3,
+
+  /**
+   * Toques, buffs and caps.
+   *
+   * @generated from enum value: GEAR_AREA_HEAD = 4;
+   */
+  HEAD = 4,
+}
+
+/**
+ * Describes the enum plans.v1.GearArea.
+ */
+export const GearAreaSchema: GenEnum<GearArea> = /*@__PURE__*/
+  enumDesc(file_plans_v1_gear, 1);
+
+/**
+ * GearFeel is how warm a part of the body was during a workout.
+ *
+ * @generated from enum plans.v1.GearFeel
+ */
+export enum GearFeel {
+  /**
+   * @generated from enum value: GEAR_FEEL_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: GEAR_FEEL_TOO_COLD = 1;
+   */
+  TOO_COLD = 1,
+
+  /**
+   * @generated from enum value: GEAR_FEEL_JUST_RIGHT = 2;
+   */
+  JUST_RIGHT = 2,
+
+  /**
+   * @generated from enum value: GEAR_FEEL_TOO_WARM = 3;
+   */
+  TOO_WARM = 3,
+}
+
+/**
+ * Describes the enum plans.v1.GearFeel.
+ */
+export const GearFeelSchema: GenEnum<GearFeel> = /*@__PURE__*/
+  enumDesc(file_plans_v1_gear, 2);
 

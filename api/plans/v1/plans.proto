@@ -91,6 +91,12 @@ service TrainingPlanService {
   // does this in the web app, on the equipment page; only change it when
   // they say what they have.
   rpc SetGearProfile(SetGearProfileRequest) returns (SetGearProfileResponse);
+  // Get how the gear felt on a workout.
+  rpc GetGearFeedback(GetGearFeedbackRequest) returns (GetGearFeedbackResponse);
+  // Set how the gear felt on a workout, which adjusts what's suggested to
+  // wear on later workouts. The user usually does this on the workout's
+  // page after it; only set it when they say how their gear felt.
+  rpc SetGearFeedback(SetGearFeedbackRequest) returns (SetGearFeedbackResponse);
   // Get the user's own limits for ski touring, which the forecasts of ski
   // tours are checked against for a go, caution or no-go verdict.
   rpc GetTouringLimits(GetTouringLimitsRequest) returns (GetTouringLimitsResponse);
