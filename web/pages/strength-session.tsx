@@ -401,7 +401,7 @@ const Session: React.FC<SessionProps> = ({
         exercises={draft.exercises}
         onStep={goTo}
       />
-      <main className="mx-auto flex w-full max-w-lg flex-col gap-4 p-4">
+      <main className="mx-auto flex w-full max-w-lg flex-col gap-4 px-4 pt-4">
         {current !== undefined && currentDraft !== undefined ? (
           <ExerciseStep
             planned={current}
@@ -433,7 +433,22 @@ const Session: React.FC<SessionProps> = ({
           ) : (
             <ErrorText error={save.error} />
           ))}
-        <nav className="flex gap-2 pt-1">
+        {block !== undefined && next.step === block.first && (
+          <button
+            type="button"
+            className="self-center text-sm font-medium text-gray-600 hover:underline"
+            onClick={() => {
+              goTo(block.last + 1);
+            }}
+          >
+            {`Done with the ${block.group.kind === ExerciseGroupKind.CIRCUIT ? "circuit" : "superset"}`}
+          </button>
+        )}
+        {/*
+         * Kept at the bottom of the screen, so the next exercise is a tap
+         * away however far the page is scrolled.
+         */}
+        <nav className="sticky bottom-0 -mx-4 flex gap-2 border-t border-gray-200 bg-white/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur">
           {step > 0 && (
             <button
               type="button"
@@ -477,17 +492,6 @@ const Session: React.FC<SessionProps> = ({
             </button>
           )}
         </nav>
-        {block !== undefined && next.step === block.first && (
-          <button
-            type="button"
-            className="self-center text-sm font-medium text-gray-600 hover:underline"
-            onClick={() => {
-              goTo(block.last + 1);
-            }}
-          >
-            {`Done with the ${block.group.kind === ExerciseGroupKind.CIRCUIT ? "circuit" : "superset"}`}
-          </button>
-        )}
       </main>
     </div>
   );
@@ -813,6 +817,56 @@ const ExerciseStep: React.FC<ExerciseStepProps> = ({
         </p>
       )}
 
+      <Card title="How to do it">
+        <div className="flex flex-col gap-3">
+          {exercise !== undefined && exercise.instructions.length > 0 && (
+            <ol className="flex list-decimal flex-col gap-2 pl-5 text-sm leading-relaxed text-gray-700">
+              {exercise.instructions.map((step) => (
+                <li key={step}>{step}</li>
+              ))}
+            </ol>
+          )}
+          <section className="flex flex-col gap-1.5">
+            <h3 className="text-xs font-semibold tracking-wide text-gray-500 uppercase">
+              How it should feel
+            </h3>
+            <div className="flex flex-col gap-2.5 text-sm leading-relaxed text-gray-700">
+              {planned.targetEffort > 0 && (
+                <div className="flex items-center gap-2.5">
+                  <div
+                    className="grid grow grid-cols-10 gap-0.5"
+                    aria-hidden="true"
+                  >
+                    {EFFORT_SCALE.map((level) => (
+                      <span
+                        key={level}
+                        className={`h-2 rounded-sm ${level <= planned.targetEffort ? "bg-ember" : "bg-gray-200"}`}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-sm font-semibold whitespace-nowrap text-gray-900">
+                    Effort {planned.targetEffort} of 10
+                  </span>
+                </div>
+              )}
+              {exercise !== undefined && exercise.feel !== "" && (
+                <p className="whitespace-pre-line">{exercise.feel}</p>
+              )}
+              {planned.notes !== "" && (
+                <p className="whitespace-pre-line">{planned.notes}</p>
+              )}
+              {planned.targetEffort === 0 &&
+                (exercise?.feel ?? "") === "" &&
+                planned.notes === "" && (
+                  <p className="text-gray-500">
+                    No notes on how it should feel.
+                  </p>
+                )}
+            </div>
+          </section>
+        </div>
+      </Card>
+
       <section className="flex flex-col gap-2">
         <h2 className="text-[0.9375rem] font-semibold">
           {block === undefined ? "Sets" : "Rounds"}
@@ -886,40 +940,6 @@ const ExerciseStep: React.FC<ExerciseStepProps> = ({
         />
       )}
 
-      <Card title="How it should feel">
-        <div className="flex flex-col gap-2.5 text-sm leading-relaxed text-gray-700">
-          {planned.targetEffort > 0 && (
-            <div className="flex items-center gap-2.5">
-              <div
-                className="grid grow grid-cols-10 gap-0.5"
-                aria-hidden="true"
-              >
-                {EFFORT_SCALE.map((level) => (
-                  <span
-                    key={level}
-                    className={`h-2 rounded-sm ${level <= planned.targetEffort ? "bg-ember" : "bg-gray-200"}`}
-                  />
-                ))}
-              </div>
-              <span className="text-sm font-semibold whitespace-nowrap text-gray-900">
-                Effort {planned.targetEffort} of 10
-              </span>
-            </div>
-          )}
-          {exercise !== undefined && exercise.feel !== "" && (
-            <p className="whitespace-pre-line">{exercise.feel}</p>
-          )}
-          {planned.notes !== "" && (
-            <p className="whitespace-pre-line">{planned.notes}</p>
-          )}
-          {planned.targetEffort === 0 &&
-            (exercise?.feel ?? "") === "" &&
-            planned.notes === "" && (
-              <p className="text-gray-500">No notes on how it should feel.</p>
-            )}
-        </div>
-      </Card>
-
       {exercise !== undefined &&
         muscles.primary.length + muscles.secondary.length > 0 && (
           <Card title="Muscles">
@@ -929,16 +949,6 @@ const ExerciseStep: React.FC<ExerciseStepProps> = ({
             </div>
           </Card>
         )}
-
-      {exercise !== undefined && exercise.instructions.length > 0 && (
-        <Card title="How to do it">
-          <ol className="flex list-decimal flex-col gap-2 pl-5 text-sm leading-relaxed text-gray-700">
-            {exercise.instructions.map((step) => (
-              <li key={step}>{step}</li>
-            ))}
-          </ol>
-        </Card>
-      )}
     </>
   );
 };
