@@ -675,10 +675,12 @@ const tapHint = (
     lastOfBlock &&
     round >= (block.group.rounds ?? 1)
   ) {
-    return "Tap this round when you finish it: it's the last.";
+    return "The last round.";
   }
   if (block === undefined) {
-    return `Tap a set when you finish it${planned.restSeconds > 0 ? `, then rest ${formatSeconds(planned.restSeconds)}` : ""}.`;
+    return planned.restSeconds > 0
+      ? `Then rest ${formatSeconds(planned.restSeconds)}.`
+      : "";
   }
   const rest = lastOfBlock
     ? (block.group.restSeconds ?? 0)
@@ -686,8 +688,165 @@ const tapHint = (
   const then = lastOfBlock
     ? "start the next round"
     : "go on to the next exercise";
-  return `Tap this round when you finish it, then ${rest > 0 ? `rest ${formatSeconds(rest)} and ` : ""}${then}.`;
+  return `Then ${rest > 0 ? `rest ${formatSeconds(rest)} and ` : ""}${then}.`;
 };
+
+interface CurrentSetProps {
+  sets: DraftSet[];
+  // Whether the sets are rounds of a superset or circuit.
+  inRounds: boolean;
+  // How long to rest after a set, 0 for no rest timer.
+  restSeconds: number;
+  // What follows the set, e.g. "Then rest 30 s.", empty if nothing.
+  hint: string;
+  onSet: (index: number, change: Partial<DraftSet>) => void;
+}
+
+/**
+ * CurrentSet shows one set at a time: the next to do, big, with a button to
+ * tick it off, then the rest before the one after, counting down. The sets
+ * are listed small above it, to see how far along the exercise is, and to
+ * untick one done by mistake.
+ */
+const CurrentSet: React.FC<CurrentSetProps> = ({
+  sets,
+  inRounds,
+  restSeconds,
+  hint,
+  onSet,
+}) => {
+  const noun = inRounds ? "Round" : "Set";
+  const current = sets.findIndex((set) => !set.done);
+  // When the rest after the latest set ends, undefined if not resting.
+  const [restUntil, setRestUntil] = useState<number>();
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    if (restUntil === undefined) {
+      return undefined;
+    }
+    const timer = globalThis.setInterval(() => {
+      const time = Date.now();
+      setNow(time);
+      if (time >= restUntil) {
+        setRestUntil(undefined);
+        // A buzz says the rest is over, on phones that can.
+        globalThis.navigator.vibrate?.([200, 100, 200]);
+      }
+    }, 250);
+    return () => {
+      globalThis.clearInterval(timer);
+    };
+  }, [restUntil]);
+  const resting = restUntil !== undefined && current !== -1;
+  const set = sets[current];
+  return (
+    <div className="flex flex-col gap-3">
+      <ol className="flex flex-wrap gap-1.5" aria-label={`${noun}s`}>
+        {sets.map((each, index) => (
+          <li
+            // Sets keep their order.
+            // oxlint-disable-next-line no-array-index-key
+            key={index}
+          >
+            <button
+              type="button"
+              aria-pressed={each.done}
+              aria-label={`${noun} ${index + 1}${each.done ? ", done" : ""}`}
+              className={`flex h-8 min-w-8 items-center justify-center gap-0.5 rounded-full px-2.5 text-xs font-medium ${pillClass(
+                each.done,
+                index === current
+              )}`}
+              onClick={() => {
+                onSet(index, { done: !each.done });
+                setRestUntil(undefined);
+              }}
+            >
+              {each.done && <CheckIcon className="size-3.5" />}
+              {index + 1}
+            </button>
+          </li>
+        ))}
+      </ol>
+      {set === undefined ? (
+        <p className="rounded-lg bg-violet-50 p-4 text-center font-medium text-violet-900">
+          All {inRounds ? "rounds" : "sets"} done.
+        </p>
+      ) : (
+        <div className="flex flex-col items-center gap-3 rounded-lg bg-white p-4 ring-1 ring-gray-200">
+          {resting ? (
+            <>
+              <p className="text-sm font-medium text-gray-600">Rest</p>
+              <p className="text-5xl font-semibold tabular-nums">
+                {formatClock(Math.max(0, Math.ceil((restUntil - now) / 1000)))}
+              </p>
+              <p className="text-sm text-gray-600">
+                Then {noun.toLowerCase()} {current + 1} of {sets.length}
+              </p>
+              <button
+                type="button"
+                className="flex h-12 w-full items-center justify-center rounded-lg bg-white font-medium text-gray-800 ring-1 ring-gray-300 ring-inset"
+                onClick={() => {
+                  setRestUntil(undefined);
+                }}
+              >
+                Skip the rest
+              </button>
+            </>
+          ) : (
+            <>
+              <p className="text-sm font-medium text-gray-600">
+                {noun} {current + 1} of {sets.length}
+              </p>
+              <p className="text-3xl font-semibold tabular-nums">
+                {formatReps(
+                  set.reps,
+                  set.holdSeconds,
+                  false,
+                  set.leftReps,
+                  set.leftHoldSeconds
+                )}
+                {set.weight.value > 0 && ` · ${formatWeight(set.weight)}`}
+              </p>
+              <button
+                type="button"
+                className="flex h-14 w-full items-center justify-center gap-1.5 rounded-lg bg-violet-600 text-lg font-semibold text-white"
+                onClick={() => {
+                  onSet(current, { done: true });
+                  // The last set needs no rest after it.
+                  if (restSeconds > 0 && current < sets.length - 1) {
+                    const time = Date.now();
+                    setNow(time);
+                    setRestUntil(time + restSeconds * 1000);
+                  }
+                }}
+              >
+                <CheckIcon className="size-5" />
+                Done
+              </button>
+              {hint !== "" && (
+                <p className="text-center text-sm text-gray-600">{hint}</p>
+              )}
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// PillClass styles a set's pill: done, the current one, or still to do.
+const pillClass = (done: boolean, current: boolean): string => {
+  if (done) {
+    return "bg-violet-600 text-white";
+  }
+  return current
+    ? "bg-white text-violet-800 ring-2 ring-violet-600 ring-inset"
+    : "bg-white text-gray-600 ring-1 ring-gray-300 ring-inset";
+};
+
+// FormatClock formats seconds as minutes and seconds, e.g. "1:05".
+const formatClock = (seconds: number): string =>
+  `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
 
 // SetsLabel labels what a planned exercise's sets are of.
 const setsLabel = (planned: PlannedExercise): string => {
@@ -886,46 +1045,15 @@ const ExerciseStep: React.FC<ExerciseStepProps> = ({
         <h2 className="text-[0.9375rem] font-semibold">
           {block === undefined ? "Sets" : "Rounds"}
         </h2>
-        <div className="grid grid-cols-3 gap-2">
-          {draft.sets.map((set, index) => (
-            <button
-              // Sets keep their order.
-              // oxlint-disable-next-line no-array-index-key
-              key={index}
-              type="button"
-              aria-pressed={set.done}
-              className={`flex h-16 flex-col items-center justify-center gap-0.5 rounded-lg text-[0.9375rem] font-medium ${
-                set.done
-                  ? "bg-violet-100 text-violet-900 ring-2 ring-violet-600 ring-inset"
-                  : "bg-white text-gray-800 ring-1 ring-gray-300 ring-inset"
-              }`}
-              onClick={() => {
-                setSet(index, { done: !set.done });
-              }}
-            >
-              <span className="flex items-center gap-1">
-                {set.done && <CheckIcon className="size-4" />}
-                {block === undefined ? "Set" : "Round"} {index + 1}
-              </span>
-              <span className="text-xs font-normal tabular-nums">
-                {formatReps(
-                  set.reps,
-                  set.holdSeconds,
-                  false,
-                  set.leftReps,
-                  set.leftHoldSeconds
-                )}
-                {set.weight.value > 0 && ` · ${formatWeight(set.weight)}`}
-              </span>
-            </button>
-          ))}
-        </div>
-        <div className="flex items-baseline justify-between gap-2">
-          <p className="text-sm text-gray-600">
-            {allDone
-              ? `All ${block === undefined ? "sets" : "rounds"} done.`
-              : tapHint(planned, block, lastOfBlock, round)}
-          </p>
+        <CurrentSet
+          sets={draft.sets}
+          inRounds={block !== undefined}
+          // Straight sets rest between sets; a superset or circuit moves on.
+          restSeconds={block === undefined ? planned.restSeconds : 0}
+          hint={allDone ? "" : tapHint(planned, block, lastOfBlock, round)}
+          onSet={setSet}
+        />
+        <div className="flex justify-end">
           <button
             type="button"
             className="shrink-0 text-sm font-medium text-brand-600"
