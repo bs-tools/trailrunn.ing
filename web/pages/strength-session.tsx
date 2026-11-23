@@ -392,6 +392,21 @@ const Session: React.FC<SessionProps> = ({
   const currentDraft = draft.exercises[step];
   const next = nextStep(strength, draft, step);
   const block = roundBlockOf(strength, step);
+  /*
+   * Straight sets are done set after set on the same exercise, so moving on
+   * before they're all ticked off is skipping the rest: the button says so,
+   * and stays quiet until they're done. A superset or circuit moves on after
+   * each set, so its Next is always the way on.
+   */
+  const setsLeft =
+    block === undefined &&
+    currentDraft !== undefined &&
+    !finished(currentDraft);
+  let nextLabel = setsLeft ? "Skip to the debrief" : "Finish";
+  if (next.step < finishStep) {
+    const round = next.round > 0 ? ` · round ${next.round}` : "";
+    nextLabel = `${setsLeft ? "Skip to" : "Next"}: ${planned[next.step]?.exerciseName ?? ""}${round}`;
+  }
   return (
     <div className="flex min-h-full flex-col bg-gray-100 font-ui text-gray-900">
       <SessionHeader
@@ -464,16 +479,16 @@ const Session: React.FC<SessionProps> = ({
           {step < finishStep ? (
             <button
               type="button"
-              className="flex h-13 min-w-0 grow items-center justify-center gap-1 rounded-lg bg-ink px-4 font-medium text-white"
+              className={`flex h-13 min-w-0 grow items-center justify-center gap-1 rounded-lg px-4 font-medium ${
+                setsLeft
+                  ? "bg-white text-gray-800 ring-1 ring-gray-300 ring-inset"
+                  : "bg-ink text-white"
+              }`}
               onClick={() => {
                 goTo(next.step);
               }}
             >
-              <span className="truncate">
-                {next.step < finishStep
-                  ? `Next: ${planned[next.step]?.exerciseName ?? ""}${next.round > 0 ? ` · round ${next.round}` : ""}`
-                  : "Finish"}
-              </span>
+              <span className="truncate">{nextLabel}</span>
               <ChevronRightIcon className="size-5 shrink-0" />
             </button>
           ) : (
