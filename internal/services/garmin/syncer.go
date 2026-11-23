@@ -151,6 +151,7 @@ func NewSyncer(log *slog.Logger, report *errreport.Reporter, client Client, acti
 type ThresholdRepository interface {
 	ListTests(ctx context.Context, userID pgtype.UUID) ([]*lactate.Test, error)
 	GetProfile(ctx context.Context, userID pgtype.UUID) (*lactate.Profile, error)
+	EstimateMaxHeartRate(ctx context.Context, userID pgtype.UUID) (int32, error)
 }
 
 // userThresholds returns the heart rates of the user's aerobic and
@@ -192,6 +193,12 @@ func (s *Syncer) userThresholds(ctx context.Context, userID pgtype.UUID) (thresh
 		// targets and zones too. Cleared, they stay the latest test's.
 		if profile.AerobicThresholdHeartRateBPM > 0 {
 			t.aerobic = profile.AerobicThresholdHeartRateBPM
+		}
+		t.max = profile.MaxHeartRateBPM
+	}
+	if t.max == 0 {
+		if t.max, err = s.thresholds.EstimateMaxHeartRate(ctx, userID); err != nil {
+			return t, err
 		}
 	}
 	return t, nil

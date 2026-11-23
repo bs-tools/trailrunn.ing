@@ -209,10 +209,12 @@ message DeleteLactateTestRequest {
 
 message DeleteLactateTestResponse {}
 
-// What the user's next lactate test goes by. A test has stages 10 bpm apart,
-// and 5 bpm apart within 10 bpm of the expected aerobic threshold, to find
-// it more precisely, starting 30 bpm below it. The web app's guided test and
-// the planned tests on the user's Garmin calendar are run that way.
+// The user's heart rates: their expected aerobic threshold, which their
+// next lactate test goes by, their maximum heart rate, and the heart rate
+// zones they make. A test has stages 10 bpm apart, and 5 bpm apart within
+// 10 bpm of the expected aerobic threshold, to find it more precisely,
+// starting 30 bpm below it. The web app's guided test and the planned tests
+// on the user's Garmin calendar are run that way.
 message LactateProfile {
   // The heart rate the next test expects the aerobic threshold at, from 40
   // to 230. Each test that finds a threshold sets it, if it's the user's
@@ -223,6 +225,37 @@ message LactateProfile {
   // When the profile was last set, by the user or a test. Unset if it never
   // was.
   google.protobuf.Timestamp update_time = 2 [(mcp.v1.field).output_only = true];
+  // The user's maximum heart rate, from 100 to 230, if they've set it.
+  // Unset to estimate it, see estimated_max_heart_rate_bpm.
+  optional int32 max_heart_rate_bpm = 3;
+  // The highest heart rate of the user's activities in the past year, as
+  // an estimate of their maximum, 0 if none has one. Readings above 220 bpm
+  // are left out as sensor glitches.
+  int32 estimated_max_heart_rate_bpm = 4 [(mcp.v1.field).output_only = true];
+  // The anaerobic threshold, at 4 mmol/L, of the latest test that found
+  // it, 0 if none did.
+  int32 anaerobic_threshold_heart_rate_bpm = 5 [(mcp.v1.field).output_only = true];
+  // The user's heart rate zones in Uphill Athlete's system, from the
+  // aerobic threshold above, or else the latest test's, the anaerobic
+  // threshold and the maximum heart rate, set or estimated. Empty without
+  // an aerobic threshold. These are the zones of heart rate targets in
+  // training plans, see plans.v1.HeartRateTarget.
+  repeated HeartRateZone zones = 6 [(mcp.v1.field).output_only = true];
+}
+
+// A heart rate zone of Uphill Athlete's system: zone 1 is from 80% to 90%
+// of the aerobic threshold's heart rate, zone 2 from there to the aerobic
+// threshold, zone 3 from the aerobic to the anaerobic threshold, and zone 4
+// from the anaerobic threshold to the maximum heart rate.
+message HeartRateZone {
+  // The zone, from 1 to 4.
+  int32 zone = 1;
+  // The heart rates it's between, in beats per minute. high_bpm is 0 for
+  // zone 3 without an anaerobic threshold, which then has no zone 4.
+  int32 low_bpm = 2;
+  int32 high_bpm = 3;
+  // What training it's for, e.g. "Easy aerobic base: most of the volume".
+  string description = 4;
 }
 
 message GetLactateProfileRequest {}
@@ -233,8 +266,11 @@ message GetLactateProfileResponse {
 }
 
 message SetLactateProfileRequest {
-  // The user's lactate profile, replacing the earlier one.
+  // The user's lactate profile.
   LactateProfile profile = 1;
+  // The fields to set, e.g. "max_heart_rate_bpm". If empty, both
+  // aerobic_threshold_heart_rate_bpm and max_heart_rate_bpm are replaced.
+  google.protobuf.FieldMask update_mask = 2;
 }
 
 message SetLactateProfileResponse {

@@ -4,10 +4,11 @@ select * from lactate_profiles
 where user_id = $1;
 
 -- name: SetLactateProfile :one
-insert into lactate_profiles (user_id, aerobic_threshold_heart_rate_bpm)
-values ($1, $2)
+insert into lactate_profiles (user_id, aerobic_threshold_heart_rate_bpm, max_heart_rate_bpm)
+values ($1, $2, $3)
 on conflict (user_id) do update set
   aerobic_threshold_heart_rate_bpm = excluded.aerobic_threshold_heart_rate_bpm,
+  max_heart_rate_bpm = excluded.max_heart_rate_bpm,
   update_time = now()
 returning *;
 
@@ -26,3 +27,12 @@ where t.id = sqlc.arg(test_id) and not exists (
 on conflict (user_id) do update set
   aerobic_threshold_heart_rate_bpm = excluded.aerobic_threshold_heart_rate_bpm,
   update_time = now();
+
+-- name: EstimateMaxHeartRate :one
+-- Estimates the user's maximum heart rate as the highest of their
+-- activities in the past year, 0 if none has one. Readings above 220 bpm are
+-- taken to be glitches of the sensor.
+select coalesce(max(max_heartrate_bpm), 0)::integer from strava_activities
+where user_id = $1
+  and start_time > now() - interval '1 year'
+  and max_heartrate_bpm <= 220;

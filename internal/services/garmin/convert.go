@@ -265,6 +265,8 @@ type thresholds struct {
 	// Where the next lactate test expects the aerobic threshold, 0 if
 	// nowhere.
 	lactateThreshold int32
+	// The maximum heart rate, which zone 4 goes up to, 0 if unknown.
+	max int32
 }
 
 // trainingWorkout returns a workout as a Training API workout, if it's a
@@ -436,7 +438,7 @@ func setHeartRate(step *garmin.WorkoutStep, target *plans.HeartRateTarget, t thr
 			zones = fmt.Sprintf("Zones %d to %d", target.LowZone, target.HighZone)
 		}
 	}
-	low, high, ok := target.Resolve(t.aerobic, t.anaerobic)
+	low, high, ok := target.Resolve(t.aerobic, t.anaerobic, t.max)
 	switch {
 	case ok:
 		step.TargetType, step.TargetValueLow, step.TargetValueHigh = "HEART_RATE", float64(low), float64(high)

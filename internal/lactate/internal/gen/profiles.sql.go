@@ -11,8 +11,25 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const estimateMaxHeartRate = `-- name: EstimateMaxHeartRate :one
+select coalesce(max(max_heartrate_bpm), 0)::integer from strava_activities
+where user_id = $1
+  and start_time > now() - interval '1 year'
+  and max_heartrate_bpm <= 220
+`
+
+// Estimates the user's maximum heart rate as the highest of their
+// activities in the past year, 0 if none has one. Readings above 220 bpm are
+// taken to be glitches of the sensor.
+func (q *Queries) EstimateMaxHeartRate(ctx context.Context, userID pgtype.UUID) (int32, error) {
+	row := q.db.QueryRow(ctx, estimateMaxHeartRate, userID)
+	var column_1 int32
+	err := row.Scan(&column_1)
+	return column_1, err
+}
+
 const getLactateProfile = `-- name: GetLactateProfile :many
-select user_id, aerobic_threshold_heart_rate_bpm, update_time from lactate_profiles
+select user_id, aerobic_threshold_heart_rate_bpm, update_time, max_heart_rate_bpm from lactate_profiles
 where user_id = $1
 `
 
@@ -26,7 +43,12 @@ func (q *Queries) GetLactateProfile(ctx context.Context, userID pgtype.UUID) ([]
 	var items []*LactateProfile
 	for rows.Next() {
 		var i LactateProfile
-		if err := rows.Scan(&i.UserID, &i.AerobicThresholdHeartRateBpm, &i.UpdateTime); err != nil {
+		if err := rows.Scan(
+			&i.UserID,
+			&i.AerobicThresholdHeartRateBpm,
+			&i.UpdateTime,
+			&i.MaxHeartRateBpm,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, &i)
@@ -38,23 +60,30 @@ func (q *Queries) GetLactateProfile(ctx context.Context, userID pgtype.UUID) ([]
 }
 
 const setLactateProfile = `-- name: SetLactateProfile :one
-insert into lactate_profiles (user_id, aerobic_threshold_heart_rate_bpm)
-values ($1, $2)
+insert into lactate_profiles (user_id, aerobic_threshold_heart_rate_bpm, max_heart_rate_bpm)
+values ($1, $2, $3)
 on conflict (user_id) do update set
   aerobic_threshold_heart_rate_bpm = excluded.aerobic_threshold_heart_rate_bpm,
+  max_heart_rate_bpm = excluded.max_heart_rate_bpm,
   update_time = now()
-returning user_id, aerobic_threshold_heart_rate_bpm, update_time
+returning user_id, aerobic_threshold_heart_rate_bpm, update_time, max_heart_rate_bpm
 `
 
 type SetLactateProfileParams struct {
 	UserID                       pgtype.UUID
 	AerobicThresholdHeartRateBpm pgtype.Int4
+	MaxHeartRateBpm              pgtype.Int4
 }
 
 func (q *Queries) SetLactateProfile(ctx context.Context, arg *SetLactateProfileParams) (*LactateProfile, error) {
-	row := q.db.QueryRow(ctx, setLactateProfile, arg.UserID, arg.AerobicThresholdHeartRateBpm)
+	row := q.db.QueryRow(ctx, setLactateProfile, arg.UserID, arg.AerobicThresholdHeartRateBpm, arg.MaxHeartRateBpm)
 	var i LactateProfile
-	err := row.Scan(&i.UserID, &i.AerobicThresholdHeartRateBpm, &i.UpdateTime)
+	err := row.Scan(
+		&i.UserID,
+		&i.AerobicThresholdHeartRateBpm,
+		&i.UpdateTime,
+		&i.MaxHeartRateBpm,
+	)
 	return &i, err
 }
 
