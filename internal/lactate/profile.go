@@ -14,7 +14,10 @@ type Profile struct {
 	// Where the test expects the aerobic threshold, which it has closer
 	// stages around, or 0 for a test with even steps.
 	AerobicThresholdHeartRateBPM int32
-	UpdateTime                   time.Time
+	// The user's maximum heart rate, or 0 to estimate it from their
+	// activities, see EstimateMaxHeartRate.
+	MaxHeartRateBPM int32
+	UpdateTime      time.Time
 }
 
 // GetProfile gets the user's lactate profile, nil if it was never set, by
@@ -35,11 +38,22 @@ func (r *Repository) SetProfile(ctx context.Context, userID pgtype.UUID, p *Prof
 	row, err := r.q.SetLactateProfile(ctx, &gen.SetLactateProfileParams{
 		UserID:                       userID,
 		AerobicThresholdHeartRateBpm: pgtype.Int4{Int32: p.AerobicThresholdHeartRateBPM, Valid: p.AerobicThresholdHeartRateBPM > 0},
+		MaxHeartRateBpm:              pgtype.Int4{Int32: p.MaxHeartRateBPM, Valid: p.MaxHeartRateBPM > 0},
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to set lactate profile: %w", err)
 	}
 	return profileFromDB(row), nil
+}
+
+// EstimateMaxHeartRate estimates the user's maximum heart rate as the
+// highest of their activities in the past year, 0 if none has one.
+func (r *Repository) EstimateMaxHeartRate(ctx context.Context, userID pgtype.UUID) (int32, error) {
+	bpm, err := r.q.EstimateMaxHeartRate(ctx, userID)
+	if err != nil {
+		return 0, fmt.Errorf("failed to estimate the maximum heart rate: %w", err)
+	}
+	return bpm, nil
 }
 
 // setProfileFromTest sets the user's expected aerobic threshold to the one a
@@ -62,6 +76,7 @@ func (r *Repository) setProfileFromTest(ctx context.Context, test *Test) error {
 func profileFromDB(row *gen.LactateProfile) *Profile {
 	return &Profile{
 		AerobicThresholdHeartRateBPM: row.AerobicThresholdHeartRateBpm.Int32,
+		MaxHeartRateBPM:              row.MaxHeartRateBpm.Int32,
 		UpdateTime:                   row.UpdateTime.Time,
 	}
 }

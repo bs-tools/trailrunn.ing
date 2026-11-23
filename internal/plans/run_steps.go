@@ -65,11 +65,11 @@ type PaceTarget struct {
 }
 
 // Resolve returns a heart rate target's range in beats per minute, given
-// the user's thresholds, 0 if unknown. It reports false if it's relative to
+// the user's thresholds and maximum heart rate, 0 if unknown. It reports false if it's relative to
 // an unknown threshold, or of zones that need one.
-func (t *HeartRateTarget) Resolve(aerobicBPM, anaerobicBPM int32) (low, high int32, ok bool) {
+func (t *HeartRateTarget) Resolve(aerobicBPM, anaerobicBPM, maxBPM int32) (low, high int32, ok bool) {
 	if t.LowZone > 0 {
-		zones, ok := UphillAthleteZones(aerobicBPM, anaerobicBPM)
+		zones, ok := UphillAthleteZones(aerobicBPM, anaerobicBPM, maxBPM)
 		if !ok {
 			return 0, 0, false
 		}

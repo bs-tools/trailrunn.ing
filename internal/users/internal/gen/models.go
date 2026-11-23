@@ -1166,6 +1166,7 @@ type LactateProfile struct {
 	UserID                       pgtype.UUID
 	AerobicThresholdHeartRateBpm pgtype.Int4
 	UpdateTime                   pgtype.Timestamptz
+	MaxHeartRateBpm              pgtype.Int4
 }
 
 type LactateTest struct {

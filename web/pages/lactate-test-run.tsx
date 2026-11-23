@@ -815,6 +815,8 @@ const LactateTestRunPage: React.FC = () => {
               aerobicThresholdHeartRateBpm:
                 heartRateBpm > 0 ? heartRateBpm : undefined,
             },
+            // The maximum heart rate is kept.
+            updateMask: { paths: ["aerobic_threshold_heart_rate_bpm"] },
           });
         }}
         pending={createTest.isPending || update.isPending}
