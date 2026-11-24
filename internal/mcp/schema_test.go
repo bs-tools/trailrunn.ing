@@ -49,7 +49,7 @@ func TestInputSchemaOneof(t *testing.T) {
 	if s.Type != "object" {
 		t.Errorf("type = %q, want object", s.Type)
 	}
-	want := []string{"name", "description", "waypoints", "gpx", "activityId", "routeId", "includePoints", "conversion"}
+	want := []string{"name", "description", "waypoints", "gpx", "activityId", "routeId", "stravaSegment", "includePoints", "conversion"}
 	if got := propertyNames(s); !slices.Equal(got, want) {
 		t.Errorf("properties = %v, want %v", got, want)
 	}
@@ -58,7 +58,7 @@ func TestInputSchemaOneof(t *testing.T) {
 	if gpx.Type != "string" {
 		t.Errorf("gpx type = %q, want string", gpx.Type)
 	}
-	for _, want := range []string{"The contents of a GPX file.", `Mutually exclusive with "waypoints", "activityId", "routeId" (oneof "source")`} {
+	for _, want := range []string{"The contents of a GPX file.", `Mutually exclusive with "waypoints", "activityId", "routeId", "stravaSegment" (oneof "source")`} {
 		if !strings.Contains(gpx.Description, want) {
 			t.Errorf("gpx description %q does not contain %q", gpx.Description, want)
 		}
