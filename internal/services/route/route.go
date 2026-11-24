@@ -368,7 +368,11 @@ func (s *Service) routeFromTrack(ctx context.Context, route *routes.Route, track
 			"Move its waypoints, or route legs along trails, to adjust it.", reason), nil
 	}
 	route.Waypoints, route.Legs = legsFromTrack(track)
-	return "", checkRoutePoints(route.Legs)
+	if err := checkRoutePoints(route.Legs); err != nil {
+		return "", err
+	}
+	s.matchTerrains(ctx, route.Legs)
+	return "", nil
 }
 
 // checkRoutePoints checks that the legs of a route that follows a recorded

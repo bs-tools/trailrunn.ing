@@ -20,7 +20,8 @@ so you can bring your own AI agent to do the planning.
   within one route. Drag the route to reshape it, undo and redo, close the loop
   or turn it into an out and back. You can also import GPX files, turn a past
   activity into a route, or make one from a Strava segment's link, which
-  also downloads as GPX. Each route has an elevation profile, distance, gain,
+  also downloads as GPX. Tracks imported exactly keep their path, and take
+  their terrain from the mapped paths they follow. Each route has an elevation profile, distance, gain,
   grades and a terrain breakdown, and can be downloaded as GPX for your watch.
   Overlays show your personal heatmap, OpenStreetMap trails and points of
   interest.
