@@ -101,12 +101,22 @@ func (s *Service) CreateRoute(ctx context.Context, req *routesv1.CreateRouteRequ
 		}
 		route.Legs = legs
 	default:
-		track, err := s.recordedTrack(ctx, userID, req)
+		var track *recording
+		var err error
+		if req.HasStravaSegment() {
+			var description string
+			track, description, err = s.segmentTrack(ctx, userID, req.GetStravaSegment())
+			if route.Description == "" {
+				route.Description = description
+			}
+		} else {
+			track, err = s.recordedTrack(ctx, userID, req)
+		}
 		if err != nil {
 			return nil, err
 		}
 		if track == nil {
-			return nil, connect.NewError(connect.CodeInvalidArgument, "one of waypoints, gpx, activity_id or route_id must be set")
+			return nil, connect.NewError(connect.CodeInvalidArgument, "one of waypoints, gpx, activity_id, route_id or strava_segment must be set")
 		}
 		if err := s.fillMissingElevations(ctx, track.points); err != nil {
 			return nil, connect.NewError(connect.CodeUnavailable, err.Error()).WithCause(err)

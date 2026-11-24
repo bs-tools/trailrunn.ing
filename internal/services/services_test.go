@@ -215,9 +215,16 @@ func newEnv(t *testing.T) *env {
 	}
 	activityService := activity.NewService(log, report, activityRepo, lactateRepo, strava.WebURL)
 	stravaService := stravasvc.NewService(log, report, activityRepo, activityRepo, e.syncer, nil, strava.WebURL)
+	segmentCache, err := blob.NewDir(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	segments := stravasvc.NewSegments(log, report, activityRepo, e.strava, segmentCache, strava.WebURL)
+	stravaService.SetSegments(segments)
 	routeService := route.NewService(log, report, routeRepo, activityRepo, e.router, e.mapData)
 	routeService.SetAvalanches(e.avalanches)
 	routeService.SetTouringLimitsSource(planRepo)
+	routeService.SetStravaSegments(segments)
 	geoService := geosvc.NewService(log, report, e.mapData, e.mapData, activityRepo)
 	geoService.SetAvalanches(e.avalanches)
 	planService := plan.NewService(log, report, planRepo, routeRepo, activityRepo, e.mapData)
@@ -284,6 +291,7 @@ func newEnv(t *testing.T) *env {
 	mux.Handle(trip.ProfilePath, raceReportService.PageHandler(false, tripService.PageHandler(false)))
 
 	mux.Handle("/routes/", routeService.DownloadHandler(http.NotFoundHandler()))
+	mux.Handle(stravasvc.SegmentDownloadPath, stravaService.SegmentDownloadHandler())
 	mux.Handle("/workouts/", planService.DownloadHandler(http.NotFoundHandler()))
 	mux.Handle(plan.ShareDownloadPath, planService.ShareDownloadHandler())
 	// The frontend's calendar pages answer with frontendPage.

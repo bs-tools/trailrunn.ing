@@ -53,6 +53,7 @@ resource "google_cloud_run_v2_service" "app" {
             TRAIL_TOOLS_IMPORT_JOB                = google_cloud_run_v2_job.import[0].id
             TRAIL_TOOLS_PHOTO_BUCKET              = google_storage_bucket.photos.name
             TRAIL_TOOLS_ACTIVITY_BUCKET           = google_storage_bucket.activity_data.name
+            TRAIL_TOOLS_SEGMENT_BUCKET            = google_storage_bucket.strava_segments.name
             TRAIL_TOOLS_DEM_BUCKET                = google_storage_bucket.dem.name
             TRAIL_TOOLS_SCHEDULER_SERVICE_ACCOUNT = google_service_account.scheduler.email
             TRAIL_TOOLS_SCHEDULER_AUDIENCE        = "trail-tools-scheduler"
@@ -107,6 +108,7 @@ resource "google_cloud_run_v2_service" "app" {
     google_storage_bucket_iam_member.run_photos,
     google_storage_bucket_iam_member.run_dem,
     google_storage_bucket_iam_member.run_activity_data,
+    google_storage_bucket_iam_member.run_strava_segments,
     google_project_iam_member.run_error_reporting,
     google_project_iam_member.run_tracing,
   ]

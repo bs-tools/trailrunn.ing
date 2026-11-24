@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package strava.v1;
 
+import "geo/v1/geo.proto";
 import "google/protobuf/timestamp.proto";
 import "mcp/v1/options.proto";
 
@@ -53,6 +54,17 @@ service StravaService {
   // original file from the archive, if it has one.
   rpc ImportStravaArchiveActivity(ImportStravaArchiveActivityRequest) returns (ImportStravaArchiveActivityResponse) {
     option (mcp.v1.method).exclude = true;
+  }
+  // Get a Strava segment by its link or ID, e.g.
+  // https://www.strava.com/segments/40535472: its name, statistics and
+  // optionally its path. Download it as a GPX file at gpx_url, or make a
+  // route from it with RouteService.CreateRoute's strava_segment. Strava's
+  // API needs the user's Strava connection to get segments, so Strava must
+  // be connected. Segments are cached for up to 6 days, as Strava's API
+  // terms allow at most 7, so changes to a segment on Strava can take that
+  // long to show.
+  rpc GetStravaSegment(GetStravaSegmentRequest) returns (GetStravaSegmentResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
   }
 }
 
@@ -201,4 +213,47 @@ message ImportStravaArchiveActivityResponse {
   // Whether the activity's file couldn't be read, so it was imported
   // without its samples.
   bool file_unreadable = 2;
+}
+
+// A Strava segment: a stretch of road or trail athletes compare their times
+// on.
+message StravaSegment {
+  // The segment's ID on Strava.
+  string id = 1;
+  // The segment's name, as its creator named it.
+  string name = 2;
+  // The segment's page on Strava.
+  string url = 3;
+  // Where to download the segment as a GPX file, while signed in.
+  string gpx_url = 4;
+  // The sport, e.g. "Run" or "Ride".
+  string activity_type = 5;
+  double distance_meters = 6;
+  double elevation_gain_meters = 7;
+  double average_grade_percent = 8;
+  // Where the segment is, e.g. "Squamish, BC, Canada". Empty if unknown.
+  string location = 9;
+  // Private segments are only visible to the athlete who created them.
+  bool private = 10;
+  // Whether athletes flagged the segment as hazardous, e.g. a descent on a
+  // busy road.
+  bool hazardous = 11;
+  // When the segment was fetched from Strava.
+  google.protobuf.Timestamp fetch_time = 12;
+  // The segment's path, if asked for. It can be thousands of points.
+  repeated geo.v1.LatLng points = 13;
+}
+
+message GetStravaSegmentRequest {
+  // A link to the segment, e.g. https://www.strava.com/segments/40535472,
+  // or its ID.
+  string segment = 1;
+  // Include the path. It can be thousands of points; prefer the
+  // statistics unless the coordinates are needed.
+  bool include_points = 2;
+}
+
+message GetStravaSegmentResponse {
+  // The segment.
+  StravaSegment segment = 1;
 }

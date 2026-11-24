@@ -7,6 +7,7 @@
 package stravav1
 
 import (
+	v1 "github.com/bs-tools/trailrunn.ing/internal/gen/geo/v1"
 	_ "github.com/bs-tools/trailrunn.ing/internal/gen/mcp/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
@@ -1376,11 +1377,406 @@ func (b0 ImportStravaArchiveActivityResponse_builder) Build() *ImportStravaArchi
 	return m0
 }
 
+// A Strava segment: a stretch of road or trail athletes compare their times
+// on.
+type StravaSegment struct {
+	state                          protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Id                  string                 `protobuf:"bytes,1,opt,name=id,proto3"`
+	xxx_hidden_Name                string                 `protobuf:"bytes,2,opt,name=name,proto3"`
+	xxx_hidden_Url                 string                 `protobuf:"bytes,3,opt,name=url,proto3"`
+	xxx_hidden_GpxUrl              string                 `protobuf:"bytes,4,opt,name=gpx_url,json=gpxUrl,proto3"`
+	xxx_hidden_ActivityType        string                 `protobuf:"bytes,5,opt,name=activity_type,json=activityType,proto3"`
+	xxx_hidden_DistanceMeters      float64                `protobuf:"fixed64,6,opt,name=distance_meters,json=distanceMeters,proto3"`
+	xxx_hidden_ElevationGainMeters float64                `protobuf:"fixed64,7,opt,name=elevation_gain_meters,json=elevationGainMeters,proto3"`
+	xxx_hidden_AverageGradePercent float64                `protobuf:"fixed64,8,opt,name=average_grade_percent,json=averageGradePercent,proto3"`
+	xxx_hidden_Location            string                 `protobuf:"bytes,9,opt,name=location,proto3"`
+	xxx_hidden_Private             bool                   `protobuf:"varint,10,opt,name=private,proto3"`
+	xxx_hidden_Hazardous           bool                   `protobuf:"varint,11,opt,name=hazardous,proto3"`
+	xxx_hidden_FetchTime           *timestamppb.Timestamp `protobuf:"bytes,12,opt,name=fetch_time,json=fetchTime,proto3"`
+	xxx_hidden_Points              *[]*v1.LatLng          `protobuf:"bytes,13,rep,name=points,proto3"`
+	unknownFields                  protoimpl.UnknownFields
+	sizeCache                      protoimpl.SizeCache
+}
+
+func (x *StravaSegment) Reset() {
+	*x = StravaSegment{}
+	mi := &file_strava_v1_strava_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *StravaSegment) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*StravaSegment) ProtoMessage() {}
+
+func (x *StravaSegment) ProtoReflect() protoreflect.Message {
+	mi := &file_strava_v1_strava_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *StravaSegment) GetId() string {
+	if x != nil {
+		return x.xxx_hidden_Id
+	}
+	return ""
+}
+
+func (x *StravaSegment) GetName() string {
+	if x != nil {
+		return x.xxx_hidden_Name
+	}
+	return ""
+}
+
+func (x *StravaSegment) GetUrl() string {
+	if x != nil {
+		return x.xxx_hidden_Url
+	}
+	return ""
+}
+
+func (x *StravaSegment) GetGpxUrl() string {
+	if x != nil {
+		return x.xxx_hidden_GpxUrl
+	}
+	return ""
+}
+
+func (x *StravaSegment) GetActivityType() string {
+	if x != nil {
+		return x.xxx_hidden_ActivityType
+	}
+	return ""
+}
+
+func (x *StravaSegment) GetDistanceMeters() float64 {
+	if x != nil {
+		return x.xxx_hidden_DistanceMeters
+	}
+	return 0
+}
+
+func (x *StravaSegment) GetElevationGainMeters() float64 {
+	if x != nil {
+		return x.xxx_hidden_ElevationGainMeters
+	}
+	return 0
+}
+
+func (x *StravaSegment) GetAverageGradePercent() float64 {
+	if x != nil {
+		return x.xxx_hidden_AverageGradePercent
+	}
+	return 0
+}
+
+func (x *StravaSegment) GetLocation() string {
+	if x != nil {
+		return x.xxx_hidden_Location
+	}
+	return ""
+}
+
+func (x *StravaSegment) GetPrivate() bool {
+	if x != nil {
+		return x.xxx_hidden_Private
+	}
+	return false
+}
+
+func (x *StravaSegment) GetHazardous() bool {
+	if x != nil {
+		return x.xxx_hidden_Hazardous
+	}
+	return false
+}
+
+func (x *StravaSegment) GetFetchTime() *timestamppb.Timestamp {
+	if x != nil {
+		return x.xxx_hidden_FetchTime
+	}
+	return nil
+}
+
+func (x *StravaSegment) GetPoints() []*v1.LatLng {
+	if x != nil {
+		if x.xxx_hidden_Points != nil {
+			return *x.xxx_hidden_Points
+		}
+	}
+	return nil
+}
+
+func (x *StravaSegment) SetId(v string) {
+	x.xxx_hidden_Id = v
+}
+
+func (x *StravaSegment) SetName(v string) {
+	x.xxx_hidden_Name = v
+}
+
+func (x *StravaSegment) SetUrl(v string) {
+	x.xxx_hidden_Url = v
+}
+
+func (x *StravaSegment) SetGpxUrl(v string) {
+	x.xxx_hidden_GpxUrl = v
+}
+
+func (x *StravaSegment) SetActivityType(v string) {
+	x.xxx_hidden_ActivityType = v
+}
+
+func (x *StravaSegment) SetDistanceMeters(v float64) {
+	x.xxx_hidden_DistanceMeters = v
+}
+
+func (x *StravaSegment) SetElevationGainMeters(v float64) {
+	x.xxx_hidden_ElevationGainMeters = v
+}
+
+func (x *StravaSegment) SetAverageGradePercent(v float64) {
+	x.xxx_hidden_AverageGradePercent = v
+}
+
+func (x *StravaSegment) SetLocation(v string) {
+	x.xxx_hidden_Location = v
+}
+
+func (x *StravaSegment) SetPrivate(v bool) {
+	x.xxx_hidden_Private = v
+}
+
+func (x *StravaSegment) SetHazardous(v bool) {
+	x.xxx_hidden_Hazardous = v
+}
+
+func (x *StravaSegment) SetFetchTime(v *timestamppb.Timestamp) {
+	x.xxx_hidden_FetchTime = v
+}
+
+func (x *StravaSegment) SetPoints(v []*v1.LatLng) {
+	x.xxx_hidden_Points = &v
+}
+
+func (x *StravaSegment) HasFetchTime() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_FetchTime != nil
+}
+
+func (x *StravaSegment) ClearFetchTime() {
+	x.xxx_hidden_FetchTime = nil
+}
+
+type StravaSegment_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// The segment's ID on Strava.
+	Id string
+	// The segment's name, as its creator named it.
+	Name string
+	// The segment's page on Strava.
+	Url string
+	// Where to download the segment as a GPX file, while signed in.
+	GpxUrl string
+	// The sport, e.g. "Run" or "Ride".
+	ActivityType        string
+	DistanceMeters      float64
+	ElevationGainMeters float64
+	AverageGradePercent float64
+	// Where the segment is, e.g. "Squamish, BC, Canada". Empty if unknown.
+	Location string
+	// Private segments are only visible to the athlete who created them.
+	Private bool
+	// Whether athletes flagged the segment as hazardous, e.g. a descent on a
+	// busy road.
+	Hazardous bool
+	// When the segment was fetched from Strava.
+	FetchTime *timestamppb.Timestamp
+	// The segment's path, if asked for. It can be thousands of points.
+	Points []*v1.LatLng
+}
+
+func (b0 StravaSegment_builder) Build() *StravaSegment {
+	m0 := &StravaSegment{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Id = b.Id
+	x.xxx_hidden_Name = b.Name
+	x.xxx_hidden_Url = b.Url
+	x.xxx_hidden_GpxUrl = b.GpxUrl
+	x.xxx_hidden_ActivityType = b.ActivityType
+	x.xxx_hidden_DistanceMeters = b.DistanceMeters
+	x.xxx_hidden_ElevationGainMeters = b.ElevationGainMeters
+	x.xxx_hidden_AverageGradePercent = b.AverageGradePercent
+	x.xxx_hidden_Location = b.Location
+	x.xxx_hidden_Private = b.Private
+	x.xxx_hidden_Hazardous = b.Hazardous
+	x.xxx_hidden_FetchTime = b.FetchTime
+	x.xxx_hidden_Points = &b.Points
+	return m0
+}
+
+type GetStravaSegmentRequest struct {
+	state                    protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Segment       string                 `protobuf:"bytes,1,opt,name=segment,proto3"`
+	xxx_hidden_IncludePoints bool                   `protobuf:"varint,2,opt,name=include_points,json=includePoints,proto3"`
+	unknownFields            protoimpl.UnknownFields
+	sizeCache                protoimpl.SizeCache
+}
+
+func (x *GetStravaSegmentRequest) Reset() {
+	*x = GetStravaSegmentRequest{}
+	mi := &file_strava_v1_strava_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetStravaSegmentRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetStravaSegmentRequest) ProtoMessage() {}
+
+func (x *GetStravaSegmentRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_strava_v1_strava_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *GetStravaSegmentRequest) GetSegment() string {
+	if x != nil {
+		return x.xxx_hidden_Segment
+	}
+	return ""
+}
+
+func (x *GetStravaSegmentRequest) GetIncludePoints() bool {
+	if x != nil {
+		return x.xxx_hidden_IncludePoints
+	}
+	return false
+}
+
+func (x *GetStravaSegmentRequest) SetSegment(v string) {
+	x.xxx_hidden_Segment = v
+}
+
+func (x *GetStravaSegmentRequest) SetIncludePoints(v bool) {
+	x.xxx_hidden_IncludePoints = v
+}
+
+type GetStravaSegmentRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// A link to the segment, e.g. https://www.strava.com/segments/40535472,
+	// or its ID.
+	Segment string
+	// Include the path. It can be thousands of points; prefer the
+	// statistics unless the coordinates are needed.
+	IncludePoints bool
+}
+
+func (b0 GetStravaSegmentRequest_builder) Build() *GetStravaSegmentRequest {
+	m0 := &GetStravaSegmentRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Segment = b.Segment
+	x.xxx_hidden_IncludePoints = b.IncludePoints
+	return m0
+}
+
+type GetStravaSegmentResponse struct {
+	state              protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Segment *StravaSegment         `protobuf:"bytes,1,opt,name=segment,proto3"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *GetStravaSegmentResponse) Reset() {
+	*x = GetStravaSegmentResponse{}
+	mi := &file_strava_v1_strava_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetStravaSegmentResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetStravaSegmentResponse) ProtoMessage() {}
+
+func (x *GetStravaSegmentResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_strava_v1_strava_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *GetStravaSegmentResponse) GetSegment() *StravaSegment {
+	if x != nil {
+		return x.xxx_hidden_Segment
+	}
+	return nil
+}
+
+func (x *GetStravaSegmentResponse) SetSegment(v *StravaSegment) {
+	x.xxx_hidden_Segment = v
+}
+
+func (x *GetStravaSegmentResponse) HasSegment() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Segment != nil
+}
+
+func (x *GetStravaSegmentResponse) ClearSegment() {
+	x.xxx_hidden_Segment = nil
+}
+
+type GetStravaSegmentResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// The segment.
+	Segment *StravaSegment
+}
+
+func (b0 GetStravaSegmentResponse_builder) Build() *GetStravaSegmentResponse {
+	m0 := &GetStravaSegmentResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Segment = b.Segment
+	return m0
+}
+
 var File_strava_v1_strava_proto protoreflect.FileDescriptor
 
 const file_strava_v1_strava_proto_rawDesc = "" +
 	"\n" +
-	"\x16strava/v1/strava.proto\x12\tstrava.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x14mcp/v1/options.proto\"\xbd\x04\n" +
+	"\x16strava/v1/strava.proto\x12\tstrava.v1\x1a\x10geo/v1/geo.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x14mcp/v1/options.proto\"\xbd\x04\n" +
 	"\x10StravaConnection\x12\x1c\n" +
 	"\tconnected\x18\x01 \x01(\bR\tconnected\x12!\n" +
 	"\fathlete_name\x18\x02 \x01(\tR\vathleteName\x12\x1d\n" +
@@ -1450,13 +1846,34 @@ const file_strava_v1_strava_proto_rawDesc = "" +
 	"#ImportStravaArchiveActivityResponse\x12\x1f\n" +
 	"\vactivity_id\x18\x01 \x01(\tR\n" +
 	"activityId\x12'\n" +
-	"\x0ffile_unreadable\x18\x02 \x01(\bR\x0efileUnreadable*\x88\x01\n" +
+	"\x0ffile_unreadable\x18\x02 \x01(\bR\x0efileUnreadable\"\xcb\x03\n" +
+	"\rStravaSegment\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x10\n" +
+	"\x03url\x18\x03 \x01(\tR\x03url\x12\x17\n" +
+	"\agpx_url\x18\x04 \x01(\tR\x06gpxUrl\x12#\n" +
+	"\ractivity_type\x18\x05 \x01(\tR\factivityType\x12'\n" +
+	"\x0fdistance_meters\x18\x06 \x01(\x01R\x0edistanceMeters\x122\n" +
+	"\x15elevation_gain_meters\x18\a \x01(\x01R\x13elevationGainMeters\x122\n" +
+	"\x15average_grade_percent\x18\b \x01(\x01R\x13averageGradePercent\x12\x1a\n" +
+	"\blocation\x18\t \x01(\tR\blocation\x12\x18\n" +
+	"\aprivate\x18\n" +
+	" \x01(\bR\aprivate\x12\x1c\n" +
+	"\thazardous\x18\v \x01(\bR\thazardous\x129\n" +
+	"\n" +
+	"fetch_time\x18\f \x01(\v2\x1a.google.protobuf.TimestampR\tfetchTime\x12&\n" +
+	"\x06points\x18\r \x03(\v2\x0e.geo.v1.LatLngR\x06points\"Z\n" +
+	"\x17GetStravaSegmentRequest\x12\x18\n" +
+	"\asegment\x18\x01 \x01(\tR\asegment\x12%\n" +
+	"\x0einclude_points\x18\x02 \x01(\bR\rincludePoints\"N\n" +
+	"\x18GetStravaSegmentResponse\x122\n" +
+	"\asegment\x18\x01 \x01(\v2\x18.strava.v1.StravaSegmentR\asegment*\x88\x01\n" +
 	"\tSyncState\x12\x1a\n" +
 	"\x16SYNC_STATE_UNSPECIFIED\x10\x00\x12\x13\n" +
 	"\x0fSYNC_STATE_IDLE\x10\x01\x12\x16\n" +
 	"\x12SYNC_STATE_RUNNING\x10\x02\x12\x1b\n" +
 	"\x17SYNC_STATE_RATE_LIMITED\x10\x03\x12\x15\n" +
-	"\x11SYNC_STATE_FAILED\x10\x042\xfc\x05\n" +
+	"\x11SYNC_STATE_FAILED\x10\x042\xde\x06\n" +
 	"\rStravaService\x12d\n" +
 	"\x13GetStravaConnection\x12%.strava.v1.GetStravaConnectionRequest\x1a&.strava.v1.GetStravaConnectionResponse\x12I\n" +
 	"\n" +
@@ -1465,12 +1882,13 @@ const file_strava_v1_strava_proto_rawDesc = "" +
 	"\x10DisconnectStrava\x12\".strava.v1.DisconnectStravaRequest\x1a#.strava.v1.DisconnectStravaResponse\"\x06\xa2\x9f\x19\x02\b\x01\x12x\n" +
 	"\x17SetStravaKeepActivities\x12).strava.v1.SetStravaKeepActivitiesRequest\x1a*.strava.v1.SetStravaKeepActivitiesResponse\"\x06\xa2\x9f\x19\x02\b\x01\x12{\n" +
 	"\x18StartStravaArchiveImport\x12*.strava.v1.StartStravaArchiveImportRequest\x1a+.strava.v1.StartStravaArchiveImportResponse\"\x06\xa2\x9f\x19\x02\b\x01\x12\x84\x01\n" +
-	"\x1bImportStravaArchiveActivity\x12-.strava.v1.ImportStravaArchiveActivityRequest\x1a..strava.v1.ImportStravaArchiveActivityResponse\"\x06\xa2\x9f\x19\x02\b\x01B\xa4\x01\n" +
+	"\x1bImportStravaArchiveActivity\x12-.strava.v1.ImportStravaArchiveActivityRequest\x1a..strava.v1.ImportStravaArchiveActivityResponse\"\x06\xa2\x9f\x19\x02\b\x01\x12`\n" +
+	"\x10GetStravaSegment\x12\".strava.v1.GetStravaSegmentRequest\x1a#.strava.v1.GetStravaSegmentResponse\"\x03\x90\x02\x01B\xa4\x01\n" +
 	"\rcom.strava.v1B\vStravaProtoP\x01ZAgithub.com/bs-tools/trailrunn.ing/internal/gen/strava/v1;stravav1\xa2\x02\x03SXX\xaa\x02\tStrava.V1\xca\x02\tStrava\\V1\xe2\x02\x15Strava\\V1\\GPBMetadata\xea\x02\n" +
 	"Strava::V1b\x06proto3"
 
 var file_strava_v1_strava_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_strava_v1_strava_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
+var file_strava_v1_strava_proto_msgTypes = make([]protoimpl.MessageInfo, 19)
 var file_strava_v1_strava_proto_goTypes = []any{
 	(SyncState)(0),                              // 0: strava.v1.SyncState
 	(*StravaConnection)(nil),                    // 1: strava.v1.StravaConnection
@@ -1489,37 +1907,46 @@ var file_strava_v1_strava_proto_goTypes = []any{
 	(*StartStravaArchiveImportResponse)(nil),    // 14: strava.v1.StartStravaArchiveImportResponse
 	(*ImportStravaArchiveActivityRequest)(nil),  // 15: strava.v1.ImportStravaArchiveActivityRequest
 	(*ImportStravaArchiveActivityResponse)(nil), // 16: strava.v1.ImportStravaArchiveActivityResponse
-	(*timestamppb.Timestamp)(nil),               // 17: google.protobuf.Timestamp
+	(*StravaSegment)(nil),                       // 17: strava.v1.StravaSegment
+	(*GetStravaSegmentRequest)(nil),             // 18: strava.v1.GetStravaSegmentRequest
+	(*GetStravaSegmentResponse)(nil),            // 19: strava.v1.GetStravaSegmentResponse
+	(*timestamppb.Timestamp)(nil),               // 20: google.protobuf.Timestamp
+	(*v1.LatLng)(nil),                           // 21: geo.v1.LatLng
 }
 var file_strava_v1_strava_proto_depIdxs = []int32{
 	0,  // 0: strava.v1.StravaConnection.sync_state:type_name -> strava.v1.SyncState
-	17, // 1: strava.v1.StravaConnection.last_sync_time:type_name -> google.protobuf.Timestamp
-	17, // 2: strava.v1.StravaConnection.resume_time:type_name -> google.protobuf.Timestamp
+	20, // 1: strava.v1.StravaConnection.last_sync_time:type_name -> google.protobuf.Timestamp
+	20, // 2: strava.v1.StravaConnection.resume_time:type_name -> google.protobuf.Timestamp
 	1,  // 3: strava.v1.GetStravaConnectionResponse.connection:type_name -> strava.v1.StravaConnection
 	1,  // 4: strava.v1.SyncStravaResponse.connection:type_name -> strava.v1.StravaConnection
-	17, // 5: strava.v1.SyncActivityResponse.resume_time:type_name -> google.protobuf.Timestamp
+	20, // 5: strava.v1.SyncActivityResponse.resume_time:type_name -> google.protobuf.Timestamp
 	1,  // 6: strava.v1.DisconnectStravaResponse.connection:type_name -> strava.v1.StravaConnection
 	1,  // 7: strava.v1.SetStravaKeepActivitiesResponse.connection:type_name -> strava.v1.StravaConnection
 	13, // 8: strava.v1.StartStravaArchiveImportResponse.activities:type_name -> strava.v1.StravaArchiveActivity
-	2,  // 9: strava.v1.StravaService.GetStravaConnection:input_type -> strava.v1.GetStravaConnectionRequest
-	4,  // 10: strava.v1.StravaService.SyncStrava:input_type -> strava.v1.SyncStravaRequest
-	6,  // 11: strava.v1.StravaService.SyncActivity:input_type -> strava.v1.SyncActivityRequest
-	8,  // 12: strava.v1.StravaService.DisconnectStrava:input_type -> strava.v1.DisconnectStravaRequest
-	10, // 13: strava.v1.StravaService.SetStravaKeepActivities:input_type -> strava.v1.SetStravaKeepActivitiesRequest
-	12, // 14: strava.v1.StravaService.StartStravaArchiveImport:input_type -> strava.v1.StartStravaArchiveImportRequest
-	15, // 15: strava.v1.StravaService.ImportStravaArchiveActivity:input_type -> strava.v1.ImportStravaArchiveActivityRequest
-	3,  // 16: strava.v1.StravaService.GetStravaConnection:output_type -> strava.v1.GetStravaConnectionResponse
-	5,  // 17: strava.v1.StravaService.SyncStrava:output_type -> strava.v1.SyncStravaResponse
-	7,  // 18: strava.v1.StravaService.SyncActivity:output_type -> strava.v1.SyncActivityResponse
-	9,  // 19: strava.v1.StravaService.DisconnectStrava:output_type -> strava.v1.DisconnectStravaResponse
-	11, // 20: strava.v1.StravaService.SetStravaKeepActivities:output_type -> strava.v1.SetStravaKeepActivitiesResponse
-	14, // 21: strava.v1.StravaService.StartStravaArchiveImport:output_type -> strava.v1.StartStravaArchiveImportResponse
-	16, // 22: strava.v1.StravaService.ImportStravaArchiveActivity:output_type -> strava.v1.ImportStravaArchiveActivityResponse
-	16, // [16:23] is the sub-list for method output_type
-	9,  // [9:16] is the sub-list for method input_type
-	9,  // [9:9] is the sub-list for extension type_name
-	9,  // [9:9] is the sub-list for extension extendee
-	0,  // [0:9] is the sub-list for field type_name
+	20, // 9: strava.v1.StravaSegment.fetch_time:type_name -> google.protobuf.Timestamp
+	21, // 10: strava.v1.StravaSegment.points:type_name -> geo.v1.LatLng
+	17, // 11: strava.v1.GetStravaSegmentResponse.segment:type_name -> strava.v1.StravaSegment
+	2,  // 12: strava.v1.StravaService.GetStravaConnection:input_type -> strava.v1.GetStravaConnectionRequest
+	4,  // 13: strava.v1.StravaService.SyncStrava:input_type -> strava.v1.SyncStravaRequest
+	6,  // 14: strava.v1.StravaService.SyncActivity:input_type -> strava.v1.SyncActivityRequest
+	8,  // 15: strava.v1.StravaService.DisconnectStrava:input_type -> strava.v1.DisconnectStravaRequest
+	10, // 16: strava.v1.StravaService.SetStravaKeepActivities:input_type -> strava.v1.SetStravaKeepActivitiesRequest
+	12, // 17: strava.v1.StravaService.StartStravaArchiveImport:input_type -> strava.v1.StartStravaArchiveImportRequest
+	15, // 18: strava.v1.StravaService.ImportStravaArchiveActivity:input_type -> strava.v1.ImportStravaArchiveActivityRequest
+	18, // 19: strava.v1.StravaService.GetStravaSegment:input_type -> strava.v1.GetStravaSegmentRequest
+	3,  // 20: strava.v1.StravaService.GetStravaConnection:output_type -> strava.v1.GetStravaConnectionResponse
+	5,  // 21: strava.v1.StravaService.SyncStrava:output_type -> strava.v1.SyncStravaResponse
+	7,  // 22: strava.v1.StravaService.SyncActivity:output_type -> strava.v1.SyncActivityResponse
+	9,  // 23: strava.v1.StravaService.DisconnectStrava:output_type -> strava.v1.DisconnectStravaResponse
+	11, // 24: strava.v1.StravaService.SetStravaKeepActivities:output_type -> strava.v1.SetStravaKeepActivitiesResponse
+	14, // 25: strava.v1.StravaService.StartStravaArchiveImport:output_type -> strava.v1.StartStravaArchiveImportResponse
+	16, // 26: strava.v1.StravaService.ImportStravaArchiveActivity:output_type -> strava.v1.ImportStravaArchiveActivityResponse
+	19, // 27: strava.v1.StravaService.GetStravaSegment:output_type -> strava.v1.GetStravaSegmentResponse
+	20, // [20:28] is the sub-list for method output_type
+	12, // [12:20] is the sub-list for method input_type
+	12, // [12:12] is the sub-list for extension type_name
+	12, // [12:12] is the sub-list for extension extendee
+	0,  // [0:12] is the sub-list for field type_name
 }
 
 func init() { file_strava_v1_strava_proto_init() }
@@ -1533,7 +1960,7 @@ func file_strava_v1_strava_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_strava_v1_strava_proto_rawDesc), len(file_strava_v1_strava_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   16,
+			NumMessages:   19,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

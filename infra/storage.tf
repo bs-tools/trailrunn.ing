@@ -66,3 +66,35 @@ resource "google_storage_bucket_iam_member" "run_activity_data" {
   role   = "roles/storage.objectUser"
   member = google_service_account.run.member
 }
+
+# The cache of Strava segments, for segment downloads and routes made from
+# segments. A segment is a gzipped file of tens of kilobytes. Strava's API
+# policy allows caching its data for at most seven days, so objects are
+# deleted after six, as Cloud Storage applies lifecycle rules up to a day
+# late; the service also fetches segments older than six days again. Only
+# the service account can read and write it.
+resource "google_storage_bucket" "strava_segments" {
+  name                        = "${var.project}-strava-segments"
+  location                    = upper(var.region)
+  storage_class               = "STANDARD"
+  uniform_bucket_level_access = true
+  public_access_prevention    = "enforced"
+
+  lifecycle_rule {
+    condition {
+      age = 6
+    }
+    action {
+      type = "Delete"
+    }
+  }
+
+  depends_on = [google_project_service.services]
+}
+
+# The service caches, reads and deletes segments.
+resource "google_storage_bucket_iam_member" "run_strava_segments" {
+  bucket = google_storage_bucket.strava_segments.name
+  role   = "roles/storage.objectUser"
+  member = google_service_account.run.member
+}

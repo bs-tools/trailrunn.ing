@@ -43,6 +43,8 @@ type Service struct {
 	avalanches Avalanches
 	// Gets the user's touring limits, nil if there are none.
 	touringLimits TouringLimitsSource
+	// Gets Strava segments, nil if Strava isn't configured.
+	segments StravaSegments
 }
 
 // NewService creates a new Service.

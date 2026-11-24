@@ -43,6 +43,9 @@ const (
 	// StravaServiceImportStravaArchiveActivityProcedure is the procedure name of the StravaService's
 	// ImportStravaArchiveActivity RPC.
 	StravaServiceImportStravaArchiveActivityProcedure = "/strava.v1.StravaService/ImportStravaArchiveActivity"
+	// StravaServiceGetStravaSegmentProcedure is the procedure name of the StravaService's
+	// GetStravaSegment RPC.
+	StravaServiceGetStravaSegmentProcedure = "/strava.v1.StravaService/GetStravaSegment"
 )
 
 var (
@@ -95,6 +98,14 @@ var (
 			Procedure:  StravaServiceImportStravaArchiveActivityProcedure,
 		}
 	})
+	stravaServiceGetStravaSegmentSpec = sync.OnceValue(func() connect.Spec {
+		return connect.Spec{
+			StreamType:       connect.StreamTypeUnary,
+			Schema:           v1.File_strava_v1_strava_proto.Services().ByName("StravaService").Methods().ByName("GetStravaSegment"),
+			Procedure:        StravaServiceGetStravaSegmentProcedure,
+			IdempotencyLevel: connect.IdempotencyNoSideEffects,
+		}
+	})
 )
 
 // StravaServiceClient is a client for the strava.v1.StravaService service.
@@ -134,6 +145,15 @@ type StravaServiceClient interface {
 	// Import an activity of the archive whose import was started, with its
 	// original file from the archive, if it has one.
 	ImportStravaArchiveActivity(context.Context, *v1.ImportStravaArchiveActivityRequest) (*v1.ImportStravaArchiveActivityResponse, error)
+	// Get a Strava segment by its link or ID, e.g.
+	// https://www.strava.com/segments/40535472: its name, statistics and
+	// optionally its path. Download it as a GPX file at gpx_url, or make a
+	// route from it with RouteService.CreateRoute's strava_segment. Strava's
+	// API needs the user's Strava connection to get segments, so Strava must
+	// be connected. Segments are cached for up to 6 days, as Strava's API
+	// terms allow at most 7, so changes to a segment on Strava can take that
+	// long to show.
+	GetStravaSegment(context.Context, *v1.GetStravaSegmentRequest) (*v1.GetStravaSegmentResponse, error)
 }
 
 // NewStravaServiceClient constructs a client for the strava.v1.StravaService service. Multiple
@@ -179,6 +199,15 @@ type StravaServiceHandler interface {
 	// Import an activity of the archive whose import was started, with its
 	// original file from the archive, if it has one.
 	ImportStravaArchiveActivity(context.Context, *v1.ImportStravaArchiveActivityRequest) (*v1.ImportStravaArchiveActivityResponse, error)
+	// Get a Strava segment by its link or ID, e.g.
+	// https://www.strava.com/segments/40535472: its name, statistics and
+	// optionally its path. Download it as a GPX file at gpx_url, or make a
+	// route from it with RouteService.CreateRoute's strava_segment. Strava's
+	// API needs the user's Strava connection to get segments, so Strava must
+	// be connected. Segments are cached for up to 6 days, as Strava's API
+	// terms allow at most 7, so changes to a segment on Strava can take that
+	// long to show.
+	GetStravaSegment(context.Context, *v1.GetStravaSegmentRequest) (*v1.GetStravaSegmentResponse, error)
 }
 
 // RegisterStravaServiceHandler registers svc as the strava.v1.StravaService implementation on
@@ -193,6 +222,7 @@ func RegisterStravaServiceHandler(server *connect.Server, svc StravaServiceHandl
 		connect.Method{Spec: stravaServiceSetStravaKeepActivitiesSpec(), Handler: adapter.setStravaKeepActivities},
 		connect.Method{Spec: stravaServiceStartStravaArchiveImportSpec(), Handler: adapter.startStravaArchiveImport},
 		connect.Method{Spec: stravaServiceImportStravaArchiveActivitySpec(), Handler: adapter.importStravaArchiveActivity},
+		connect.Method{Spec: stravaServiceGetStravaSegmentSpec(), Handler: adapter.getStravaSegment},
 	)
 }
 
@@ -225,6 +255,10 @@ func (UnimplementedStravaServiceHandler) StartStravaArchiveImport(context.Contex
 
 func (UnimplementedStravaServiceHandler) ImportStravaArchiveActivity(context.Context, *v1.ImportStravaArchiveActivityRequest) (*v1.ImportStravaArchiveActivityResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, "strava.v1.StravaService.ImportStravaArchiveActivity is not implemented")
+}
+
+func (UnimplementedStravaServiceHandler) GetStravaSegment(context.Context, *v1.GetStravaSegmentRequest) (*v1.GetStravaSegmentResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, "strava.v1.StravaService.GetStravaSegment is not implemented")
 }
 
 type stravaServiceClient struct {
@@ -282,6 +316,14 @@ func (c *stravaServiceClient) StartStravaArchiveImport(ctx context.Context, req 
 func (c *stravaServiceClient) ImportStravaArchiveActivity(ctx context.Context, req *v1.ImportStravaArchiveActivityRequest) (*v1.ImportStravaArchiveActivityResponse, error) {
 	var res v1.ImportStravaArchiveActivityResponse
 	if err := c.client.CallUnary(ctx, stravaServiceImportStravaArchiveActivitySpec(), req, &res); err != nil {
+		return nil, err
+	}
+	return &res, nil
+}
+
+func (c *stravaServiceClient) GetStravaSegment(ctx context.Context, req *v1.GetStravaSegmentRequest) (*v1.GetStravaSegmentResponse, error) {
+	var res v1.GetStravaSegmentResponse
+	if err := c.client.CallUnary(ctx, stravaServiceGetStravaSegmentSpec(), req, &res); err != nil {
 		return nil, err
 	}
 	return &res, nil
@@ -367,6 +409,18 @@ func (h stravaServiceHandler) importStravaArchiveActivity(ctx context.Context, _
 		return err
 	}
 	res, err := h.svc.ImportStravaArchiveActivity(ctx, &req)
+	if err != nil {
+		return err
+	}
+	return stream.Send(res)
+}
+
+func (h stravaServiceHandler) getStravaSegment(ctx context.Context, _ connect.Spec, stream connect.ServerStream) error {
+	var req v1.GetStravaSegmentRequest
+	if err := stream.Receive(&req); err != nil {
+		return err
+	}
+	res, err := h.svc.GetStravaSegment(ctx, &req)
 	if err != nil {
 		return err
 	}

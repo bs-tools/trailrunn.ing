@@ -18,8 +18,9 @@ so you can bring your own AI agent to do the planning.
   [OpenStreetMap](https://www.openstreetmap.org) data), prefer the paths you've run before
   (your heatmap), or are joined by straight lines for off-trail sections, mixed
   within one route. Drag the route to reshape it, undo and redo, close the loop
-  or turn it into an out and back. You can also import GPX files or turn a past
-  activity into a route. Each route has an elevation profile, distance, gain,
+  or turn it into an out and back. You can also import GPX files, turn a past
+  activity into a route, or make one from a Strava segment's link, which
+  also downloads as GPX. Each route has an elevation profile, distance, gain,
   grades and a terrain breakdown, and can be downloaded as GPX for your watch.
   Overlays show your personal heatmap, OpenStreetMap trails and points of
   interest.
@@ -121,6 +122,17 @@ files, not in the database: locally in the `activity-data` directory of the
 working directory, which is ignored by git, or elsewhere with
 `-activity-dir`, or in a Google Cloud Storage bucket with
 `-activity-bucket` (`TRAIL_TOOLS_ACTIVITY_BUCKET`).
+
+Routes can be made from Strava segments, from a link like
+`https://www.strava.com/segments/40535472`, and segments download as GPX
+files at `/strava/segments/<id>.gpx`. Strava's API only gives segments to
+the athletes connected to the app, so this needs Strava connected, and each
+new segment costs two of the app's Strava requests. Segments are cached, as
+they're the same for everyone, but for at most six days: Strava's API
+policy allows seven. Private segments aren't cached, so only their owner
+sees them. The cache is the `strava-segments` directory, or `-segment-dir`,
+or a bucket with `-segment-bucket` (`TRAIL_TOOLS_SEGMENT_BUCKET`) that
+deletes objects after six days.
 
 When the server is reachable from the internet, Strava can also push new,
 changed and deleted activities to it as they happen, so they appear within
@@ -560,6 +572,15 @@ It's set up like the photos bucket, private and in `us-west1`, and Terraform
 passes it to the service as `TRAIL_TOOLS_ACTIVITY_BUCKET`. Streams are
 stored compactly, at Strava's precision, in about a seventh of the space of
 the API's message.
+
+### Strava segments
+
+Strava segments are cached in the `<project>-strava-segments` Cloud Storage
+bucket, set up like the photos bucket, with a lifecycle rule deleting
+objects after six days, as Strava's API policy allows caching for at most
+seven and Cloud Storage applies the rule up to a day late. A segment is a
+gzipped file of tens of kilobytes, so the bucket stays well within the free
+tier. Terraform passes it to the service as `TRAIL_TOOLS_SEGMENT_BUCKET`.
 
 ### Elevation tiles
 

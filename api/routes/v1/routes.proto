@@ -302,11 +302,16 @@ message CreateRouteRequest {
     // an editable copy of an imported route with conversion SNAP. The saved
     // route is not changed.
     string route_id = 8;
+    // A link to a Strava segment, e.g.
+    // https://www.strava.com/segments/40535472, or its ID, whose path
+    // becomes the route, named after the segment unless name is set.
+    // Strava must be connected. See StravaService.GetStravaSegment.
+    string strava_segment = 9;
   }
   // Include the full path in the response.
   bool include_points = 6;
-  // How a GPX file, activity or route becomes the new route. Ignored for
-  // waypoints. Defaults to EXACT.
+  // How a GPX file, activity, route or segment becomes the new route.
+  // Ignored for waypoints. Defaults to EXACT.
   TrackConversion conversion = 7;
 }
 
