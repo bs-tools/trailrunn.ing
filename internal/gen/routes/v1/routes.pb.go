@@ -1561,6 +1561,15 @@ func (x *CreateRouteRequest) GetRouteId() string {
 	return ""
 }
 
+func (x *CreateRouteRequest) GetStravaSegment() string {
+	if x != nil {
+		if x, ok := x.xxx_hidden_Source.(*createRouteRequest_StravaSegment); ok {
+			return x.StravaSegment
+		}
+	}
+	return ""
+}
+
 func (x *CreateRouteRequest) GetIncludePoints() bool {
 	if x != nil {
 		return x.xxx_hidden_IncludePoints
@@ -1601,6 +1610,10 @@ func (x *CreateRouteRequest) SetActivityId(v string) {
 
 func (x *CreateRouteRequest) SetRouteId(v string) {
 	x.xxx_hidden_Source = &createRouteRequest_RouteId{v}
+}
+
+func (x *CreateRouteRequest) SetStravaSegment(v string) {
+	x.xxx_hidden_Source = &createRouteRequest_StravaSegment{v}
 }
 
 func (x *CreateRouteRequest) SetIncludePoints(v bool) {
@@ -1650,6 +1663,14 @@ func (x *CreateRouteRequest) HasRouteId() bool {
 	return ok
 }
 
+func (x *CreateRouteRequest) HasStravaSegment() bool {
+	if x == nil {
+		return false
+	}
+	_, ok := x.xxx_hidden_Source.(*createRouteRequest_StravaSegment)
+	return ok
+}
+
 func (x *CreateRouteRequest) ClearSource() {
 	x.xxx_hidden_Source = nil
 }
@@ -1678,11 +1699,18 @@ func (x *CreateRouteRequest) ClearRouteId() {
 	}
 }
 
+func (x *CreateRouteRequest) ClearStravaSegment() {
+	if _, ok := x.xxx_hidden_Source.(*createRouteRequest_StravaSegment); ok {
+		x.xxx_hidden_Source = nil
+	}
+}
+
 const CreateRouteRequest_Source_not_set_case case_CreateRouteRequest_Source = 0
 const CreateRouteRequest_Waypoints_case case_CreateRouteRequest_Source = 3
 const CreateRouteRequest_Gpx_case case_CreateRouteRequest_Source = 4
 const CreateRouteRequest_ActivityId_case case_CreateRouteRequest_Source = 5
 const CreateRouteRequest_RouteId_case case_CreateRouteRequest_Source = 8
+const CreateRouteRequest_StravaSegment_case case_CreateRouteRequest_Source = 9
 
 func (x *CreateRouteRequest) WhichSource() case_CreateRouteRequest_Source {
 	if x == nil {
@@ -1697,6 +1725,8 @@ func (x *CreateRouteRequest) WhichSource() case_CreateRouteRequest_Source {
 		return CreateRouteRequest_ActivityId_case
 	case *createRouteRequest_RouteId:
 		return CreateRouteRequest_RouteId_case
+	case *createRouteRequest_StravaSegment:
+		return CreateRouteRequest_StravaSegment_case
 	default:
 		return CreateRouteRequest_Source_not_set_case
 	}
@@ -1724,11 +1754,16 @@ type CreateRouteRequest_builder struct {
 	// an editable copy of an imported route with conversion SNAP. The saved
 	// route is not changed.
 	RouteId *string
+	// A link to a Strava segment, e.g.
+	// https://www.strava.com/segments/40535472, or its ID, whose path
+	// becomes the route, named after the segment unless name is set.
+	// Strava must be connected. See StravaService.GetStravaSegment.
+	StravaSegment *string
 	// -- end of xxx_hidden_Source
 	// Include the full path in the response.
 	IncludePoints bool
-	// How a GPX file, activity or route becomes the new route. Ignored for
-	// waypoints. Defaults to EXACT.
+	// How a GPX file, activity, route or segment becomes the new route.
+	// Ignored for waypoints. Defaults to EXACT.
 	Conversion TrackConversion
 }
 
@@ -1749,6 +1784,9 @@ func (b0 CreateRouteRequest_builder) Build() *CreateRouteRequest {
 	}
 	if b.RouteId != nil {
 		x.xxx_hidden_Source = &createRouteRequest_RouteId{*b.RouteId}
+	}
+	if b.StravaSegment != nil {
+		x.xxx_hidden_Source = &createRouteRequest_StravaSegment{*b.StravaSegment}
 	}
 	x.xxx_hidden_IncludePoints = b.IncludePoints
 	x.xxx_hidden_Conversion = b.Conversion
@@ -1793,6 +1831,14 @@ type createRouteRequest_RouteId struct {
 	RouteId string `protobuf:"bytes,8,opt,name=route_id,json=routeId,proto3,oneof"`
 }
 
+type createRouteRequest_StravaSegment struct {
+	// A link to a Strava segment, e.g.
+	// https://www.strava.com/segments/40535472, or its ID, whose path
+	// becomes the route, named after the segment unless name is set.
+	// Strava must be connected. See StravaService.GetStravaSegment.
+	StravaSegment string `protobuf:"bytes,9,opt,name=strava_segment,json=stravaSegment,proto3,oneof"`
+}
+
 func (*createRouteRequest_Waypoints) isCreateRouteRequest_Source() {}
 
 func (*createRouteRequest_Gpx) isCreateRouteRequest_Source() {}
@@ -1800,6 +1846,8 @@ func (*createRouteRequest_Gpx) isCreateRouteRequest_Source() {}
 func (*createRouteRequest_ActivityId) isCreateRouteRequest_Source() {}
 
 func (*createRouteRequest_RouteId) isCreateRouteRequest_Source() {}
+
+func (*createRouteRequest_StravaSegment) isCreateRouteRequest_Source() {}
 
 type CreateRouteResponse struct {
 	state              protoimpl.MessageState `protogen:"opaque.v1"`
@@ -3792,7 +3840,7 @@ const file_routes_v1_routes_proto_rawDesc = "" +
 	"\tWaypoints\x12,\n" +
 	"\twaypoints\x18\x01 \x03(\v2\x0e.geo.v1.LatLngR\twaypoints\x123\n" +
 	"\aprofile\x18\x02 \x01(\x0e2\x19.routes.v1.RoutingProfileR\aprofile\x12<\n" +
-	"\fleg_profiles\x18\x03 \x03(\x0e2\x19.routes.v1.RoutingProfileR\vlegProfiles\"\xc1\x02\n" +
+	"\fleg_profiles\x18\x03 \x03(\x0e2\x19.routes.v1.RoutingProfileR\vlegProfiles\"\xea\x02\n" +
 	"\x12CreateRouteRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12 \n" +
 	"\vdescription\x18\x02 \x01(\tR\vdescription\x124\n" +
@@ -3800,7 +3848,8 @@ const file_routes_v1_routes_proto_rawDesc = "" +
 	"\x03gpx\x18\x04 \x01(\tH\x00R\x03gpx\x12!\n" +
 	"\vactivity_id\x18\x05 \x01(\tH\x00R\n" +
 	"activityId\x12\x1b\n" +
-	"\broute_id\x18\b \x01(\tH\x00R\arouteId\x12%\n" +
+	"\broute_id\x18\b \x01(\tH\x00R\arouteId\x12'\n" +
+	"\x0estrava_segment\x18\t \x01(\tH\x00R\rstravaSegment\x12%\n" +
 	"\x0einclude_points\x18\x06 \x01(\bR\rincludePoints\x12:\n" +
 	"\n" +
 	"conversion\x18\a \x01(\x0e2\x1a.routes.v1.TrackConversionR\n" +
@@ -4035,6 +4084,7 @@ func file_routes_v1_routes_proto_init() {
 		(*createRouteRequest_Gpx)(nil),
 		(*createRouteRequest_ActivityId)(nil),
 		(*createRouteRequest_RouteId)(nil),
+		(*createRouteRequest_StravaSegment)(nil),
 	}
 	file_routes_v1_routes_proto_msgTypes[14].OneofWrappers = []any{}
 	file_routes_v1_routes_proto_msgTypes[18].OneofWrappers = []any{

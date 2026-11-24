@@ -290,6 +290,18 @@ var (
 		"activity-data",
 		"The local directory to store activities' streams and Strava's responses in, if -activity-bucket is unset",
 	)
+	segmentBucket = flag.String(
+		"segment-bucket",
+		"",
+		"The Google Cloud Storage bucket to cache Strava segments in, using the application default credentials."+
+			" Strava's API policy allows caching for at most 7 days, so the bucket must delete objects within that."+
+			" If unset, they're cached in -segment-dir",
+	)
+	segmentDir = flag.String(
+		"segment-dir",
+		"strava-segments",
+		"The local directory to cache Strava segments in, if -segment-bucket is unset",
+	)
 	garminClientID = flag.String(
 		"garmin-client-id",
 		"",
@@ -370,6 +382,8 @@ func main() {
 		*photoDir,
 		*activityBucket,
 		*activityDir,
+		*segmentBucket,
+		*segmentDir,
 		*demBucket,
 		garminConfig{ClientID: *garminClientID, ClientSecret: *garminClientSecret, WebhookSecret: *garminWebhookSecret},
 		mapdata.Config{},
@@ -464,6 +478,8 @@ func run(
 	photoDir string,
 	activityBucket string,
 	activityDir string,
+	segmentBucket string,
+	segmentDir string,
 	demBucket string,
 	garminConf garminConfig,
 	mapConfig mapdata.Config,
@@ -491,6 +507,8 @@ func run(
 		return errors.New("photo-bucket or photo-dir is required")
 	case activityBucket == "" && activityDir == "":
 		return errors.New("activity-bucket or activity-dir is required")
+	case segmentBucket == "" && segmentDir == "":
+		return errors.New("segment-bucket or segment-dir is required")
 	}
 	dbURL, err := url.Parse(databaseURL)
 	if err != nil {
@@ -575,6 +593,7 @@ func run(
 	var stravaSyncer *stravasvc.Syncer
 	var stravaOAuth *stravasvc.OAuth
 	var stravaWebhook *stravasvc.Webhook
+	var stravaSegments *stravasvc.Segments
 	var fakeStravaServer *fakestrava.Server
 	// Links to activities and athletes go to Strava's website, or the fake's.
 	stravaWebURL := strava.WebURL
@@ -626,6 +645,11 @@ func run(
 			trigger = syncJob
 		}
 		stravaSyncer = stravasvc.NewSyncer(ctx, log, report, activityRepo, stravaClient, background, trigger)
+		segmentCache, err := newBlobStore(googleCtx, log, "Strava segments", segmentBucket, segmentDir)
+		if err != nil {
+			return err
+		}
+		stravaSegments = stravasvc.NewSegments(log, report, activityRepo, stravaClient, segmentCache, stravaWebURL)
 		stravaOAuth = stravasvc.NewOAuth(log, report, stravaClient, activityRepo, stravaSyncer, []byte(stravaClientSecret))
 		if stravaWebhookVerifyToken != "" {
 			stravaWebhook, err = stravasvc.NewWebhook(log, report, activityRepo, stravaSyncer, stravaClient,
@@ -680,6 +704,9 @@ func run(
 	}
 	activityService := activity.NewService(log, report, activityRepo, lactateRepo, stravaWebURL)
 	stravaService := stravasvc.NewService(log, report, activityRepo, activityRepo, stravaSyncer, stravaOAuth, stravaWebURL)
+	if stravaSegments != nil {
+		stravaService.SetSegments(stravaSegments)
+	}
 	garminService := garminsvc.NewService(report, activityRepo, garminSyncer)
 	// Avalanche forecasts are shared by the services, so they share their
 	// cache too.
@@ -687,6 +714,9 @@ func run(
 	routeService := route.NewService(log, report, routeRepo, activityRepo, routing.NewRouter(db), mapData)
 	routeService.SetAvalanches(avalanches)
 	routeService.SetTouringLimitsSource(planRepo)
+	if stravaSegments != nil {
+		routeService.SetStravaSegments(stravaSegments)
+	}
 	geoService := geosvc.NewService(log, report, mapData, routing.NewFinder(db), activityRepo)
 	geoService.SetAvalanches(avalanches)
 	planService := plan.NewService(log, report, planRepo, routeRepo, activityRepo, mapData)
@@ -904,6 +934,8 @@ func run(
 	// Serve routes as GPX files, falling back to the frontend for other
 	// /routes/ pages.
 	mux.Handle("/routes/", authenticate(routeService.DownloadHandler(indexHandler)))
+	// Strava segments as GPX files.
+	mux.Handle(stravasvc.SegmentDownloadPath, authenticate(stravaService.SegmentDownloadHandler()))
 	// Serve strength workouts as Garmin workouts, falling back to the
 	// frontend for other /workouts/ pages.
 	mux.Handle("/workouts/", authenticate(planService.DownloadHandler(indexHandler)))

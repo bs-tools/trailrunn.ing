@@ -73,3 +73,17 @@ export const startStravaArchiveImport = StravaService.method.startStravaArchiveI
  * @generated from rpc strava.v1.StravaService.ImportStravaArchiveActivity
  */
 export const importStravaArchiveActivity = StravaService.method.importStravaArchiveActivity;
+
+/**
+ * Get a Strava segment by its link or ID, e.g.
+ * https://www.strava.com/segments/40535472: its name, statistics and
+ * optionally its path. Download it as a GPX file at gpx_url, or make a
+ * route from it with RouteService.CreateRoute's strava_segment. Strava's
+ * API needs the user's Strava connection to get segments, so Strava must
+ * be connected. Segments are cached for up to 6 days, as Strava's API
+ * terms allow at most 7, so changes to a segment on Strava can take that
+ * long to show.
+ *
+ * @generated from rpc strava.v1.StravaService.GetStravaSegment
+ */
+export const getStravaSegment = StravaService.method.getStravaSegment;

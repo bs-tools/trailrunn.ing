@@ -14,5 +14,8 @@ localhost.pem
 # -activity-dir
 /activity-data/
 
+# Strava segments cached locally, see -segment-dir
+/strava-segments/
+
 # Test binaries, from go test -c.
 *.test

@@ -58,6 +58,9 @@ type fakeStrava struct {
 	listErr error
 	// Fetching the streams of these activities fails.
 	failStreams map[int64]bool
+	// The segments, and how many times one was fetched.
+	segments     map[int64]*strava.Segment
+	segmentCalls int
 	// The number of activities fetched.
 	activityCalls int
 	// The number of activities fetched within a request marked with

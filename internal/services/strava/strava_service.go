@@ -42,6 +42,8 @@ type Service struct {
 	archive ArchiveRepository
 	syncer  *Syncer
 	oauth   *OAuth
+	// Gets segments, nil if Strava isn't configured.
+	segments *Segments
 	// The URL of Strava's website.
 	webURL string
 }

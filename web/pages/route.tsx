@@ -13,7 +13,11 @@ import Card from "@components/ui/card";
 import { CheckboxField, SelectField, TextField } from "@components/ui/fields";
 import type { SelectOption } from "@components/ui/fields";
 import QueryError, { ErrorText } from "@components/ui/query-error";
-import { primaryButton } from "@components/ui/styles";
+import {
+  linkClass,
+  primaryButton,
+  secondaryButton,
+} from "@components/ui/styles";
 import { useMutation, useQuery } from "@connectrpc/connect-query";
 import { skipToken, useQueryClient } from "@tanstack/react-query";
 import { listActivities } from "gen/activities/v1/activities-ActivityService_connectquery";
@@ -30,7 +34,17 @@ import {
 } from "gen/routes/v1/routes-RouteService_connectquery";
 import type { CheckTrackCoverageRequest, Route } from "gen/routes/v1/routes_pb";
 import { RouteService, TrackConversion } from "gen/routes/v1/routes_pb";
-import { formatDate, formatHoursMinutes, formatKm } from "helpers/format";
+import {
+  getStravaConnection,
+  getStravaSegment,
+} from "gen/strava/v1/strava-StravaService_connectquery";
+import type { StravaSegment } from "gen/strava/v1/strava_pb";
+import {
+  formatDate,
+  formatHoursMinutes,
+  formatKm,
+  formatMeters,
+} from "helpers/format";
 import { styleOfWorkout } from "helpers/labels";
 import { invalidateServices } from "helpers/query";
 import { hasRoute, workoutDetails, workoutTargets } from "helpers/workouts";
@@ -292,7 +306,161 @@ const FromActivity: React.FC = () => {
   );
 };
 
-type NewMode = "draw" | "gpx" | "activity";
+// SegmentSummary shows a Strava segment's statistics, with links to it on
+// Strava and to download it.
+const SegmentSummary: React.FC<{ segment: StravaSegment }> = ({ segment }) => (
+  <div className="flex flex-col gap-2 rounded-md bg-gray-50 p-3 ring-1 ring-gray-200">
+    <div>
+      <p className="font-semibold text-gray-900">{segment.name}</p>
+      {segment.location !== "" && (
+        <p className="text-sm text-gray-600">{segment.location}</p>
+      )}
+    </div>
+    <p className="flex flex-wrap gap-x-4 text-sm text-gray-700 tabular-nums">
+      <span>
+        <span className="font-semibold">
+          {formatKm(segment.distanceMeters)}
+        </span>
+      </span>
+      <span>
+        <span className="font-semibold">
+          {formatMeters(segment.elevationGainMeters)}
+        </span>{" "}
+        gain
+      </span>
+      <span>{segment.averageGradePercent.toFixed(1)}% average</span>
+    </p>
+    {segment.hazardous && (
+      <p className="text-sm text-amber-800">
+        Athletes flagged this segment as hazardous on Strava.
+      </p>
+    )}
+    {segment.private && (
+      <p className="text-sm text-gray-600">
+        A private segment: only you can see it on Strava.
+      </p>
+    )}
+    <p className="flex flex-wrap gap-x-4 text-sm">
+      <a href={segment.gpxUrl} download className={linkClass}>
+        Download GPX
+      </a>
+      <a
+        href={segment.url}
+        target="_blank"
+        rel="noreferrer"
+        className={linkClass}
+      >
+        View on Strava
+      </a>
+    </p>
+  </div>
+);
+
+/**
+ * FromSegment makes a route from a Strava segment, from a link to it, and
+ * offers it as a GPX file. Segments are looked up when asked, not as the
+ * link is typed, as each lookup costs Strava requests shared by everyone.
+ */
+const FromSegment: React.FC = () => {
+  const { onCreated, linkError } = useRouteCreated();
+  const strava = useQuery(getStravaConnection);
+  const [link, setLink] = useState("");
+  // The link looked up, empty until the user asks.
+  const [lookedUp, setLookedUp] = useState("");
+  const [name, setName] = useState("");
+  // A segment's path is usually meant exactly, like a race course's.
+  const [exact, setExact] = useState(true);
+  const segment = useQuery(
+    getStravaSegment,
+    lookedUp === "" ? skipToken : { segment: lookedUp },
+    { retry: false }
+  );
+  const create = useMutation(createRoute, {
+    onSuccess: async (response) => {
+      await onCreated(response.route, response.warning);
+    },
+  });
+  if (strava.data?.connection?.connected === false) {
+    return (
+      <p className="text-sm text-gray-600">
+        Strava only gives segments to the athletes connected to the app. Connect
+        Strava in{" "}
+        <Link to="/settings" className={linkClass}>
+          Settings
+        </Link>{" "}
+        first.
+      </p>
+    );
+  }
+  const found = lookedUp === link.trim() ? segment.data?.segment : undefined;
+  return (
+    <form
+      className="flex flex-col gap-3"
+      onSubmit={(event) => {
+        event.preventDefault();
+        if (found === undefined) {
+          setLookedUp(link.trim());
+          return;
+        }
+        create.mutate({
+          conversion: trackConversion(exact),
+          name: name.trim() === "" ? found.name : name.trim(),
+          source: { case: "stravaSegment", value: found.id },
+        });
+      }}
+    >
+      <div className="flex items-end gap-2">
+        <TextField
+          label="Segment link"
+          value={link}
+          onChange={setLink}
+          placeholder="https://www.strava.com/segments/40535472"
+          className="min-w-0 grow"
+        />
+        <button
+          type="button"
+          className={secondaryButton}
+          disabled={link.trim() === "" || segment.isFetching}
+          onClick={() => {
+            setLookedUp(link.trim());
+          }}
+        >
+          {segment.isFetching ? "Finding…" : "Find"}
+        </button>
+      </div>
+      <ErrorText error={segment.error} />
+      {found !== undefined && (
+        <>
+          <SegmentSummary segment={found} />
+          <TextField
+            label="Name"
+            value={name}
+            onChange={setName}
+            placeholder={found.name}
+          />
+          <ExactTrackField
+            exact={exact}
+            onChange={setExact}
+            source={undefined}
+          />
+          <SnapProgress pending={create.isPending && !exact} />
+          <ErrorText error={create.error ?? linkError} />
+          <div>
+            <button
+              type="submit"
+              className={primaryButton}
+              disabled={create.isPending}
+            >
+              {create.isPending ? "Creating…" : "Create route"}
+            </button>
+          </div>
+        </>
+      )}
+    </form>
+  );
+};
+
+type NewMode = "draw" | "gpx" | "activity" | "segment";
 
 interface WorkoutContextProps {
   workout: Workout;
@@ -338,6 +506,7 @@ const NewRoute: React.FC = () => {
     { label: "Draw on map", mode: "draw" },
     { label: "Import GPX", mode: "gpx" },
     { label: "From activity", mode: "activity" },
+    { label: "Strava segment", mode: "segment" },
   ];
 
   return (
@@ -410,6 +579,11 @@ const NewRoute: React.FC = () => {
       {mode === "activity" && (
         <Card title="Create a route from an activity" className="max-w-xl">
           <FromActivity />
+        </Card>
+      )}
+      {mode === "segment" && (
+        <Card title="Create a route from a Strava segment" className="max-w-xl">
+          <FromSegment />
         </Card>
       )}
     </div>

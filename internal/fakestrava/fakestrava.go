@@ -94,6 +94,8 @@ func New(appURL string, router Router, cacheDir string) *Server {
 	s.mux.HandleFunc("GET "+p+"/api/v3/activities/{id}", s.authenticated(s.getActivity))
 	s.mux.HandleFunc("GET "+p+"/api/v3/activities/{id}/streams", s.authenticated(s.getStreams))
 	s.mux.HandleFunc("GET "+p+"/api/v3/activities/{id}/photos", s.authenticated(s.getPhotos))
+	s.mux.HandleFunc("GET "+p+"/api/v3/segments/{id}", s.authenticated(s.getSegment))
+	s.mux.HandleFunc("GET "+p+"/api/v3/segments/{id}/streams", s.authenticated(s.getSegmentStreams))
 	s.mux.HandleFunc("GET "+p+"/photos/{activity}/{photo}", s.photoImage)
 	s.mux.HandleFunc("GET "+p+"/activities/{id}", s.activityPageHandler)
 	s.mux.HandleFunc("GET "+p+"/athletes/{id}", s.athletePageHandler)

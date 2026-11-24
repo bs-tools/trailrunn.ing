@@ -4,6 +4,8 @@
 
 import type { GenEnum, GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv2";
 import { enumDesc, fileDesc, messageDesc, serviceDesc } from "@bufbuild/protobuf/codegenv2";
+import type { LatLng } from "../../geo/v1/geo_pb";
+import { file_geo_v1_geo } from "../../geo/v1/geo_pb";
 import type { Timestamp } from "@bufbuild/protobuf/wkt";
 import { file_google_protobuf_timestamp } from "@bufbuild/protobuf/wkt";
 import { file_mcp_v1_options } from "../../mcp/v1/options_pb";
@@ -13,7 +15,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file strava/v1/strava.proto.
  */
 export const file_strava_v1_strava: GenFile = /*@__PURE__*/
-  fileDesc("ChZzdHJhdmEvdjEvc3RyYXZhLnByb3RvEglzdHJhdmEudjEiiQMKEFN0cmF2YUNvbm5lY3Rpb24SEQoJY29ubmVjdGVkGAEgASgIEhQKDGF0aGxldGVfbmFtZRgCIAEoCRISCgphdGhsZXRlX2lkGAMgASgJEigKCnN5bmNfc3RhdGUYBCABKA4yFC5zdHJhdmEudjEuU3luY1N0YXRlEhQKDHN5bmNfbWVzc2FnZRgFIAEoCRIyCg5sYXN0X3N5bmNfdGltZRgGIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASLwoLcmVzdW1lX3RpbWUYByABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEhYKDmFjdGl2aXR5X2NvdW50GAggASgFEhwKFHBlbmRpbmdfc3RyZWFtX2NvdW50GAkgASgFEhIKCmNvbmZpZ3VyZWQYCiABKAgSEwoLYXRobGV0ZV91cmwYCyABKAkSFwoPa2VlcF9hY3Rpdml0aWVzGAwgASgIEhsKE2RlbGV0aW5nX2FjdGl2aXRpZXMYDSABKAgiHAoaR2V0U3RyYXZhQ29ubmVjdGlvblJlcXVlc3QiTgobR2V0U3RyYXZhQ29ubmVjdGlvblJlc3BvbnNlEi8KCmNvbm5lY3Rpb24YASABKAsyGy5zdHJhdmEudjEuU3RyYXZhQ29ubmVjdGlvbiIhChFTeW5jU3RyYXZhUmVxdWVzdBIMCgRmdWxsGAEgASgIIkUKElN5bmNTdHJhdmFSZXNwb25zZRIvCgpjb25uZWN0aW9uGAEgASgLMhsuc3RyYXZhLnYxLlN0cmF2YUNvbm5lY3Rpb24iKgoTU3luY0FjdGl2aXR5UmVxdWVzdBITCgthY3Rpdml0eV9pZBgBIAEoCSJXChRTeW5jQWN0aXZpdHlSZXNwb25zZRIOCgZzeW5jZWQYASABKAgSLwoLcmVzdW1lX3RpbWUYAiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wIjIKF0Rpc2Nvbm5lY3RTdHJhdmFSZXF1ZXN0EhcKD2tlZXBfYWN0aXZpdGllcxgBIAEoCCJLChhEaXNjb25uZWN0U3RyYXZhUmVzcG9uc2USLwoKY29ubmVjdGlvbhgBIAEoCzIbLnN0cmF2YS52MS5TdHJhdmFDb25uZWN0aW9uIjkKHlNldFN0cmF2YUtlZXBBY3Rpdml0aWVzUmVxdWVzdBIXCg9rZWVwX2FjdGl2aXRpZXMYASABKAgiUgofU2V0U3RyYXZhS2VlcEFjdGl2aXRpZXNSZXNwb25zZRIvCgpjb25uZWN0aW9uGAEgASgLMhsuc3RyYXZhLnYxLlN0cmF2YUNvbm5lY3Rpb24iOQofU3RhcnRTdHJhdmFBcmNoaXZlSW1wb3J0UmVxdWVzdBIWCg5hY3Rpdml0aWVzX2NzdhgBIAEoCSJKChVTdHJhdmFBcmNoaXZlQWN0aXZpdHkSEQoJc3RyYXZhX2lkGAEgASgJEgwKBG5hbWUYAiABKAkSEAoIZmlsZW5hbWUYAyABKAkikgEKIFN0YXJ0U3RyYXZhQXJjaGl2ZUltcG9ydFJlc3BvbnNlEjQKCmFjdGl2aXRpZXMYASADKAsyIC5zdHJhdmEudjEuU3RyYXZhQXJjaGl2ZUFjdGl2aXR5Eh4KFmFscmVhZHlfaW1wb3J0ZWRfY291bnQYAiABKAUSGAoQdW5yZWFkYWJsZV9jb3VudBgDIAEoBSJFCiJJbXBvcnRTdHJhdmFBcmNoaXZlQWN0aXZpdHlSZXF1ZXN0EhEKCXN0cmF2YV9pZBgBIAEoCRIMCgRmaWxlGAIgASgMIlMKI0ltcG9ydFN0cmF2YUFyY2hpdmVBY3Rpdml0eVJlc3BvbnNlEhMKC2FjdGl2aXR5X2lkGAEgASgJEhcKD2ZpbGVfdW5yZWFkYWJsZRgCIAEoCCqIAQoJU3luY1N0YXRlEhoKFlNZTkNfU1RBVEVfVU5TUEVDSUZJRUQQABITCg9TWU5DX1NUQVRFX0lETEUQARIWChJTWU5DX1NUQVRFX1JVTk5JTkcQAhIbChdTWU5DX1NUQVRFX1JBVEVfTElNSVRFRBADEhUKEVNZTkNfU1RBVEVfRkFJTEVEEAQy/AUKDVN0cmF2YVNlcnZpY2USZAoTR2V0U3RyYXZhQ29ubmVjdGlvbhIlLnN0cmF2YS52MS5HZXRTdHJhdmFDb25uZWN0aW9uUmVxdWVzdBomLnN0cmF2YS52MS5HZXRTdHJhdmFDb25uZWN0aW9uUmVzcG9uc2USSQoKU3luY1N0cmF2YRIcLnN0cmF2YS52MS5TeW5jU3RyYXZhUmVxdWVzdBodLnN0cmF2YS52MS5TeW5jU3RyYXZhUmVzcG9uc2USVwoMU3luY0FjdGl2aXR5Eh4uc3RyYXZhLnYxLlN5bmNBY3Rpdml0eVJlcXVlc3QaHy5zdHJhdmEudjEuU3luY0FjdGl2aXR5UmVzcG9uc2UiBqKfGQIIARJjChBEaXNjb25uZWN0U3RyYXZhEiIuc3RyYXZhLnYxLkRpc2Nvbm5lY3RTdHJhdmFSZXF1ZXN0GiMuc3RyYXZhLnYxLkRpc2Nvbm5lY3RTdHJhdmFSZXNwb25zZSIGop8ZAggBEngKF1NldFN0cmF2YUtlZXBBY3Rpdml0aWVzEikuc3RyYXZhLnYxLlNldFN0cmF2YUtlZXBBY3Rpdml0aWVzUmVxdWVzdBoqLnN0cmF2YS52MS5TZXRTdHJhdmFLZWVwQWN0aXZpdGllc1Jlc3BvbnNlIgainxkCCAESewoYU3RhcnRTdHJhdmFBcmNoaXZlSW1wb3J0Eiouc3RyYXZhLnYxLlN0YXJ0U3RyYXZhQXJjaGl2ZUltcG9ydFJlcXVlc3QaKy5zdHJhdmEudjEuU3RhcnRTdHJhdmFBcmNoaXZlSW1wb3J0UmVzcG9uc2UiBqKfGQIIARKEAQobSW1wb3J0U3RyYXZhQXJjaGl2ZUFjdGl2aXR5Ei0uc3RyYXZhLnYxLkltcG9ydFN0cmF2YUFyY2hpdmVBY3Rpdml0eVJlcXVlc3QaLi5zdHJhdmEudjEuSW1wb3J0U3RyYXZhQXJjaGl2ZUFjdGl2aXR5UmVzcG9uc2UiBqKfGQIIAUKkAQoNY29tLnN0cmF2YS52MUILU3RyYXZhUHJvdG9QAVpBZ2l0aHViLmNvbS9icy10b29scy90cmFpbHJ1bm4uaW5nL2ludGVybmFsL2dlbi9zdHJhdmEvdjE7c3RyYXZhdjGiAgNTWFiqAglTdHJhdmEuVjHKAglTdHJhdmFcVjHiAhVTdHJhdmFcVjFcR1BCTWV0YWRhdGHqAgpTdHJhdmE6OlYxYgZwcm90bzM", [file_google_protobuf_timestamp, file_mcp_v1_options]);
+  fileDesc("ChZzdHJhdmEvdjEvc3RyYXZhLnByb3RvEglzdHJhdmEudjEiiQMKEFN0cmF2YUNvbm5lY3Rpb24SEQoJY29ubmVjdGVkGAEgASgIEhQKDGF0aGxldGVfbmFtZRgCIAEoCRISCgphdGhsZXRlX2lkGAMgASgJEigKCnN5bmNfc3RhdGUYBCABKA4yFC5zdHJhdmEudjEuU3luY1N0YXRlEhQKDHN5bmNfbWVzc2FnZRgFIAEoCRIyCg5sYXN0X3N5bmNfdGltZRgGIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASLwoLcmVzdW1lX3RpbWUYByABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEhYKDmFjdGl2aXR5X2NvdW50GAggASgFEhwKFHBlbmRpbmdfc3RyZWFtX2NvdW50GAkgASgFEhIKCmNvbmZpZ3VyZWQYCiABKAgSEwoLYXRobGV0ZV91cmwYCyABKAkSFwoPa2VlcF9hY3Rpdml0aWVzGAwgASgIEhsKE2RlbGV0aW5nX2FjdGl2aXRpZXMYDSABKAgiHAoaR2V0U3RyYXZhQ29ubmVjdGlvblJlcXVlc3QiTgobR2V0U3RyYXZhQ29ubmVjdGlvblJlc3BvbnNlEi8KCmNvbm5lY3Rpb24YASABKAsyGy5zdHJhdmEudjEuU3RyYXZhQ29ubmVjdGlvbiIhChFTeW5jU3RyYXZhUmVxdWVzdBIMCgRmdWxsGAEgASgIIkUKElN5bmNTdHJhdmFSZXNwb25zZRIvCgpjb25uZWN0aW9uGAEgASgLMhsuc3RyYXZhLnYxLlN0cmF2YUNvbm5lY3Rpb24iKgoTU3luY0FjdGl2aXR5UmVxdWVzdBITCgthY3Rpdml0eV9pZBgBIAEoCSJXChRTeW5jQWN0aXZpdHlSZXNwb25zZRIOCgZzeW5jZWQYASABKAgSLwoLcmVzdW1lX3RpbWUYAiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wIjIKF0Rpc2Nvbm5lY3RTdHJhdmFSZXF1ZXN0EhcKD2tlZXBfYWN0aXZpdGllcxgBIAEoCCJLChhEaXNjb25uZWN0U3RyYXZhUmVzcG9uc2USLwoKY29ubmVjdGlvbhgBIAEoCzIbLnN0cmF2YS52MS5TdHJhdmFDb25uZWN0aW9uIjkKHlNldFN0cmF2YUtlZXBBY3Rpdml0aWVzUmVxdWVzdBIXCg9rZWVwX2FjdGl2aXRpZXMYASABKAgiUgofU2V0U3RyYXZhS2VlcEFjdGl2aXRpZXNSZXNwb25zZRIvCgpjb25uZWN0aW9uGAEgASgLMhsuc3RyYXZhLnYxLlN0cmF2YUNvbm5lY3Rpb24iOQofU3RhcnRTdHJhdmFBcmNoaXZlSW1wb3J0UmVxdWVzdBIWCg5hY3Rpdml0aWVzX2NzdhgBIAEoCSJKChVTdHJhdmFBcmNoaXZlQWN0aXZpdHkSEQoJc3RyYXZhX2lkGAEgASgJEgwKBG5hbWUYAiABKAkSEAoIZmlsZW5hbWUYAyABKAkikgEKIFN0YXJ0U3RyYXZhQXJjaGl2ZUltcG9ydFJlc3BvbnNlEjQKCmFjdGl2aXRpZXMYASADKAsyIC5zdHJhdmEudjEuU3RyYXZhQXJjaGl2ZUFjdGl2aXR5Eh4KFmFscmVhZHlfaW1wb3J0ZWRfY291bnQYAiABKAUSGAoQdW5yZWFkYWJsZV9jb3VudBgDIAEoBSJFCiJJbXBvcnRTdHJhdmFBcmNoaXZlQWN0aXZpdHlSZXF1ZXN0EhEKCXN0cmF2YV9pZBgBIAEoCRIMCgRmaWxlGAIgASgMIlMKI0ltcG9ydFN0cmF2YUFyY2hpdmVBY3Rpdml0eVJlc3BvbnNlEhMKC2FjdGl2aXR5X2lkGAEgASgJEhcKD2ZpbGVfdW5yZWFkYWJsZRgCIAEoCCK7AgoNU3RyYXZhU2VnbWVudBIKCgJpZBgBIAEoCRIMCgRuYW1lGAIgASgJEgsKA3VybBgDIAEoCRIPCgdncHhfdXJsGAQgASgJEhUKDWFjdGl2aXR5X3R5cGUYBSABKAkSFwoPZGlzdGFuY2VfbWV0ZXJzGAYgASgBEh0KFWVsZXZhdGlvbl9nYWluX21ldGVycxgHIAEoARIdChVhdmVyYWdlX2dyYWRlX3BlcmNlbnQYCCABKAESEAoIbG9jYXRpb24YCSABKAkSDwoHcHJpdmF0ZRgKIAEoCBIRCgloYXphcmRvdXMYCyABKAgSLgoKZmV0Y2hfdGltZRgMIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASHgoGcG9pbnRzGA0gAygLMg4uZ2VvLnYxLkxhdExuZyJCChdHZXRTdHJhdmFTZWdtZW50UmVxdWVzdBIPCgdzZWdtZW50GAEgASgJEhYKDmluY2x1ZGVfcG9pbnRzGAIgASgIIkUKGEdldFN0cmF2YVNlZ21lbnRSZXNwb25zZRIpCgdzZWdtZW50GAEgASgLMhguc3RyYXZhLnYxLlN0cmF2YVNlZ21lbnQqiAEKCVN5bmNTdGF0ZRIaChZTWU5DX1NUQVRFX1VOU1BFQ0lGSUVEEAASEwoPU1lOQ19TVEFURV9JRExFEAESFgoSU1lOQ19TVEFURV9SVU5OSU5HEAISGwoXU1lOQ19TVEFURV9SQVRFX0xJTUlURUQQAxIVChFTWU5DX1NUQVRFX0ZBSUxFRBAEMt4GCg1TdHJhdmFTZXJ2aWNlEmQKE0dldFN0cmF2YUNvbm5lY3Rpb24SJS5zdHJhdmEudjEuR2V0U3RyYXZhQ29ubmVjdGlvblJlcXVlc3QaJi5zdHJhdmEudjEuR2V0U3RyYXZhQ29ubmVjdGlvblJlc3BvbnNlEkkKClN5bmNTdHJhdmESHC5zdHJhdmEudjEuU3luY1N0cmF2YVJlcXVlc3QaHS5zdHJhdmEudjEuU3luY1N0cmF2YVJlc3BvbnNlElcKDFN5bmNBY3Rpdml0eRIeLnN0cmF2YS52MS5TeW5jQWN0aXZpdHlSZXF1ZXN0Gh8uc3RyYXZhLnYxLlN5bmNBY3Rpdml0eVJlc3BvbnNlIgainxkCCAESYwoQRGlzY29ubmVjdFN0cmF2YRIiLnN0cmF2YS52MS5EaXNjb25uZWN0U3RyYXZhUmVxdWVzdBojLnN0cmF2YS52MS5EaXNjb25uZWN0U3RyYXZhUmVzcG9uc2UiBqKfGQIIARJ4ChdTZXRTdHJhdmFLZWVwQWN0aXZpdGllcxIpLnN0cmF2YS52MS5TZXRTdHJhdmFLZWVwQWN0aXZpdGllc1JlcXVlc3QaKi5zdHJhdmEudjEuU2V0U3RyYXZhS2VlcEFjdGl2aXRpZXNSZXNwb25zZSIGop8ZAggBEnsKGFN0YXJ0U3RyYXZhQXJjaGl2ZUltcG9ydBIqLnN0cmF2YS52MS5TdGFydFN0cmF2YUFyY2hpdmVJbXBvcnRSZXF1ZXN0Gisuc3RyYXZhLnYxLlN0YXJ0U3RyYXZhQXJjaGl2ZUltcG9ydFJlc3BvbnNlIgainxkCCAEShAEKG0ltcG9ydFN0cmF2YUFyY2hpdmVBY3Rpdml0eRItLnN0cmF2YS52MS5JbXBvcnRTdHJhdmFBcmNoaXZlQWN0aXZpdHlSZXF1ZXN0Gi4uc3RyYXZhLnYxLkltcG9ydFN0cmF2YUFyY2hpdmVBY3Rpdml0eVJlc3BvbnNlIgainxkCCAESYAoQR2V0U3RyYXZhU2VnbWVudBIiLnN0cmF2YS52MS5HZXRTdHJhdmFTZWdtZW50UmVxdWVzdBojLnN0cmF2YS52MS5HZXRTdHJhdmFTZWdtZW50UmVzcG9uc2UiA5ACAUKkAQoNY29tLnN0cmF2YS52MUILU3RyYXZhUHJvdG9QAVpBZ2l0aHViLmNvbS9icy10b29scy90cmFpbHJ1bm4uaW5nL2ludGVybmFsL2dlbi9zdHJhdmEvdjE7c3RyYXZhdjGiAgNTWFiqAglTdHJhdmEuVjHKAglTdHJhdmFcVjHiAhVTdHJhdmFcVjFcR1BCTWV0YWRhdGHqAgpTdHJhdmE6OlYxYgZwcm90bzM", [file_geo_v1_geo, file_google_protobuf_timestamp, file_mcp_v1_options]);
 
 /**
  * The status of the Strava connection.
@@ -468,6 +470,154 @@ export const ImportStravaArchiveActivityResponseSchema: GenMessage<ImportStravaA
   messageDesc(file_strava_v1_strava, 15);
 
 /**
+ * A Strava segment: a stretch of road or trail athletes compare their times
+ * on.
+ *
+ * @generated from message strava.v1.StravaSegment
+ */
+export type StravaSegment = Message<"strava.v1.StravaSegment"> & {
+  /**
+   * The segment's ID on Strava.
+   *
+   * @generated from field: string id = 1;
+   */
+  id: string;
+
+  /**
+   * The segment's name, as its creator named it.
+   *
+   * @generated from field: string name = 2;
+   */
+  name: string;
+
+  /**
+   * The segment's page on Strava.
+   *
+   * @generated from field: string url = 3;
+   */
+  url: string;
+
+  /**
+   * Where to download the segment as a GPX file, while signed in.
+   *
+   * @generated from field: string gpx_url = 4;
+   */
+  gpxUrl: string;
+
+  /**
+   * The sport, e.g. "Run" or "Ride".
+   *
+   * @generated from field: string activity_type = 5;
+   */
+  activityType: string;
+
+  /**
+   * @generated from field: double distance_meters = 6;
+   */
+  distanceMeters: number;
+
+  /**
+   * @generated from field: double elevation_gain_meters = 7;
+   */
+  elevationGainMeters: number;
+
+  /**
+   * @generated from field: double average_grade_percent = 8;
+   */
+  averageGradePercent: number;
+
+  /**
+   * Where the segment is, e.g. "Squamish, BC, Canada". Empty if unknown.
+   *
+   * @generated from field: string location = 9;
+   */
+  location: string;
+
+  /**
+   * Private segments are only visible to the athlete who created them.
+   *
+   * @generated from field: bool private = 10;
+   */
+  private: boolean;
+
+  /**
+   * Whether athletes flagged the segment as hazardous, e.g. a descent on a
+   * busy road.
+   *
+   * @generated from field: bool hazardous = 11;
+   */
+  hazardous: boolean;
+
+  /**
+   * When the segment was fetched from Strava.
+   *
+   * @generated from field: google.protobuf.Timestamp fetch_time = 12;
+   */
+  fetchTime?: Timestamp | undefined;
+
+  /**
+   * The segment's path, if asked for. It can be thousands of points.
+   *
+   * @generated from field: repeated geo.v1.LatLng points = 13;
+   */
+  points: LatLng[];
+};
+
+/**
+ * Describes the message strava.v1.StravaSegment.
+ * Use `create(StravaSegmentSchema)` to create a new message.
+ */
+export const StravaSegmentSchema: GenMessage<StravaSegment> = /*@__PURE__*/
+  messageDesc(file_strava_v1_strava, 16);
+
+/**
+ * @generated from message strava.v1.GetStravaSegmentRequest
+ */
+export type GetStravaSegmentRequest = Message<"strava.v1.GetStravaSegmentRequest"> & {
+  /**
+   * A link to the segment, e.g. https://www.strava.com/segments/40535472,
+   * or its ID.
+   *
+   * @generated from field: string segment = 1;
+   */
+  segment: string;
+
+  /**
+   * Include the path. It can be thousands of points; prefer the
+   * statistics unless the coordinates are needed.
+   *
+   * @generated from field: bool include_points = 2;
+   */
+  includePoints: boolean;
+};
+
+/**
+ * Describes the message strava.v1.GetStravaSegmentRequest.
+ * Use `create(GetStravaSegmentRequestSchema)` to create a new message.
+ */
+export const GetStravaSegmentRequestSchema: GenMessage<GetStravaSegmentRequest> = /*@__PURE__*/
+  messageDesc(file_strava_v1_strava, 17);
+
+/**
+ * @generated from message strava.v1.GetStravaSegmentResponse
+ */
+export type GetStravaSegmentResponse = Message<"strava.v1.GetStravaSegmentResponse"> & {
+  /**
+   * The segment.
+   *
+   * @generated from field: strava.v1.StravaSegment segment = 1;
+   */
+  segment?: StravaSegment | undefined;
+};
+
+/**
+ * Describes the message strava.v1.GetStravaSegmentResponse.
+ * Use `create(GetStravaSegmentResponseSchema)` to create a new message.
+ */
+export const GetStravaSegmentResponseSchema: GenMessage<GetStravaSegmentResponse> = /*@__PURE__*/
+  messageDesc(file_strava_v1_strava, 18);
+
+/**
  * SyncState is the state of a Strava sync.
  *
  * @generated from enum strava.v1.SyncState
@@ -611,6 +761,23 @@ export const StravaService: GenService<{
     methodKind: "unary";
     input: typeof ImportStravaArchiveActivityRequestSchema;
     output: typeof ImportStravaArchiveActivityResponseSchema;
+  },
+  /**
+   * Get a Strava segment by its link or ID, e.g.
+   * https://www.strava.com/segments/40535472: its name, statistics and
+   * optionally its path. Download it as a GPX file at gpx_url, or make a
+   * route from it with RouteService.CreateRoute's strava_segment. Strava's
+   * API needs the user's Strava connection to get segments, so Strava must
+   * be connected. Segments are cached for up to 6 days, as Strava's API
+   * terms allow at most 7, so changes to a segment on Strava can take that
+   * long to show.
+   *
+   * @generated from rpc strava.v1.StravaService.GetStravaSegment
+   */
+  getStravaSegment: {
+    methodKind: "unary";
+    input: typeof GetStravaSegmentRequestSchema;
+    output: typeof GetStravaSegmentResponseSchema;
   },
 }> = /*@__PURE__*/
   serviceDesc(file_strava_v1_strava, 0);
