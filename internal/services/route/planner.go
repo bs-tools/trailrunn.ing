@@ -47,6 +47,9 @@ type Router interface {
 	Route(ctx context.Context, req routing.Request) (*routing.Path, error)
 	// Regions returns the bounds of the areas paths can be routed in.
 	Regions(ctx context.Context) ([]geo.Bounds, error)
+	// TrackTerrains returns the terrain of each segment of each track, from
+	// the mapped paths it follows, unknown where it follows none.
+	TrackTerrains(ctx context.Context, tracks [][]geo.Point) ([][]geo.Terrain, error)
 }
 
 // MapData provides elevation and weather data.
@@ -272,6 +275,28 @@ func legsFromTrack(points []geo.Point) ([]routes.LatLng, []routes.Leg) {
 		legs[i] = routes.NewLeg(waypoints[i], waypoints[i+1], "", geo.SimplifyTrack(points[idxs[i]:idxs[i+1]+1], trackToleranceMeters, trackElevationToleranceMeters), nil)
 	}
 	return waypoints, legs
+}
+
+// matchTerrains sets the terrain of legs that follow a recorded track
+// exactly, from the mapped paths along it, for the route's terrain
+// breakdown. Their paths are kept as recorded. If the terrain can't be
+// looked up, it stays unknown, as the route is still right without it.
+func (s *Service) matchTerrains(ctx context.Context, legs []routes.Leg) {
+	tracks := make([][]geo.Point, len(legs))
+	for i := range legs {
+		tracks[i] = legs[i].GeoPoints()
+	}
+	terrains, err := s.router.TrackTerrains(ctx, tracks)
+	if err != nil {
+		if ctx.Err() == nil {
+			s.report.Report(ctx, "Failed to look up the terrain of a track", err)
+		}
+		return
+	}
+	for i, leg := range legs {
+		matched := routes.NewLeg(leg.From, leg.To, leg.Profile, tracks[i], terrains[i])
+		legs[i].Terrains = matched.Terrains
+	}
 }
 
 // computeStats computes the statistics of a route's path.

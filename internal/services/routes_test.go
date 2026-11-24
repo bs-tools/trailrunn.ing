@@ -649,6 +649,21 @@ func TestSnapTrack(t *testing.T) {
 			t.Fatalf("exact import has leg profiles %v", exact.GetRoute().GetLegProfiles())
 		}
 	}
+	// The exact track keeps its path, wobbles and all, without routing,
+	// but takes the terrain of the mapped paths it follows.
+	if terrain := exact.GetRoute().GetStats().GetTerrain(); len(terrain) != 1 || terrain[0].GetTerrain() != geov1.Terrain_TERRAIN_TRAIL {
+		t.Errorf("got terrain %v, want the recorded track on trails", terrain)
+	}
+	// Off the map, its terrain is unknown.
+	exactOff, err := e.routes.CreateRoute(ctx, routesv1.CreateRouteRequest_builder{
+		Gpx: new(cornerGPX(85, 0)),
+	}.Build())
+	if err != nil {
+		t.Fatalf("CreateRoute: %v", err)
+	}
+	if terrain := exactOff.GetRoute().GetStats().GetTerrain(); len(terrain) != 1 || terrain[0].GetTerrain() != geov1.Terrain_TERRAIN_UNSPECIFIED {
+		t.Errorf("got terrain %v off the map, want unknown", terrain)
+	}
 	copied, err := e.routes.CreateRoute(ctx, routesv1.CreateRouteRequest_builder{
 		RouteId:    new(exact.GetRoute().GetId()),
 		Conversion: snap,

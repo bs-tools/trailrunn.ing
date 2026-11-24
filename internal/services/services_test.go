@@ -470,6 +470,21 @@ func (f *fakeRouter) Regions(context.Context) ([]geo.Bounds, error) {
 	return []geo.Bounds{{MinLat: -90, MinLng: -180, MaxLat: 80, MaxLng: 180}}, nil
 }
 
+// TrackTerrains finds every segment of a track on a trail, but those with a
+// point north of 80°, where Regions has no map.
+func (f *fakeRouter) TrackTerrains(_ context.Context, tracks [][]geo.Point) ([][]geo.Terrain, error) {
+	terrains := make([][]geo.Terrain, len(tracks))
+	for t, track := range tracks {
+		terrains[t] = make([]geo.Terrain, len(track))
+		for i := 1; i < len(track); i++ {
+			if track[i-1].Lat <= 80 && track[i].Lat <= 80 {
+				terrains[t][i-1] = geo.TerrainTrail
+			}
+		}
+	}
+	return terrains, nil
+}
+
 func (f *fakeRouter) routeCallCount() int {
 	f.mu.Lock()
 	defer f.mu.Unlock()
