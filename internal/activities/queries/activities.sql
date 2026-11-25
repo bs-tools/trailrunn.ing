@@ -253,7 +253,8 @@ with workout_kinds as (
     else 'cross_training'
   end as kind) k
   where p.user_id = sqlc.arg(user_id)::uuid
-    and w.type <> 'rest'
+    -- Rest days and recovery work have no activity.
+    and w.type not in ('rest', 'recovery')
     and w.completed_activity_id is null
     and not w.link_dismissed
 ),

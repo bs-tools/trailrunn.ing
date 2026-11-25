@@ -1,4 +1,5 @@
 import Loading from "@components/loading";
+import RecoveryWorkoutView from "@components/plans/recovery-workout";
 import RunSteps from "@components/plans/run-steps";
 import { Goal, RouteCard } from "@components/plans/workout-goal";
 import AnimationPlayer from "@components/strength/animation-player";
@@ -343,6 +344,13 @@ const SharedWorkoutPage: React.FC = () => {
         </RouteCard>
       )}
       <SharedExercises workout={workout} exercises={data.exercises} />
+      {workout.details.case === "recovery" && (
+        <RecoveryWorkoutView
+          workout={workout}
+          recovery={workout.details.value}
+          canMarkDone={false}
+        />
+      )}
       {strengthFile && (
         <Card title="On your watch">
           <div className="flex flex-col gap-2">

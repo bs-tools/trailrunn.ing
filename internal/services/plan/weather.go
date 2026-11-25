@@ -115,10 +115,10 @@ func (s *Service) GetWorkoutWeather(ctx context.Context, req *plansv1.GetWorkout
 	return resp.Build(), nil
 }
 
-// indoors reports whether a workout doesn't need a forecast: rest days
-// and strength training.
+// indoors reports whether a workout doesn't need a forecast: rest days,
+// strength training and recovery work.
 func indoors(w *plans.Workout) bool {
-	return w.Type == plans.WorkoutTypeRest || w.Type == plans.WorkoutTypeStrength
+	return w.Type == plans.WorkoutTypeRest || w.Type == plans.WorkoutTypeStrength || w.Type == plans.WorkoutTypeRecovery
 }
 
 // weatherLocation is where a workout's forecast is for.

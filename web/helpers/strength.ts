@@ -2,7 +2,7 @@ import { create } from "@bufbuild/protobuf";
 import type { Weight } from "gen/plans/v1/equipment_pb";
 import { Equipment, WeightUnit } from "gen/plans/v1/equipment_pb";
 import type { Exercise } from "gen/plans/v1/exercises_pb";
-import { Muscle } from "gen/plans/v1/exercises_pb";
+import { Muscle } from "gen/plans/v1/muscles_pb";
 import type {
   ExerciseGroup as PlannedGroup,
   LoggedSet,

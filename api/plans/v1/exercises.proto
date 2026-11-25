@@ -6,6 +6,7 @@ import "google/protobuf/field_mask.proto";
 import "google/protobuf/timestamp.proto";
 import "mcp/v1/options.proto";
 import "plans/v1/equipment.proto";
+import "plans/v1/muscles.proto";
 import "plans/v1/plans.proto";
 
 // ExerciseService manages the user's exercise library: the strength and
@@ -58,44 +59,6 @@ service ExerciseService {
   // working out every angle: they put hands, feet and shoulders on the
   // floor where they should be.
   rpc ListStockPoses(ListStockPosesRequest) returns (ListStockPosesResponse);
-}
-
-// Muscle is a muscle or muscle group an exercise works.
-enum Muscle {
-  MUSCLE_UNSPECIFIED = 0;
-  MUSCLE_NECK = 1;
-  // The trapezius and rhomboids.
-  MUSCLE_UPPER_BACK = 2;
-  // The latissimus dorsi.
-  MUSCLE_LATS = 3;
-  // The erector spinae.
-  MUSCLE_LOWER_BACK = 4;
-  // The deltoids.
-  MUSCLE_SHOULDERS = 5;
-  MUSCLE_CHEST = 6;
-  MUSCLE_BICEPS = 7;
-  MUSCLE_TRICEPS = 8;
-  MUSCLE_FOREARMS = 9;
-  // The rectus abdominis and deep core.
-  MUSCLE_ABS = 10;
-  MUSCLE_OBLIQUES = 11;
-  // The iliopsoas and rectus femoris at the front of the hip.
-  MUSCLE_HIP_FLEXORS = 12;
-  // The gluteus maximus.
-  MUSCLE_GLUTES = 13;
-  // The gluteus medius and minimus at the side of the hip, which keep the
-  // pelvis level on one leg.
-  MUSCLE_HIP_ABDUCTORS = 14;
-  // The inner thigh.
-  MUSCLE_ADDUCTORS = 15;
-  MUSCLE_QUADS = 16;
-  MUSCLE_HAMSTRINGS = 17;
-  // The gastrocnemius and soleus.
-  MUSCLE_CALVES = 18;
-  // The tibialis anterior at the front of the shin.
-  MUSCLE_SHINS = 19;
-  // The muscles of the foot and ankle.
-  MUSCLE_FEET = 20;
 }
 
 // An exercise in the user's library.

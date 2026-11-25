@@ -1,4 +1,4 @@
-import { Muscle } from "gen/plans/v1/exercises_pb";
+import { Muscle } from "gen/plans/v1/muscles_pb";
 import type { MuscleSet } from "helpers/strength";
 import { muscleLabel } from "helpers/strength";
 import React from "react";
