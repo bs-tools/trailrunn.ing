@@ -206,6 +206,7 @@ var workoutTypeNames = map[plans.WorkoutType]string{
 	plans.WorkoutTypeCrossTraining: "Cross training",
 	plans.WorkoutTypeStrength:      "Strength",
 	plans.WorkoutTypeRace:          "Race",
+	plans.WorkoutTypeRecovery:      "Recovery",
 }
 
 // workoutCalendar returns an iCalendar of workouts, from their local times
@@ -247,8 +248,11 @@ func workoutCalendar(workouts []*plans.Workout, loc *time.Location, now time.Tim
 		if w.CrossTrainingSport == plans.CrossTrainingSportSkiTouring {
 			name = "Ski tour"
 		}
-		done := w.CompletedActivityID.Valid || w.Log != nil
+		done := w.Done()
 		duration := time.Duration(w.TargetDurationSeconds) * time.Second
+		if duration <= 0 && w.Recovery != nil {
+			duration = w.Recovery.Duration()
+		}
 		var start time.Time
 		if clock, err := time.Parse("15:04", w.StartTime); err == nil {
 			start = time.Date(w.Date.Year(), w.Date.Month(), w.Date.Day(), clock.Hour(), clock.Minute(), 0, 0, loc)

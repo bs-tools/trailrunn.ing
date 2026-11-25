@@ -998,6 +998,7 @@ const (
 	WorkoutTypeStrength      WorkoutType = "strength"
 	WorkoutTypeRace          WorkoutType = "race"
 	WorkoutTypeRest          WorkoutType = "rest"
+	WorkoutTypeRecovery      WorkoutType = "recovery"
 )
 
 func (e *WorkoutType) Scan(src interface{}) error {
@@ -1042,7 +1043,8 @@ func (e WorkoutType) Valid() bool {
 		WorkoutTypeCrossTraining,
 		WorkoutTypeStrength,
 		WorkoutTypeRace,
-		WorkoutTypeRest:
+		WorkoutTypeRest,
+		WorkoutTypeRecovery:
 		return true
 	}
 	return false
@@ -1831,6 +1833,7 @@ type Workout struct {
 	RunFueling                json.RawMessage
 	CrossTrainingSport        string
 	RunHeartRate              json.RawMessage
+	Recovery                  json.RawMessage
 }
 
 type WorkoutExercise struct {

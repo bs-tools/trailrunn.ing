@@ -17,6 +17,7 @@ import { WorkoutType } from "gen/plans/v1/plans_pb";
 import type { RoutePoint, RouteStats } from "gen/routes/v1/routes_pb";
 import { formatDate, formatHoursMinutes, formatKm } from "helpers/format";
 import { terrainStyle } from "helpers/labels";
+import { recoveryDuration } from "helpers/recovery";
 import { workoutTargets } from "helpers/workouts";
 import React, { useMemo, useState } from "react";
 import { Link } from "react-router";
@@ -59,10 +60,15 @@ export const Goal: React.FC<GoalProps> = ({ workout, threshold }) => {
       value: `${Math.round(planned.elevationGainMeters).toLocaleString()} m`,
     });
   }
-  if (planned.durationSeconds > 0) {
+  // Recovery work without a target takes as long as its items.
+  const durationSeconds =
+    workout.details.case === "recovery"
+      ? recoveryDuration(workout.details.value)
+      : planned.durationSeconds;
+  if (durationSeconds > 0) {
     targets.push({
       label: "Time",
-      value: formatHoursMinutes(planned.durationSeconds),
+      value: formatHoursMinutes(durationSeconds),
     });
   }
   if (workout.details.case === "strength") {

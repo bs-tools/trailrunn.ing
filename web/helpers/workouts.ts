@@ -5,6 +5,7 @@ import {
   CrossTrainingSport,
   CrossTrainingWorkoutSchema,
   RaceWorkoutSchema,
+  RecoveryWorkoutSchema,
   RestDaySchema,
   RunIntensity,
   RunWorkoutSchema,
@@ -69,7 +70,8 @@ export const workoutTargets = (workout: Workout): WorkoutTargets => {
         routeId: details.value.routeId,
       };
     }
-    case "strength": {
+    case "strength":
+    case "recovery": {
       return {
         ...NO_TARGETS,
         durationSeconds: details.value.targetDurationSeconds,
@@ -82,13 +84,14 @@ export const workoutTargets = (workout: Workout): WorkoutTargets => {
 };
 
 /**
- * IsCompleted reports whether a workout is done: it has an activity, or it's
- * a strength workout with a log.
+ * IsCompleted reports whether a workout is done: it has an activity, it's a
+ * strength workout with a log, or recovery work marked done.
  */
 export const isCompleted = (workout: Workout): boolean =>
   workout.completedActivityId !== "" ||
   (workout.details.case === "strength" &&
-    workout.details.value.log !== undefined);
+    workout.details.value.log !== undefined) ||
+  (workout.details.case === "recovery" && workout.details.value.done);
 
 // DetailsPath is the update mask path of the details of a workout type.
 export const detailsPath = (type: WorkoutType): string => {
@@ -106,6 +109,9 @@ export const detailsPath = (type: WorkoutType): string => {
     case WorkoutType.RACE: {
       return "race";
     }
+    case WorkoutType.RECOVERY: {
+      return "recovery";
+    }
     default: {
       return "rest";
     }
@@ -114,7 +120,8 @@ export const detailsPath = (type: WorkoutType): string => {
 
 /**
  * WorkoutDetails returns the details of a workout of the type with the
- * targets, keeping the exercises of an existing strength workout.
+ * targets, keeping the exercises of an existing strength workout, and the
+ * items of existing recovery work.
  */
 export const workoutDetails = (
   type: WorkoutType,
@@ -180,6 +187,20 @@ export const workoutDetails = (
           targetDistanceMeters: targets.distanceMeters,
           targetDurationSeconds: targets.durationSeconds,
           targetElevationGainMeters: targets.elevationGainMeters,
+        }),
+      };
+    }
+    case WorkoutType.RECOVERY: {
+      const existingRecovery =
+        existing?.details.case === "recovery"
+          ? existing.details.value
+          : undefined;
+      return {
+        case: "recovery",
+        value: create(RecoveryWorkoutSchema, {
+          done: existingRecovery?.done ?? false,
+          items: existingRecovery?.items ?? [],
+          targetDurationSeconds: targets.durationSeconds,
         }),
       };
     }

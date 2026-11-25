@@ -8,6 +8,7 @@ import "google/protobuf/timestamp.proto";
 import "mcp/v1/options.proto";
 import "plans/v1/equipment.proto";
 import "plans/v1/gear.proto";
+import "plans/v1/muscles.proto";
 
 // TrainingPlanService manages training plans of up to a year leading to one or
 // more goal races. A plan is organised at three levels:
@@ -177,6 +178,9 @@ enum WorkoutType {
   WORKOUT_TYPE_RACE = 11;
   // A rest day.
   WORKOUT_TYPE_REST = 8;
+  // Recovery work: electrical muscle stimulation, massage, compression,
+  // heat or cold. It was once a recovery run, which is a base run now.
+  WORKOUT_TYPE_RECOVERY = 7;
 
   // Deprecated: use WORKOUT_TYPE_BASE.
   WORKOUT_TYPE_EASY = 1 [deprecated = true];
@@ -190,8 +194,6 @@ enum WorkoutType {
   WORKOUT_TYPE_HILL_REPEATS = 5 [deprecated = true];
   // Deprecated: use WORKOUT_TYPE_BASE.
   WORKOUT_TYPE_VERT = 6 [deprecated = true];
-  // Deprecated: use WORKOUT_TYPE_BASE.
-  WORKOUT_TYPE_RECOVERY = 7 [deprecated = true];
   // Deprecated: use WORKOUT_TYPE_CROSS_TRAINING.
   WORKOUT_TYPE_OTHER = 12 [deprecated = true];
 }
@@ -207,7 +209,7 @@ message Workout {
   // The date of the workout (YYYY-MM-DD).
   string date = 3;
   // The type of workout, set from which of run, cross_training, strength,
-  // race and rest is set. Ignored in requests.
+  // race, rest and recovery is set. Ignored in requests.
   WorkoutType type = 4 [(mcp.v1.field).output_only = true];
   // A short title, e.g. "Long run with 1000m vert".
   string title = 5;
@@ -217,7 +219,8 @@ message Workout {
   // ActivityService. As activities sync, workouts without one are linked to
   // an activity of the same day that no other workout has: runs and races to
   // a run, strength workouts to strength training, and cross-training to
-  // any other sport but walks. Several workouts of a kind on a day are
+  // any other sport but walks. Rest days and recovery work aren't linked:
+  // recovery work is marked done instead, see RecoveryWorkout.done. Several workouts of a kind on a day are
   // paired with that day's activities in order of their start times. Clear
   // it to remove a wrong link: the workout then isn't linked again until it
   // is set by hand.
@@ -252,6 +255,8 @@ message Workout {
     RaceWorkout race = 16;
     // A rest day.
     RestDay rest = 17;
+    // Recovery work, like electrical muscle stimulation or massage.
+    RecoveryWorkout recovery = 23;
   }
 
   reserved 7, 8, 9, 10, 11;
@@ -517,6 +522,153 @@ message RaceWorkout {
 
 // A rest day.
 message RestDay {}
+
+// Recovery work: what the user does to recover or treat pain rather than to
+// train, like electrical muscle stimulation with a PowerDot, a massage gun,
+// compression boots, heat or cold, in the order it's done. Stretching and
+// mobility are strength workouts, with exercises from the user's library.
+// The user marks it done in the web app.
+message RecoveryWorkout {
+  // What's done, in order. At least 1, at most 20.
+  repeated RecoveryItem items = 1;
+  // How long the session takes in seconds. 0 if not set: the items'
+  // durations add up to it.
+  int32 target_duration_seconds = 2;
+  // Whether the user did it. Set it with UpdateWorkout's update mask
+  // "recovery.done".
+  bool done = 3;
+}
+
+// RecoveryModality is a kind of recovery work.
+enum RecoveryModality {
+  RECOVERY_MODALITY_UNSPECIFIED = 0;
+  // Electrical stimulation through pads on the skin, with a device like a
+  // PowerDot: EMS (also called NMES) contracts the muscles, and TENS eases
+  // pain. Set the item's stimulation.
+  RECOVERY_MODALITY_ELECTRICAL_STIMULATION = 1;
+  // A percussive massage gun, like a Theragun.
+  RECOVERY_MODALITY_PERCUSSION = 2;
+  // A foam roller, massage ball or stick.
+  RECOVERY_MODALITY_FOAM_ROLLING = 3;
+  // A massage by hand, by the user or a therapist.
+  RECOVERY_MODALITY_MASSAGE = 4;
+  // Pneumatic compression boots or sleeves, like Normatec.
+  RECOVERY_MODALITY_COMPRESSION = 5;
+  // Heat: a sauna, hot bath or heat pack.
+  RECOVERY_MODALITY_HEAT = 6;
+  // Cold: an ice bath, cold plunge or ice pack.
+  RECOVERY_MODALITY_COLD = 7;
+  // Anything else, described by the item's notes.
+  RECOVERY_MODALITY_OTHER = 8;
+}
+
+// RecoverySide is the side of the body an item is done on.
+enum RecoverySide {
+  // Both sides, or a part of the body that has no sides, like the lower
+  // back.
+  RECOVERY_SIDE_UNSPECIFIED = 0;
+  RECOVERY_SIDE_LEFT = 1;
+  RECOVERY_SIDE_RIGHT = 2;
+}
+
+// A part of a recovery workout.
+message RecoveryItem {
+  // What kind of recovery work it is. Required.
+  RecoveryModality modality = 1;
+  // How long it takes in seconds, at most 4 hours. 0 if not set, e.g. for
+  // a program that runs as long as it runs.
+  int32 duration_seconds = 2;
+  // The muscles it's for: where electrical stimulation's pads or a massage
+  // gun go. Required for electrical stimulation; empty for the whole body,
+  // like a sauna.
+  repeated Muscle muscles = 3;
+  // The side of the body, for the muscles.
+  RecoverySide side = 4;
+  // Anything else to know, like the exact pad placement the physio showed,
+  // a temperature or a pressure level. At most 1000 characters.
+  string notes = 5;
+  // The settings of electrical stimulation. Required for
+  // ELECTRICAL_STIMULATION, and only allowed for it.
+  ElectricalStimulation stimulation = 6;
+}
+
+// StimulationProgram is a program of an electrical stimulation device. The
+// programs are PowerDot's (in its app); choose the closest for other
+// devices, and describe the difference in the item's notes.
+enum StimulationProgram {
+  STIMULATION_PROGRAM_UNSPECIFIED = 0;
+
+  // Recovery programs (EMS), best within 2 hours of training or a race.
+  // Active Recovery: low frequency twitches that raise blood flow to flush
+  // the muscles, about 25 minutes.
+  STIMULATION_PROGRAM_ACTIVE_RECOVERY = 1;
+  // Light Recovery: gentler, non-fatiguing low frequency stimulation, e.g.
+  // between hard days.
+  STIMULATION_PROGRAM_LIGHT_RECOVERY = 2;
+  // Extended Recovery: Active Recovery over a longer session, e.g. after a
+  // race.
+  STIMULATION_PROGRAM_EXTENDED_RECOVERY = 3;
+
+  // Training programs (EMS), which work the muscles like a workout. They
+  // tire them, so don't plan them right before running hard.
+  // Muscle Endurance: fatigue resistance, e.g. for long runs.
+  STIMULATION_PROGRAM_MUSCLE_ENDURANCE = 4;
+  // Strength Endurance: holding intense efforts for longer.
+  STIMULATION_PROGRAM_STRENGTH_ENDURANCE = 5;
+  // Resistance: sustained intense contractions that build muscle.
+  STIMULATION_PROGRAM_RESISTANCE = 6;
+  // Strength: maximal strength.
+  STIMULATION_PROGRAM_STRENGTH = 7;
+  // Explosive Strength: rapid force, for power.
+  STIMULATION_PROGRAM_EXPLOSIVE_STRENGTH = 8;
+  // Warm Up / Potentiation: readies the muscles for maximal efforts, right
+  // before training or racing.
+  STIMULATION_PROGRAM_POTENTIATION = 9;
+
+  // Wellness (EMS).
+  // Massage: rhythmic contractions that relax the muscles and raise blood
+  // flow.
+  STIMULATION_PROGRAM_MASSAGE = 10;
+
+  // Pain programs (TENS), which ease pain rather than contract the muscles.
+  // Pain Relief: built by the app from the painful area, a massage style
+  // (tens_massage) and the pain level (pain_level).
+  STIMULATION_PROGRAM_PAIN_RELIEF = 11;
+  // Period Pain Relief: pads on the lower abdomen or lower back, often for
+  // 30 to 90 minutes.
+  STIMULATION_PROGRAM_PERIOD_PAIN_RELIEF = 12;
+}
+
+// TensMassage is the massage style of a TENS pain relief program.
+enum TensMassage {
+  TENS_MASSAGE_UNSPECIFIED = 0;
+  // A refreshing massage.
+  TENS_MASSAGE_REFRESHING = 1;
+  // A low frequency massage, in 7 phases.
+  TENS_MASSAGE_LOW_FREQUENCY = 2;
+  // Several phases of modulated frequencies.
+  TENS_MASSAGE_MULTI_PHASE = 3;
+}
+
+// How to set up electrical stimulation.
+message ElectricalStimulation {
+  // The program. Required.
+  StimulationProgram program = 1;
+  // How many pods to use: 1 for one muscle or one side, as with a
+  // PowerDot Uno, 2 for both sides or two muscles at once, as with a Duo.
+  // 0 if not set.
+  int32 pods = 2;
+  // The intensity to aim for, on the device's scale from 1 to 100, e.g. a
+  // physio's prescription. 0 if not set: the user raises it until the
+  // muscles contract strongly but comfortably, or, for TENS, until it
+  // tingles without hurting.
+  int32 intensity = 3;
+  // The pain level from 0 to 10 that a PAIN_RELIEF or PERIOD_PAIN_RELIEF
+  // program is built for. Unset if not given; only for those programs.
+  optional int32 pain_level = 4;
+  // The massage style of a PAIN_RELIEF program. Only for it.
+  TensMassage tens_massage = 5;
+}
 
 // Strength and mobility training. The user follows it on their phone in the
 // web app: exercise by exercise, logging the reps of each set and how each

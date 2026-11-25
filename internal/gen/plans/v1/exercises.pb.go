@@ -23,118 +23,6 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// Muscle is a muscle or muscle group an exercise works.
-type Muscle int32
-
-const (
-	Muscle_MUSCLE_UNSPECIFIED Muscle = 0
-	Muscle_MUSCLE_NECK        Muscle = 1
-	// The trapezius and rhomboids.
-	Muscle_MUSCLE_UPPER_BACK Muscle = 2
-	// The latissimus dorsi.
-	Muscle_MUSCLE_LATS Muscle = 3
-	// The erector spinae.
-	Muscle_MUSCLE_LOWER_BACK Muscle = 4
-	// The deltoids.
-	Muscle_MUSCLE_SHOULDERS Muscle = 5
-	Muscle_MUSCLE_CHEST     Muscle = 6
-	Muscle_MUSCLE_BICEPS    Muscle = 7
-	Muscle_MUSCLE_TRICEPS   Muscle = 8
-	Muscle_MUSCLE_FOREARMS  Muscle = 9
-	// The rectus abdominis and deep core.
-	Muscle_MUSCLE_ABS      Muscle = 10
-	Muscle_MUSCLE_OBLIQUES Muscle = 11
-	// The iliopsoas and rectus femoris at the front of the hip.
-	Muscle_MUSCLE_HIP_FLEXORS Muscle = 12
-	// The gluteus maximus.
-	Muscle_MUSCLE_GLUTES Muscle = 13
-	// The gluteus medius and minimus at the side of the hip, which keep the
-	// pelvis level on one leg.
-	Muscle_MUSCLE_HIP_ABDUCTORS Muscle = 14
-	// The inner thigh.
-	Muscle_MUSCLE_ADDUCTORS  Muscle = 15
-	Muscle_MUSCLE_QUADS      Muscle = 16
-	Muscle_MUSCLE_HAMSTRINGS Muscle = 17
-	// The gastrocnemius and soleus.
-	Muscle_MUSCLE_CALVES Muscle = 18
-	// The tibialis anterior at the front of the shin.
-	Muscle_MUSCLE_SHINS Muscle = 19
-	// The muscles of the foot and ankle.
-	Muscle_MUSCLE_FEET Muscle = 20
-)
-
-// Enum value maps for Muscle.
-var (
-	Muscle_name = map[int32]string{
-		0:  "MUSCLE_UNSPECIFIED",
-		1:  "MUSCLE_NECK",
-		2:  "MUSCLE_UPPER_BACK",
-		3:  "MUSCLE_LATS",
-		4:  "MUSCLE_LOWER_BACK",
-		5:  "MUSCLE_SHOULDERS",
-		6:  "MUSCLE_CHEST",
-		7:  "MUSCLE_BICEPS",
-		8:  "MUSCLE_TRICEPS",
-		9:  "MUSCLE_FOREARMS",
-		10: "MUSCLE_ABS",
-		11: "MUSCLE_OBLIQUES",
-		12: "MUSCLE_HIP_FLEXORS",
-		13: "MUSCLE_GLUTES",
-		14: "MUSCLE_HIP_ABDUCTORS",
-		15: "MUSCLE_ADDUCTORS",
-		16: "MUSCLE_QUADS",
-		17: "MUSCLE_HAMSTRINGS",
-		18: "MUSCLE_CALVES",
-		19: "MUSCLE_SHINS",
-		20: "MUSCLE_FEET",
-	}
-	Muscle_value = map[string]int32{
-		"MUSCLE_UNSPECIFIED":   0,
-		"MUSCLE_NECK":          1,
-		"MUSCLE_UPPER_BACK":    2,
-		"MUSCLE_LATS":          3,
-		"MUSCLE_LOWER_BACK":    4,
-		"MUSCLE_SHOULDERS":     5,
-		"MUSCLE_CHEST":         6,
-		"MUSCLE_BICEPS":        7,
-		"MUSCLE_TRICEPS":       8,
-		"MUSCLE_FOREARMS":      9,
-		"MUSCLE_ABS":           10,
-		"MUSCLE_OBLIQUES":      11,
-		"MUSCLE_HIP_FLEXORS":   12,
-		"MUSCLE_GLUTES":        13,
-		"MUSCLE_HIP_ABDUCTORS": 14,
-		"MUSCLE_ADDUCTORS":     15,
-		"MUSCLE_QUADS":         16,
-		"MUSCLE_HAMSTRINGS":    17,
-		"MUSCLE_CALVES":        18,
-		"MUSCLE_SHINS":         19,
-		"MUSCLE_FEET":          20,
-	}
-)
-
-func (x Muscle) Enum() *Muscle {
-	p := new(Muscle)
-	*p = x
-	return p
-}
-
-func (x Muscle) String() string {
-	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
-}
-
-func (Muscle) Descriptor() protoreflect.EnumDescriptor {
-	return file_plans_v1_exercises_proto_enumTypes[0].Descriptor()
-}
-
-func (Muscle) Type() protoreflect.EnumType {
-	return &file_plans_v1_exercises_proto_enumTypes[0]
-}
-
-func (x Muscle) Number() protoreflect.EnumNumber {
-	return protoreflect.EnumNumber(x)
-}
-
 // BodyPoint is a point of the stick figure. Near limbs are on the viewer's
 // side, and far limbs behind them.
 type BodyPoint int32
@@ -197,11 +85,11 @@ func (x BodyPoint) String() string {
 }
 
 func (BodyPoint) Descriptor() protoreflect.EnumDescriptor {
-	return file_plans_v1_exercises_proto_enumTypes[1].Descriptor()
+	return file_plans_v1_exercises_proto_enumTypes[0].Descriptor()
 }
 
 func (BodyPoint) Type() protoreflect.EnumType {
-	return &file_plans_v1_exercises_proto_enumTypes[1]
+	return &file_plans_v1_exercises_proto_enumTypes[0]
 }
 
 func (x BodyPoint) Number() protoreflect.EnumNumber {
@@ -260,11 +148,11 @@ func (x AnimationPropKind) String() string {
 }
 
 func (AnimationPropKind) Descriptor() protoreflect.EnumDescriptor {
-	return file_plans_v1_exercises_proto_enumTypes[2].Descriptor()
+	return file_plans_v1_exercises_proto_enumTypes[1].Descriptor()
 }
 
 func (AnimationPropKind) Type() protoreflect.EnumType {
-	return &file_plans_v1_exercises_proto_enumTypes[2]
+	return &file_plans_v1_exercises_proto_enumTypes[1]
 }
 
 func (x AnimationPropKind) Number() protoreflect.EnumNumber {
@@ -2769,7 +2657,7 @@ var File_plans_v1_exercises_proto protoreflect.FileDescriptor
 
 const file_plans_v1_exercises_proto_rawDesc = "" +
 	"\n" +
-	"\x18plans/v1/exercises.proto\x12\bplans.v1\x1a google/protobuf/field_mask.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x14mcp/v1/options.proto\x1a\x18plans/v1/equipment.proto\x1a\x14plans/v1/plans.proto\"\xc9\x04\n" +
+	"\x18plans/v1/exercises.proto\x12\bplans.v1\x1a google/protobuf/field_mask.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x14mcp/v1/options.proto\x1a\x18plans/v1/equipment.proto\x1a\x16plans/v1/muscles.proto\x1a\x14plans/v1/plans.proto\"\xc9\x04\n" +
 	"\bExercise\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\"\n" +
@@ -2880,31 +2768,7 @@ const file_plans_v1_exercises_proto_rawDesc = "" +
 	"\x0eGarminExercise\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1a\n" +
 	"\bcategory\x18\x02 \x01(\tR\bcategory\x12\x12\n" +
-	"\x04name\x18\x03 \x01(\tR\x04name*\xb3\x03\n" +
-	"\x06Muscle\x12\x16\n" +
-	"\x12MUSCLE_UNSPECIFIED\x10\x00\x12\x0f\n" +
-	"\vMUSCLE_NECK\x10\x01\x12\x15\n" +
-	"\x11MUSCLE_UPPER_BACK\x10\x02\x12\x0f\n" +
-	"\vMUSCLE_LATS\x10\x03\x12\x15\n" +
-	"\x11MUSCLE_LOWER_BACK\x10\x04\x12\x14\n" +
-	"\x10MUSCLE_SHOULDERS\x10\x05\x12\x10\n" +
-	"\fMUSCLE_CHEST\x10\x06\x12\x11\n" +
-	"\rMUSCLE_BICEPS\x10\a\x12\x12\n" +
-	"\x0eMUSCLE_TRICEPS\x10\b\x12\x13\n" +
-	"\x0fMUSCLE_FOREARMS\x10\t\x12\x0e\n" +
-	"\n" +
-	"MUSCLE_ABS\x10\n" +
-	"\x12\x13\n" +
-	"\x0fMUSCLE_OBLIQUES\x10\v\x12\x16\n" +
-	"\x12MUSCLE_HIP_FLEXORS\x10\f\x12\x11\n" +
-	"\rMUSCLE_GLUTES\x10\r\x12\x18\n" +
-	"\x14MUSCLE_HIP_ABDUCTORS\x10\x0e\x12\x14\n" +
-	"\x10MUSCLE_ADDUCTORS\x10\x0f\x12\x10\n" +
-	"\fMUSCLE_QUADS\x10\x10\x12\x15\n" +
-	"\x11MUSCLE_HAMSTRINGS\x10\x11\x12\x11\n" +
-	"\rMUSCLE_CALVES\x10\x12\x12\x10\n" +
-	"\fMUSCLE_SHINS\x10\x13\x12\x0f\n" +
-	"\vMUSCLE_FEET\x10\x14*\xb9\x02\n" +
+	"\x04name\x18\x03 \x01(\tR\x04name*\xb9\x02\n" +
 	"\tBodyPoint\x12\x1a\n" +
 	"\x16BODY_POINT_UNSPECIFIED\x10\x00\x12\x13\n" +
 	"\x0fBODY_POINT_HEAD\x10\x01\x12\x18\n" +
@@ -2940,40 +2804,40 @@ const file_plans_v1_exercises_proto_rawDesc = "" +
 	"\x0eListStockPoses\x12\x1f.plans.v1.ListStockPosesRequest\x1a .plans.v1.ListStockPosesResponseB\xa0\x01\n" +
 	"\fcom.plans.v1B\x0eExercisesProtoP\x01Z?github.com/bs-tools/trailrunn.ing/internal/gen/plans/v1;plansv1\xa2\x02\x03PXX\xaa\x02\bPlans.V1\xca\x02\bPlans\\V1\xe2\x02\x14Plans\\V1\\GPBMetadata\xea\x02\tPlans::V1b\x06proto3"
 
-var file_plans_v1_exercises_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
+var file_plans_v1_exercises_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
 var file_plans_v1_exercises_proto_msgTypes = make([]protoimpl.MessageInfo, 28)
 var file_plans_v1_exercises_proto_goTypes = []any{
-	(Muscle)(0),                           // 0: plans.v1.Muscle
-	(BodyPoint)(0),                        // 1: plans.v1.BodyPoint
-	(AnimationPropKind)(0),                // 2: plans.v1.AnimationPropKind
-	(*Exercise)(nil),                      // 3: plans.v1.Exercise
-	(*ExerciseAnimation)(nil),             // 4: plans.v1.ExerciseAnimation
-	(*AnimationProp)(nil),                 // 5: plans.v1.AnimationProp
-	(*AnimationKeyframe)(nil),             // 6: plans.v1.AnimationKeyframe
-	(*Pose)(nil),                          // 7: plans.v1.Pose
-	(*ExerciseHistoryEntry)(nil),          // 8: plans.v1.ExerciseHistoryEntry
-	(*CreateExercisesRequest)(nil),        // 9: plans.v1.CreateExercisesRequest
-	(*CreateExercisesResponse)(nil),       // 10: plans.v1.CreateExercisesResponse
-	(*ListExercisesRequest)(nil),          // 11: plans.v1.ListExercisesRequest
-	(*ListExercisesResponse)(nil),         // 12: plans.v1.ListExercisesResponse
-	(*GetExerciseRequest)(nil),            // 13: plans.v1.GetExerciseRequest
-	(*GetExerciseResponse)(nil),           // 14: plans.v1.GetExerciseResponse
-	(*UpdateExerciseRequest)(nil),         // 15: plans.v1.UpdateExerciseRequest
-	(*UpdateExerciseResponse)(nil),        // 16: plans.v1.UpdateExerciseResponse
-	(*DeleteExerciseRequest)(nil),         // 17: plans.v1.DeleteExerciseRequest
-	(*DeleteExerciseResponse)(nil),        // 18: plans.v1.DeleteExerciseResponse
-	(*ListExerciseHistoryRequest)(nil),    // 19: plans.v1.ListExerciseHistoryRequest
-	(*ListExerciseHistoryResponse)(nil),   // 20: plans.v1.ListExerciseHistoryResponse
-	(*GetHomeEquipmentRequest)(nil),       // 21: plans.v1.GetHomeEquipmentRequest
-	(*GetHomeEquipmentResponse)(nil),      // 22: plans.v1.GetHomeEquipmentResponse
-	(*SetHomeEquipmentRequest)(nil),       // 23: plans.v1.SetHomeEquipmentRequest
-	(*SetHomeEquipmentResponse)(nil),      // 24: plans.v1.SetHomeEquipmentResponse
-	(*SearchGarminExercisesRequest)(nil),  // 25: plans.v1.SearchGarminExercisesRequest
-	(*SearchGarminExercisesResponse)(nil), // 26: plans.v1.SearchGarminExercisesResponse
-	(*ListStockPosesRequest)(nil),         // 27: plans.v1.ListStockPosesRequest
-	(*ListStockPosesResponse)(nil),        // 28: plans.v1.ListStockPosesResponse
-	(*StockPose)(nil),                     // 29: plans.v1.StockPose
-	(*GarminExercise)(nil),                // 30: plans.v1.GarminExercise
+	(BodyPoint)(0),                        // 0: plans.v1.BodyPoint
+	(AnimationPropKind)(0),                // 1: plans.v1.AnimationPropKind
+	(*Exercise)(nil),                      // 2: plans.v1.Exercise
+	(*ExerciseAnimation)(nil),             // 3: plans.v1.ExerciseAnimation
+	(*AnimationProp)(nil),                 // 4: plans.v1.AnimationProp
+	(*AnimationKeyframe)(nil),             // 5: plans.v1.AnimationKeyframe
+	(*Pose)(nil),                          // 6: plans.v1.Pose
+	(*ExerciseHistoryEntry)(nil),          // 7: plans.v1.ExerciseHistoryEntry
+	(*CreateExercisesRequest)(nil),        // 8: plans.v1.CreateExercisesRequest
+	(*CreateExercisesResponse)(nil),       // 9: plans.v1.CreateExercisesResponse
+	(*ListExercisesRequest)(nil),          // 10: plans.v1.ListExercisesRequest
+	(*ListExercisesResponse)(nil),         // 11: plans.v1.ListExercisesResponse
+	(*GetExerciseRequest)(nil),            // 12: plans.v1.GetExerciseRequest
+	(*GetExerciseResponse)(nil),           // 13: plans.v1.GetExerciseResponse
+	(*UpdateExerciseRequest)(nil),         // 14: plans.v1.UpdateExerciseRequest
+	(*UpdateExerciseResponse)(nil),        // 15: plans.v1.UpdateExerciseResponse
+	(*DeleteExerciseRequest)(nil),         // 16: plans.v1.DeleteExerciseRequest
+	(*DeleteExerciseResponse)(nil),        // 17: plans.v1.DeleteExerciseResponse
+	(*ListExerciseHistoryRequest)(nil),    // 18: plans.v1.ListExerciseHistoryRequest
+	(*ListExerciseHistoryResponse)(nil),   // 19: plans.v1.ListExerciseHistoryResponse
+	(*GetHomeEquipmentRequest)(nil),       // 20: plans.v1.GetHomeEquipmentRequest
+	(*GetHomeEquipmentResponse)(nil),      // 21: plans.v1.GetHomeEquipmentResponse
+	(*SetHomeEquipmentRequest)(nil),       // 22: plans.v1.SetHomeEquipmentRequest
+	(*SetHomeEquipmentResponse)(nil),      // 23: plans.v1.SetHomeEquipmentResponse
+	(*SearchGarminExercisesRequest)(nil),  // 24: plans.v1.SearchGarminExercisesRequest
+	(*SearchGarminExercisesResponse)(nil), // 25: plans.v1.SearchGarminExercisesResponse
+	(*ListStockPosesRequest)(nil),         // 26: plans.v1.ListStockPosesRequest
+	(*ListStockPosesResponse)(nil),        // 27: plans.v1.ListStockPosesResponse
+	(*StockPose)(nil),                     // 28: plans.v1.StockPose
+	(*GarminExercise)(nil),                // 29: plans.v1.GarminExercise
+	(Muscle)(0),                           // 30: plans.v1.Muscle
 	(Equipment)(0),                        // 31: plans.v1.Equipment
 	(*timestamppb.Timestamp)(nil),         // 32: google.protobuf.Timestamp
 	(*PlannedExercise)(nil),               // 33: plans.v1.PlannedExercise
@@ -2983,62 +2847,62 @@ var file_plans_v1_exercises_proto_goTypes = []any{
 	(*OwnedEquipment)(nil),                // 37: plans.v1.OwnedEquipment
 }
 var file_plans_v1_exercises_proto_depIdxs = []int32{
-	0,  // 0: plans.v1.Exercise.primary_muscles:type_name -> plans.v1.Muscle
-	0,  // 1: plans.v1.Exercise.secondary_muscles:type_name -> plans.v1.Muscle
+	30, // 0: plans.v1.Exercise.primary_muscles:type_name -> plans.v1.Muscle
+	30, // 1: plans.v1.Exercise.secondary_muscles:type_name -> plans.v1.Muscle
 	31, // 2: plans.v1.Exercise.equipment:type_name -> plans.v1.Equipment
 	32, // 3: plans.v1.Exercise.create_time:type_name -> google.protobuf.Timestamp
 	32, // 4: plans.v1.Exercise.update_time:type_name -> google.protobuf.Timestamp
-	4,  // 5: plans.v1.Exercise.animations:type_name -> plans.v1.ExerciseAnimation
-	1,  // 6: plans.v1.ExerciseAnimation.anchor:type_name -> plans.v1.BodyPoint
-	1,  // 7: plans.v1.ExerciseAnimation.planted:type_name -> plans.v1.BodyPoint
-	5,  // 8: plans.v1.ExerciseAnimation.props:type_name -> plans.v1.AnimationProp
-	6,  // 9: plans.v1.ExerciseAnimation.keyframes:type_name -> plans.v1.AnimationKeyframe
-	2,  // 10: plans.v1.AnimationProp.kind:type_name -> plans.v1.AnimationPropKind
-	1,  // 11: plans.v1.AnimationProp.point:type_name -> plans.v1.BodyPoint
-	7,  // 12: plans.v1.AnimationKeyframe.pose:type_name -> plans.v1.Pose
-	1,  // 13: plans.v1.AnimationKeyframe.highlight:type_name -> plans.v1.BodyPoint
+	3,  // 5: plans.v1.Exercise.animations:type_name -> plans.v1.ExerciseAnimation
+	0,  // 6: plans.v1.ExerciseAnimation.anchor:type_name -> plans.v1.BodyPoint
+	0,  // 7: plans.v1.ExerciseAnimation.planted:type_name -> plans.v1.BodyPoint
+	4,  // 8: plans.v1.ExerciseAnimation.props:type_name -> plans.v1.AnimationProp
+	5,  // 9: plans.v1.ExerciseAnimation.keyframes:type_name -> plans.v1.AnimationKeyframe
+	1,  // 10: plans.v1.AnimationProp.kind:type_name -> plans.v1.AnimationPropKind
+	0,  // 11: plans.v1.AnimationProp.point:type_name -> plans.v1.BodyPoint
+	6,  // 12: plans.v1.AnimationKeyframe.pose:type_name -> plans.v1.Pose
+	0,  // 13: plans.v1.AnimationKeyframe.highlight:type_name -> plans.v1.BodyPoint
 	33, // 14: plans.v1.ExerciseHistoryEntry.planned:type_name -> plans.v1.PlannedExercise
 	34, // 15: plans.v1.ExerciseHistoryEntry.logged:type_name -> plans.v1.LoggedExercise
 	35, // 16: plans.v1.ExerciseHistoryEntry.session_effort:type_name -> plans.v1.SessionEffort
-	3,  // 17: plans.v1.CreateExercisesRequest.exercises:type_name -> plans.v1.Exercise
-	3,  // 18: plans.v1.CreateExercisesResponse.exercises:type_name -> plans.v1.Exercise
-	3,  // 19: plans.v1.ListExercisesResponse.exercises:type_name -> plans.v1.Exercise
-	3,  // 20: plans.v1.GetExerciseResponse.exercise:type_name -> plans.v1.Exercise
-	3,  // 21: plans.v1.UpdateExerciseRequest.exercise:type_name -> plans.v1.Exercise
+	2,  // 17: plans.v1.CreateExercisesRequest.exercises:type_name -> plans.v1.Exercise
+	2,  // 18: plans.v1.CreateExercisesResponse.exercises:type_name -> plans.v1.Exercise
+	2,  // 19: plans.v1.ListExercisesResponse.exercises:type_name -> plans.v1.Exercise
+	2,  // 20: plans.v1.GetExerciseResponse.exercise:type_name -> plans.v1.Exercise
+	2,  // 21: plans.v1.UpdateExerciseRequest.exercise:type_name -> plans.v1.Exercise
 	36, // 22: plans.v1.UpdateExerciseRequest.update_mask:type_name -> google.protobuf.FieldMask
-	3,  // 23: plans.v1.UpdateExerciseResponse.exercise:type_name -> plans.v1.Exercise
-	8,  // 24: plans.v1.ListExerciseHistoryResponse.entries:type_name -> plans.v1.ExerciseHistoryEntry
+	2,  // 23: plans.v1.UpdateExerciseResponse.exercise:type_name -> plans.v1.Exercise
+	7,  // 24: plans.v1.ListExerciseHistoryResponse.entries:type_name -> plans.v1.ExerciseHistoryEntry
 	37, // 25: plans.v1.GetHomeEquipmentResponse.equipment:type_name -> plans.v1.OwnedEquipment
 	32, // 26: plans.v1.GetHomeEquipmentResponse.update_time:type_name -> google.protobuf.Timestamp
 	37, // 27: plans.v1.SetHomeEquipmentRequest.equipment:type_name -> plans.v1.OwnedEquipment
 	37, // 28: plans.v1.SetHomeEquipmentResponse.equipment:type_name -> plans.v1.OwnedEquipment
 	32, // 29: plans.v1.SetHomeEquipmentResponse.update_time:type_name -> google.protobuf.Timestamp
-	30, // 30: plans.v1.SearchGarminExercisesResponse.exercises:type_name -> plans.v1.GarminExercise
-	29, // 31: plans.v1.ListStockPosesResponse.poses:type_name -> plans.v1.StockPose
-	7,  // 32: plans.v1.StockPose.pose:type_name -> plans.v1.Pose
-	1,  // 33: plans.v1.StockPose.anchor:type_name -> plans.v1.BodyPoint
-	1,  // 34: plans.v1.StockPose.planted:type_name -> plans.v1.BodyPoint
-	5,  // 35: plans.v1.StockPose.props:type_name -> plans.v1.AnimationProp
-	9,  // 36: plans.v1.ExerciseService.CreateExercises:input_type -> plans.v1.CreateExercisesRequest
-	11, // 37: plans.v1.ExerciseService.ListExercises:input_type -> plans.v1.ListExercisesRequest
-	13, // 38: plans.v1.ExerciseService.GetExercise:input_type -> plans.v1.GetExerciseRequest
-	15, // 39: plans.v1.ExerciseService.UpdateExercise:input_type -> plans.v1.UpdateExerciseRequest
-	17, // 40: plans.v1.ExerciseService.DeleteExercise:input_type -> plans.v1.DeleteExerciseRequest
-	19, // 41: plans.v1.ExerciseService.ListExerciseHistory:input_type -> plans.v1.ListExerciseHistoryRequest
-	21, // 42: plans.v1.ExerciseService.GetHomeEquipment:input_type -> plans.v1.GetHomeEquipmentRequest
-	23, // 43: plans.v1.ExerciseService.SetHomeEquipment:input_type -> plans.v1.SetHomeEquipmentRequest
-	25, // 44: plans.v1.ExerciseService.SearchGarminExercises:input_type -> plans.v1.SearchGarminExercisesRequest
-	27, // 45: plans.v1.ExerciseService.ListStockPoses:input_type -> plans.v1.ListStockPosesRequest
-	10, // 46: plans.v1.ExerciseService.CreateExercises:output_type -> plans.v1.CreateExercisesResponse
-	12, // 47: plans.v1.ExerciseService.ListExercises:output_type -> plans.v1.ListExercisesResponse
-	14, // 48: plans.v1.ExerciseService.GetExercise:output_type -> plans.v1.GetExerciseResponse
-	16, // 49: plans.v1.ExerciseService.UpdateExercise:output_type -> plans.v1.UpdateExerciseResponse
-	18, // 50: plans.v1.ExerciseService.DeleteExercise:output_type -> plans.v1.DeleteExerciseResponse
-	20, // 51: plans.v1.ExerciseService.ListExerciseHistory:output_type -> plans.v1.ListExerciseHistoryResponse
-	22, // 52: plans.v1.ExerciseService.GetHomeEquipment:output_type -> plans.v1.GetHomeEquipmentResponse
-	24, // 53: plans.v1.ExerciseService.SetHomeEquipment:output_type -> plans.v1.SetHomeEquipmentResponse
-	26, // 54: plans.v1.ExerciseService.SearchGarminExercises:output_type -> plans.v1.SearchGarminExercisesResponse
-	28, // 55: plans.v1.ExerciseService.ListStockPoses:output_type -> plans.v1.ListStockPosesResponse
+	29, // 30: plans.v1.SearchGarminExercisesResponse.exercises:type_name -> plans.v1.GarminExercise
+	28, // 31: plans.v1.ListStockPosesResponse.poses:type_name -> plans.v1.StockPose
+	6,  // 32: plans.v1.StockPose.pose:type_name -> plans.v1.Pose
+	0,  // 33: plans.v1.StockPose.anchor:type_name -> plans.v1.BodyPoint
+	0,  // 34: plans.v1.StockPose.planted:type_name -> plans.v1.BodyPoint
+	4,  // 35: plans.v1.StockPose.props:type_name -> plans.v1.AnimationProp
+	8,  // 36: plans.v1.ExerciseService.CreateExercises:input_type -> plans.v1.CreateExercisesRequest
+	10, // 37: plans.v1.ExerciseService.ListExercises:input_type -> plans.v1.ListExercisesRequest
+	12, // 38: plans.v1.ExerciseService.GetExercise:input_type -> plans.v1.GetExerciseRequest
+	14, // 39: plans.v1.ExerciseService.UpdateExercise:input_type -> plans.v1.UpdateExerciseRequest
+	16, // 40: plans.v1.ExerciseService.DeleteExercise:input_type -> plans.v1.DeleteExerciseRequest
+	18, // 41: plans.v1.ExerciseService.ListExerciseHistory:input_type -> plans.v1.ListExerciseHistoryRequest
+	20, // 42: plans.v1.ExerciseService.GetHomeEquipment:input_type -> plans.v1.GetHomeEquipmentRequest
+	22, // 43: plans.v1.ExerciseService.SetHomeEquipment:input_type -> plans.v1.SetHomeEquipmentRequest
+	24, // 44: plans.v1.ExerciseService.SearchGarminExercises:input_type -> plans.v1.SearchGarminExercisesRequest
+	26, // 45: plans.v1.ExerciseService.ListStockPoses:input_type -> plans.v1.ListStockPosesRequest
+	9,  // 46: plans.v1.ExerciseService.CreateExercises:output_type -> plans.v1.CreateExercisesResponse
+	11, // 47: plans.v1.ExerciseService.ListExercises:output_type -> plans.v1.ListExercisesResponse
+	13, // 48: plans.v1.ExerciseService.GetExercise:output_type -> plans.v1.GetExerciseResponse
+	15, // 49: plans.v1.ExerciseService.UpdateExercise:output_type -> plans.v1.UpdateExerciseResponse
+	17, // 50: plans.v1.ExerciseService.DeleteExercise:output_type -> plans.v1.DeleteExerciseResponse
+	19, // 51: plans.v1.ExerciseService.ListExerciseHistory:output_type -> plans.v1.ListExerciseHistoryResponse
+	21, // 52: plans.v1.ExerciseService.GetHomeEquipment:output_type -> plans.v1.GetHomeEquipmentResponse
+	23, // 53: plans.v1.ExerciseService.SetHomeEquipment:output_type -> plans.v1.SetHomeEquipmentResponse
+	25, // 54: plans.v1.ExerciseService.SearchGarminExercises:output_type -> plans.v1.SearchGarminExercisesResponse
+	27, // 55: plans.v1.ExerciseService.ListStockPoses:output_type -> plans.v1.ListStockPosesResponse
 	46, // [46:56] is the sub-list for method output_type
 	36, // [36:46] is the sub-list for method input_type
 	36, // [36:36] is the sub-list for extension type_name
@@ -3052,13 +2916,14 @@ func file_plans_v1_exercises_proto_init() {
 		return
 	}
 	file_plans_v1_equipment_proto_init()
+	file_plans_v1_muscles_proto_init()
 	file_plans_v1_plans_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_plans_v1_exercises_proto_rawDesc), len(file_plans_v1_exercises_proto_rawDesc)),
-			NumEnums:      3,
+			NumEnums:      2,
 			NumMessages:   28,
 			NumExtensions: 0,
 			NumServices:   1,

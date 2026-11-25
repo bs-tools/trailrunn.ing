@@ -80,6 +80,7 @@ const (
 	WorkoutTypeStrength      WorkoutType = "strength"
 	WorkoutTypeRace          WorkoutType = "race"
 	WorkoutTypeRest          WorkoutType = "rest"
+	WorkoutTypeRecovery      WorkoutType = "recovery"
 )
 
 // CrossTrainingSport is the sport of a cross-training workout.
@@ -144,6 +145,8 @@ type Workout struct {
 	Log *StrengthLog
 	// The sport of a cross-training workout. Other for other workouts.
 	CrossTrainingSport CrossTrainingSport
+	// What a recovery workout is. Nil for other workouts.
+	Recovery *RecoveryWorkout
 }
 
 // CreateTrainingPlan stores a new training plan.
@@ -416,6 +419,7 @@ func (r *Repository) CreateWorkouts(ctx context.Context, userID, planID pgtype.U
 		params.RunHeartRates = append(params.RunHeartRates, heartRateToDB(w.RunHeartRate))
 		params.LactateTests = append(params.LactateTests, w.LactateTest)
 		params.RunFuelings = append(params.RunFuelings, runFuelingToDB(w.RunFueling))
+		params.Recoveries = append(params.Recoveries, recoveryToDB(w.Recovery))
 	}
 	var wr workoutReader
 	err := r.db.Transact(ctx, func(b *store.Batch) error {
@@ -540,6 +544,7 @@ func (r *Repository) UpdateWorkout(ctx context.Context, userID pgtype.UUID, w *W
 				LactateTest:               w.LactateTest,
 				RunFueling:                runFuelingToDB(w.RunFueling),
 				CrossTrainingSport:        string(w.CrossTrainingSport),
+				Recovery:                  recoveryToDB(w.Recovery),
 			})
 			if errors.Is(err, pgx.ErrNoRows) {
 				return store.ErrNotFound
@@ -677,6 +682,7 @@ func workoutFromDB(w *gen.Workout) *Workout {
 		RunFueling:                runFuelingFromDB(w.RunFueling),
 		ShareToken:                w.ShareToken.String,
 		CrossTrainingSport:        CrossTrainingSport(w.CrossTrainingSport),
+		Recovery:                  recoveryFromDB(w.Recovery),
 	}
 	if w.LocationLat.Valid && w.LocationLng.Valid {
 		workout.Location = &geo.Point{Lat: w.LocationLat.Float64, Lng: w.LocationLng.Float64}

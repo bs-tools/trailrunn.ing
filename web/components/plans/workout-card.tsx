@@ -6,6 +6,7 @@ import type { Workout, WorkoutWeather } from "gen/plans/v1/plans_pb";
 import { WorkoutType } from "gen/plans/v1/plans_pb";
 import { formatHoursMinutes } from "helpers/format";
 import { styleOfWorkout } from "helpers/labels";
+import { itemTitle, recoveryDuration } from "helpers/recovery";
 import { isCompleted, startWindow, workoutTargets } from "helpers/workouts";
 import React from "react";
 
@@ -36,8 +37,18 @@ const targets = (workout: Workout, capBpm: number | undefined): string => {
   if (target.elevationGainMeters > 0) {
     parts.push(`${Math.round(target.elevationGainMeters)} m`);
   }
-  if (target.durationSeconds > 0 && parts.length < 2) {
-    parts.push(formatHoursMinutes(target.durationSeconds));
+  const durationSeconds =
+    workout.details.case === "recovery"
+      ? recoveryDuration(workout.details.value)
+      : target.durationSeconds;
+  if (durationSeconds > 0 && parts.length < 2) {
+    parts.push(formatHoursMinutes(durationSeconds));
+  }
+  if (workout.details.case === "recovery" && parts.length < 2) {
+    const [first] = workout.details.value.items;
+    if (first !== undefined) {
+      parts.push(itemTitle(first));
+    }
   }
   if (workout.details.case === "strength" && parts.length < 2) {
     const count = workout.details.value.exercises.length;

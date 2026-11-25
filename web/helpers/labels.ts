@@ -48,6 +48,12 @@ export const WORKOUT_STYLES: WorkoutStyle[] = [
     type: WorkoutType.RACE,
   },
   {
+    cardClass: "bg-teal-50 border-teal-300 text-teal-900",
+    dotClass: "bg-teal-500",
+    label: "Recovery",
+    type: WorkoutType.RECOVERY,
+  },
+  {
     cardClass: "bg-white border-dashed border-gray-300 text-gray-500",
     dotClass: "bg-gray-300",
     label: "Rest",

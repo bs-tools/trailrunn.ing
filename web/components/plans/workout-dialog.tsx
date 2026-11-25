@@ -4,7 +4,15 @@ import {
   HeartRateField,
   targetOf,
 } from "@components/plans/heart-rate";
-import { SelectField, TextAreaField, TextField } from "@components/ui/fields";
+import RecoveryItemsField, {
+  newRecoveryItem,
+} from "@components/plans/recovery-items-field";
+import {
+  CheckboxField,
+  SelectField,
+  TextAreaField,
+  TextField,
+} from "@components/ui/fields";
 import type { SelectOption } from "@components/ui/fields";
 import Modal from "@components/ui/modal";
 import { ErrorText } from "@components/ui/query-error";
@@ -155,6 +163,15 @@ const WorkoutDialog: React.FC<WorkoutDialogProps> = ({
         : workout.startWindowMinutes
     )
   );
+  const storedRecovery =
+    workout?.details.case === "recovery" ? workout.details.value : undefined;
+  // A new recovery workout starts with an item to fill in.
+  const [recoveryItems, setRecoveryItems] = useState(
+    () => storedRecovery?.items ?? [newRecoveryItem()]
+  );
+  const [recoveryDone, setRecoveryDone] = useState(
+    storedRecovery?.done ?? false
+  );
   const [validation, setValidation] = useState("");
 
   const onSuccess = async () => {
@@ -210,13 +227,17 @@ const WorkoutDialog: React.FC<WorkoutDialogProps> = ({
       setValidation("Fueling rates must be positive numbers.");
       return;
     }
+    const workoutType = parseEnum(WorkoutType, type, WorkoutType.BASE);
+    if (workoutType === WorkoutType.RECOVERY && recoveryItems.length === 0) {
+      setValidation("Add at least one item, saying what recovery work to do.");
+      return;
+    }
     const heartRateTarget = targetOf(heartRate);
     if ("error" in heartRateTarget) {
       setValidation(heartRateTarget.error);
       return;
     }
     setValidation("");
-    const workoutType = parseEnum(WorkoutType, type, WorkoutType.BASE);
     const targetTerrain = parseEnum(Terrain, terrain, Terrain.UNSPECIFIED);
     // Fields the kind of workout doesn't have are left out.
     const targets = {
@@ -247,8 +268,14 @@ const WorkoutDialog: React.FC<WorkoutDialogProps> = ({
               sodiumMgPerHour: sodiumRate,
             });
     }
+    if (details.case === "recovery") {
+      details.value.items = recoveryItems;
+      details.value.done = recoveryDone;
+    }
     const fields = {
-      completedActivityId: completedId,
+      // Recovery work isn't done in an activity.
+      completedActivityId:
+        workoutType === WorkoutType.RECOVERY ? "" : completedId,
       date,
       description,
       details,
@@ -420,22 +447,23 @@ const WorkoutDialog: React.FC<WorkoutDialogProps> = ({
         />
         {selectedType !== WorkoutType.REST && (
           <div className="grid grid-cols-3 gap-3">
-            {selectedType !== WorkoutType.STRENGTH && (
-              <>
-                <TextField
-                  label="Distance (km)"
-                  value={distance}
-                  onChange={setDistance}
-                  inputMode="decimal"
-                />
-                <TextField
-                  label="Elevation gain (m)"
-                  value={vert}
-                  onChange={setVert}
-                  inputMode="numeric"
-                />
-              </>
-            )}
+            {selectedType !== WorkoutType.STRENGTH &&
+              selectedType !== WorkoutType.RECOVERY && (
+                <>
+                  <TextField
+                    label="Distance (km)"
+                    value={distance}
+                    onChange={setDistance}
+                    inputMode="decimal"
+                  />
+                  <TextField
+                    label="Elevation gain (m)"
+                    value={vert}
+                    onChange={setVert}
+                    inputMode="numeric"
+                  />
+                </>
+              )}
             <TextField
               label="Duration (h:mm)"
               value={duration}
@@ -517,6 +545,12 @@ const WorkoutDialog: React.FC<WorkoutDialogProps> = ({
             </span>
           </label>
         )}
+        {selectedType === WorkoutType.RECOVERY && (
+          <RecoveryItemsField
+            items={recoveryItems}
+            onChange={setRecoveryItems}
+          />
+        )}
         {selectedType === WorkoutType.STRENGTH && (
           <p className="text-sm text-gray-600">
             Plan the exercises of strength workouts through the MCP server, from
@@ -549,12 +583,20 @@ const WorkoutDialog: React.FC<WorkoutDialogProps> = ({
             </div>
           </div>
         )}
-        <SelectField
-          label="Completed by activity"
-          value={completedId}
-          onChange={setCompletedId}
-          options={activityOptions}
-        />
+        {selectedType === WorkoutType.RECOVERY ? (
+          <CheckboxField
+            label="Done"
+            checked={recoveryDone}
+            onChange={setRecoveryDone}
+          />
+        ) : (
+          <SelectField
+            label="Completed by activity"
+            value={completedId}
+            onChange={setCompletedId}
+            options={activityOptions}
+          />
+        )}
         {validation !== "" && (
           <p className="text-sm text-red-700">{validation}</p>
         )}

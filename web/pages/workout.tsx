@@ -5,6 +5,7 @@ import GearFeedbackCard from "@components/gear/gear-feedback";
 import { useAerobicThreshold } from "@components/lactate/use-aerobic-threshold";
 import WorkoutLactateTest from "@components/lactate/workout-lactate-test";
 import Loading from "@components/loading";
+import RecoveryWorkoutView from "@components/plans/recovery-workout";
 import RunFuelingCard from "@components/plans/run-fueling";
 import RunSteps from "@components/plans/run-steps";
 import WorkoutDialog from "@components/plans/workout-dialog";
@@ -49,10 +50,12 @@ import { Link, useNavigate, useParams } from "react-router";
 
 /**
  * Outdoors reports whether a workout is outside, so it has a route and the
- * weather matters: not rest days or strength training.
+ * weather matters: not rest days, strength training or recovery work.
  */
 const outdoors = (workout: Workout): boolean =>
-  workout.type !== WorkoutType.REST && workout.type !== WorkoutType.STRENGTH;
+  workout.type !== WorkoutType.REST &&
+  workout.type !== WorkoutType.STRENGTH &&
+  workout.type !== WorkoutType.RECOVERY;
 
 /**
  * WET_PERCENT and WET_MM are the chance of rain, and the rain, from which
@@ -390,6 +393,12 @@ const WorkoutPage: React.FC = () => {
                 }}
               />
             )}
+          {workout.details.case === "recovery" && (
+            <RecoveryWorkoutView
+              workout={workout}
+              recovery={workout.details.value}
+            />
+          )}
           {workout.details.case === "strength" && (
             <StrengthWorkoutView
               workout={workout}

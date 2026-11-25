@@ -12,7 +12,11 @@ so you can bring your own AI agent to do the planning.
 
 - **Training plans**: plans of up to a year with goal races, planned at the
   month (phase and volume), week (focus and targets) and day (workouts) level,
-  compared with what you actually ran.
+  compared with what you actually ran. Besides runs, strength and
+  cross-training, days can have recovery work: electrical stimulation with
+  PowerDot's programs (recovery, training, massage and TENS pain relief,
+  with the muscles, side, pods, intensity and pain level), a massage gun,
+  foam rolling, massage, compression, heat or cold, marked done when done.
 - **Routes**: a Strava style route editor where waypoints snap to trails or
   roads (routed with [pgRouting](https://pgrouting.org) on
   [OpenStreetMap](https://www.openstreetmap.org) data), prefer the paths you've run before

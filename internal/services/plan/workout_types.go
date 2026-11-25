@@ -35,6 +35,7 @@ var workoutTypes = map[plansv1.WorkoutType]plans.WorkoutType{
 	plansv1.WorkoutType_WORKOUT_TYPE_STRENGTH:       plans.WorkoutTypeStrength,
 	plansv1.WorkoutType_WORKOUT_TYPE_RACE:           plans.WorkoutTypeRace,
 	plansv1.WorkoutType_WORKOUT_TYPE_REST:           plans.WorkoutTypeRest,
+	plansv1.WorkoutType_WORKOUT_TYPE_RECOVERY:       plans.WorkoutTypeRecovery,
 }
 
 var crossTrainingSports = map[plansv1.CrossTrainingSport]plans.CrossTrainingSport{
@@ -152,8 +153,21 @@ func workoutDetailsFromProto(w *plansv1.Workout, workout *plans.Workout) error {
 	case plansv1.Workout_Rest_case:
 		workout.Type = plans.WorkoutTypeRest
 		return nil
+	case plansv1.Workout_Recovery_case:
+		r := w.GetRecovery()
+		workout.Type = plans.WorkoutTypeRecovery
+		if err := validateTargets(0, 0, r.GetTargetDurationSeconds()); err != nil {
+			return invalidArgument("recovery: %v", err)
+		}
+		workout.TargetDurationSeconds = r.GetTargetDurationSeconds()
+		recovery, err := recoveryFromProto(r)
+		if err != nil {
+			return invalidArgument("recovery.%v", err)
+		}
+		workout.Recovery = recovery
+		return nil
 	default:
-		return invalidArgument("one of run, cross_training, strength, race or rest is required, saying what kind of workout it is")
+		return invalidArgument("one of run, cross_training, strength, race, rest or recovery is required, saying what kind of workout it is")
 	}
 }
 
@@ -445,6 +459,8 @@ func workoutToProto(w *plans.Workout) *plansv1.Workout {
 		}.Build()
 	case plans.WorkoutTypeRest:
 		b.Rest = plansv1.RestDay_builder{}.Build()
+	case plans.WorkoutTypeRecovery:
+		b.Recovery = recoveryToProto(w)
 	}
 	return b.Build()
 }
