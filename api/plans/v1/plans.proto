@@ -55,7 +55,8 @@ service TrainingPlanService {
   rpc GetWorkout(GetWorkoutRequest) returns (GetWorkoutResponse);
   // Create one or more workouts in a plan. A day may have several workouts.
   rpc CreateWorkouts(CreateWorkoutsRequest) returns (CreateWorkoutsResponse);
-  // Update a workout.
+  // Update a workout. The exercises of a strength workout the user already
+  // logged are kept as they were done unless allow_logged_changes is set.
   rpc UpdateWorkout(UpdateWorkoutRequest) returns (UpdateWorkoutResponse);
   // Delete one or more workouts. The logs of deleted strength workouts are
   // kept in the history of their exercises.
@@ -1320,6 +1321,14 @@ message UpdateWorkoutRequest {
   // on a run, is refused: change its kind by sending the whole field. If
   // empty, all fields are replaced.
   google.protobuf.FieldMask update_mask = 2;
+  // Change a strength workout the user already logged: its exercises or
+  // groups, or its kind, which hides the log. Without it, such changes are
+  // refused, as the plan would no longer match what was done; changing its
+  // date, title, description or target time is always allowed. Set it only
+  // when the user asks for exactly that, e.g. to correct the plan to what
+  // they did; to plan the session differently next time, create a new
+  // workout instead.
+  bool allow_logged_changes = 3;
 }
 
 message UpdateWorkoutResponse {

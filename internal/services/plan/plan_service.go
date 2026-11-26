@@ -415,6 +415,11 @@ func (s *Service) UpdateWorkout(ctx context.Context, req *plansv1.UpdateWorkoutR
 	if err != nil {
 		return nil, err
 	}
+	if !req.GetAllowLoggedChanges() {
+		if err := checkLoggedUnchanged(existing, workout); err != nil {
+			return nil, err
+		}
+	}
 	if err := s.checkReferences(ctx, plan.UserID, []*plans.Workout{workout}); err != nil {
 		return nil, err
 	}
