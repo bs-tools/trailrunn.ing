@@ -84,7 +84,8 @@ export const getWorkout = TrainingPlanService.method.getWorkout;
 export const createWorkouts = TrainingPlanService.method.createWorkouts;
 
 /**
- * Update a workout.
+ * Update a workout. The exercises of a strength workout the user already
+ * logged are kept as they were done unless allow_logged_changes is set.
  *
  * @generated from rpc plans.v1.TrainingPlanService.UpdateWorkout
  */

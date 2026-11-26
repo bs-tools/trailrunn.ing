@@ -282,10 +282,40 @@ func TestStrengthWorkouts(t *testing.T) {
 	if got := log.GetExercises(); len(got) != 2 || len(got[0].GetSets()) != 3 || got[0].GetSets()[2].GetWeight().GetValue() != 12 || got[1].GetExerciseName() != "Copenhagen plank" {
 		t.Errorf("unexpected logged exercises %v", got)
 	}
-	// Replanning the workout keeps its log.
-	replanned, err := e.plans.UpdateWorkout(ctx, plansv1.UpdateWorkoutRequest_builder{
+	// Once logged, the plan isn't changed by mistake: changing the exercises
+	// or the kind of workout is refused, saying how to go ahead.
+	_, err = e.plans.UpdateWorkout(ctx, plansv1.UpdateWorkoutRequest_builder{
 		Workout:    plansv1.Workout_builder{Id: first.GetId(), Strength: strength(planks)}.Build(),
 		UpdateMask: &fieldmaskpb.FieldMask{Paths: []string{"strength"}},
+	}.Build())
+	wantCode(t, err, connect.CodeFailedPrecondition)
+	if !strings.Contains(err.Error(), "allow_logged_changes") {
+		t.Errorf("error %q should say how to change it anyway", err)
+	}
+	_, err = e.plans.UpdateWorkout(ctx, plansv1.UpdateWorkoutRequest_builder{
+		Workout:    plansv1.Workout_builder{Id: first.GetId(), Rest: plansv1.RestDay_builder{}.Build()}.Build(),
+		UpdateMask: &fieldmaskpb.FieldMask{Paths: []string{"rest"}},
+	}.Build())
+	wantCode(t, err, connect.CodeFailedPrecondition)
+	// Its title, date and target time can still change, and sending the
+	// same exercises back, as the web app does, is no change.
+	sameAgain := logged.GetWorkout().GetStrength()
+	sameAgain.SetTargetDurationSeconds(45 * 60)
+	retitled, err := e.plans.UpdateWorkout(ctx, plansv1.UpdateWorkoutRequest_builder{
+		Workout:    plansv1.Workout_builder{Id: first.GetId(), Title: "Legs", Strength: sameAgain}.Build(),
+		UpdateMask: &fieldmaskpb.FieldMask{Paths: []string{"title", "strength"}},
+	}.Build())
+	if err != nil {
+		t.Fatalf("UpdateWorkout of the title: %v", err)
+	}
+	if w := retitled.GetWorkout(); w.GetTitle() != "Legs" || w.GetStrength().GetTargetDurationSeconds() != 45*60 {
+		t.Errorf("unexpected retitled workout %v", w)
+	}
+	// Told to, replanning the workout keeps its log.
+	replanned, err := e.plans.UpdateWorkout(ctx, plansv1.UpdateWorkoutRequest_builder{
+		Workout:            plansv1.Workout_builder{Id: first.GetId(), Strength: strength(planks)}.Build(),
+		UpdateMask:         &fieldmaskpb.FieldMask{Paths: []string{"strength"}},
+		AllowLoggedChanges: true,
 	}.Build())
 	if err != nil {
 		t.Fatalf("UpdateWorkout: %v", err)

@@ -8347,11 +8347,12 @@ func (b0 CreateWorkoutsResponse_builder) Build() *CreateWorkoutsResponse {
 }
 
 type UpdateWorkoutRequest struct {
-	state                 protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_Workout    *Workout               `protobuf:"bytes,1,opt,name=workout,proto3"`
-	xxx_hidden_UpdateMask *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=update_mask,json=updateMask,proto3"`
-	unknownFields         protoimpl.UnknownFields
-	sizeCache             protoimpl.SizeCache
+	state                         protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Workout            *Workout               `protobuf:"bytes,1,opt,name=workout,proto3"`
+	xxx_hidden_UpdateMask         *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=update_mask,json=updateMask,proto3"`
+	xxx_hidden_AllowLoggedChanges bool                   `protobuf:"varint,3,opt,name=allow_logged_changes,json=allowLoggedChanges,proto3"`
+	unknownFields                 protoimpl.UnknownFields
+	sizeCache                     protoimpl.SizeCache
 }
 
 func (x *UpdateWorkoutRequest) Reset() {
@@ -8393,12 +8394,23 @@ func (x *UpdateWorkoutRequest) GetUpdateMask() *fieldmaskpb.FieldMask {
 	return nil
 }
 
+func (x *UpdateWorkoutRequest) GetAllowLoggedChanges() bool {
+	if x != nil {
+		return x.xxx_hidden_AllowLoggedChanges
+	}
+	return false
+}
+
 func (x *UpdateWorkoutRequest) SetWorkout(v *Workout) {
 	x.xxx_hidden_Workout = v
 }
 
 func (x *UpdateWorkoutRequest) SetUpdateMask(v *fieldmaskpb.FieldMask) {
 	x.xxx_hidden_UpdateMask = v
+}
+
+func (x *UpdateWorkoutRequest) SetAllowLoggedChanges(v bool) {
+	x.xxx_hidden_AllowLoggedChanges = v
 }
 
 func (x *UpdateWorkoutRequest) HasWorkout() bool {
@@ -8437,6 +8449,14 @@ type UpdateWorkoutRequest_builder struct {
 	// on a run, is refused: change its kind by sending the whole field. If
 	// empty, all fields are replaced.
 	UpdateMask *fieldmaskpb.FieldMask
+	// Change a strength workout the user already logged: its exercises or
+	// groups, or its kind, which hides the log. Without it, such changes are
+	// refused, as the plan would no longer match what was done; changing its
+	// date, title, description or target time is always allowed. Set it only
+	// when the user asks for exactly that, e.g. to correct the plan to what
+	// they did; to plan the session differently next time, create a new
+	// workout instead.
+	AllowLoggedChanges bool
 }
 
 func (b0 UpdateWorkoutRequest_builder) Build() *UpdateWorkoutRequest {
@@ -8445,6 +8465,7 @@ func (b0 UpdateWorkoutRequest_builder) Build() *UpdateWorkoutRequest {
 	_, _ = b, x
 	x.xxx_hidden_Workout = b.Workout
 	x.xxx_hidden_UpdateMask = b.UpdateMask
+	x.xxx_hidden_AllowLoggedChanges = b.AllowLoggedChanges
 	return m0
 }
 
@@ -9228,11 +9249,12 @@ const file_plans_v1_plans_proto_rawDesc = "" +
 	"\aplan_id\x18\x01 \x01(\tR\x06planId\x12-\n" +
 	"\bworkouts\x18\x02 \x03(\v2\x11.plans.v1.WorkoutR\bworkouts\"G\n" +
 	"\x16CreateWorkoutsResponse\x12-\n" +
-	"\bworkouts\x18\x01 \x03(\v2\x11.plans.v1.WorkoutR\bworkouts\"\x80\x01\n" +
+	"\bworkouts\x18\x01 \x03(\v2\x11.plans.v1.WorkoutR\bworkouts\"\xb2\x01\n" +
 	"\x14UpdateWorkoutRequest\x12+\n" +
 	"\aworkout\x18\x01 \x01(\v2\x11.plans.v1.WorkoutR\aworkout\x12;\n" +
 	"\vupdate_mask\x18\x02 \x01(\v2\x1a.google.protobuf.FieldMaskR\n" +
-	"updateMask\"D\n" +
+	"updateMask\x120\n" +
+	"\x14allow_logged_changes\x18\x03 \x01(\bR\x12allowLoggedChanges\"D\n" +
 	"\x15UpdateWorkoutResponse\x12+\n" +
 	"\aworkout\x18\x01 \x01(\v2\x11.plans.v1.WorkoutR\aworkout\"B\n" +
 	"\x15DeleteWorkoutsRequest\x12\x17\n" +

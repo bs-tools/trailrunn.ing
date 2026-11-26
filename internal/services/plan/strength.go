@@ -93,3 +93,41 @@ func (s *Service) getStrengthWorkout(ctx context.Context, id string) (pgtype.UUI
 	}
 	return userID, workout, nil
 }
+
+// checkLoggedUnchanged refuses changes to what a logged strength workout
+// planned, its exercises and groups, or to its kind, which would hide its
+// log: the plan would silently stop matching what was done.
+func checkLoggedUnchanged(existing, updated *plans.Workout) error {
+	if existing.Type != plans.WorkoutTypeStrength || existing.Log == nil {
+		return nil
+	}
+	if updated.Type != plans.WorkoutTypeStrength {
+		return connect.NewError(connect.CodeFailedPrecondition,
+			"the strength workout was already done and logged, and making it another kind of workout would hide its log; "+
+				"create a new workout instead, or set allow_logged_changes if the user asked for exactly this")
+	}
+	if !slices.EqualFunc(existing.Exercises, updated.Exercises, samePlannedExercise) {
+		return connect.NewError(connect.CodeFailedPrecondition,
+			"the strength workout was already done and logged, so changing its exercises or groups would make the plan differ from what was done; "+
+				"plan the change in a new workout instead, or set allow_logged_changes if the user asked to correct this one")
+	}
+	return nil
+}
+
+// samePlannedExercise reports whether two planned exercises are planned
+// the same, ignoring what's read with them from the exercise library.
+func samePlannedExercise(a, b *plans.PlannedExercise) bool {
+	return a.ExerciseID == b.ExerciseID &&
+		a.Group == b.Group &&
+		a.GroupKind == b.GroupKind &&
+		a.Sets == b.Sets &&
+		a.Reps == b.Reps &&
+		a.HoldSeconds == b.HoldSeconds &&
+		a.LeftReps == b.LeftReps &&
+		a.LeftHoldSeconds == b.LeftHoldSeconds &&
+		a.Weight == b.Weight &&
+		a.RestSeconds == b.RestSeconds &&
+		a.Tempo == b.Tempo &&
+		a.TargetEffort == b.TargetEffort &&
+		a.Notes == b.Notes
+}

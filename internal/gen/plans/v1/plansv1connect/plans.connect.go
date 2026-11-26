@@ -300,7 +300,8 @@ type TrainingPlanServiceClient interface {
 	GetWorkout(context.Context, *v1.GetWorkoutRequest) (*v1.GetWorkoutResponse, error)
 	// Create one or more workouts in a plan. A day may have several workouts.
 	CreateWorkouts(context.Context, *v1.CreateWorkoutsRequest) (*v1.CreateWorkoutsResponse, error)
-	// Update a workout.
+	// Update a workout. The exercises of a strength workout the user already
+	// logged are kept as they were done unless allow_logged_changes is set.
 	UpdateWorkout(context.Context, *v1.UpdateWorkoutRequest) (*v1.UpdateWorkoutResponse, error)
 	// Delete one or more workouts. The logs of deleted strength workouts are
 	// kept in the history of their exercises.
@@ -389,7 +390,8 @@ type TrainingPlanServiceHandler interface {
 	GetWorkout(context.Context, *v1.GetWorkoutRequest) (*v1.GetWorkoutResponse, error)
 	// Create one or more workouts in a plan. A day may have several workouts.
 	CreateWorkouts(context.Context, *v1.CreateWorkoutsRequest) (*v1.CreateWorkoutsResponse, error)
-	// Update a workout.
+	// Update a workout. The exercises of a strength workout the user already
+	// logged are kept as they were done unless allow_logged_changes is set.
 	UpdateWorkout(context.Context, *v1.UpdateWorkoutRequest) (*v1.UpdateWorkoutResponse, error)
 	// Delete one or more workouts. The logs of deleted strength workouts are
 	// kept in the history of their exercises.
