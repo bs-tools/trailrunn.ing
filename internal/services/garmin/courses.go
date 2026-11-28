@@ -31,11 +31,12 @@ type RouteRepository interface {
 // to navigate, replacing those whose route changed and removing those no
 // longer coming up. The courses the user sent themselves are kept, and
 // updated when their route changes. Routes that didn't change aren't sent
-// again. It returns what it did.
-func (s *Syncer) syncCourses(ctx context.Context, conn *activities.GarminConnection, token string, workouts []*plans.Workout) (string, error) {
+// again. It returns what it did, and the names of the courses on Garmin
+// by route.
+func (s *Syncer) syncCourses(ctx context.Context, conn *activities.GarminConnection, token string, workouts []*plans.Workout) (string, map[pgtype.UUID]string, error) {
 	onGarmin, err := s.plans.ListGarminCourses(ctx, conn.UserID)
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 	byRoute := map[pgtype.UUID]*plans.GarminCourse{}
 	for _, c := range onGarmin {
@@ -56,13 +57,14 @@ func (s *Syncer) syncCourses(ctx context.Context, conn *activities.GarminConnect
 	}
 	added, removed := 0, 0
 	var skipped []string
+	names := map[pgtype.UUID]string{}
 	for _, routeID := range wanted {
 		route, err := s.routes.GetRoute(ctx, conn.UserID, routeID)
 		if errors.Is(err, store.ErrNotFound) {
 			continue
 		}
 		if err != nil {
-			return "", err
+			return "", nil, err
 		}
 		existing := byRoute[routeID]
 		changed, err := s.putCourse(ctx, conn.UserID, token, route, existing, existing != nil && existing.Sent)
@@ -71,8 +73,9 @@ func (s *Syncer) syncCourses(ctx context.Context, conn *activities.GarminConnect
 			continue
 		}
 		if err != nil {
-			return "", err
+			return "", nil, err
 		}
+		names[routeID] = courseName(route)
 		if changed {
 			added++
 			if existing != nil {
@@ -85,7 +88,7 @@ func (s *Syncer) syncCourses(ctx context.Context, conn *activities.GarminConnect
 	for routeID, c := range byRoute {
 		if !seen[routeID] {
 			if err := s.removeCourse(ctx, conn.UserID, token, c); err != nil {
-				return "", err
+				return "", nil, err
 			}
 			removed++
 		}
@@ -97,7 +100,7 @@ func (s *Syncer) syncCourses(ctx context.Context, conn *activities.GarminConnect
 	if len(skipped) > 0 {
 		message = strings.TrimSpace(message + fmt.Sprintf(" Routes too long for a Garmin course: %s.", strings.Join(skipped, ", ")))
 	}
-	return message, nil
+	return message, names, nil
 }
 
 // upcomingRoutes returns the routes of workouts not yet completed, in date
@@ -298,12 +301,8 @@ func courseFromRoute(r *routes.Route) (*garmin.Course, bool) {
 			return nil, false
 		}
 	}
-	name := strings.TrimSpace(r.Name)
-	if name == "" {
-		name = "Route"
-	}
 	course := &garmin.Course{
-		CourseName:          truncate(name, 100),
+		CourseName:          courseName(r),
 		Description:         truncate(r.Description, 1024),
 		DistanceMeters:      math.Round(r.Stats.DistanceMeters*10) / 10,
 		ElevationGainMeters: math.Round(r.Stats.ElevationGainMeters*10) / 10,
@@ -321,6 +320,15 @@ func courseFromRoute(r *routes.Route) (*garmin.Course, bool) {
 		course.GeoPoints[i] = point
 	}
 	return course, true
+}
+
+// courseName returns the name of a route's course on Garmin.
+func courseName(r *routes.Route) string {
+	name := strings.TrimSpace(r.Name)
+	if name == "" {
+		name = "Route"
+	}
+	return truncate(name, 100)
 }
 
 // courseActivityType returns the activity type of a route's course:
