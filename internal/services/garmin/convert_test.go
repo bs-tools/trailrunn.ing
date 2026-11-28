@@ -43,7 +43,7 @@ func TestRunSteps(t *testing.T) {
 		}},
 		{Repeats: 1, Steps: []plans.RunStep{{Kind: plans.RunStepCoolDown}}},
 	}}
-	gw, ok := trainingWorkout(w, thresholds{aerobic: 150})
+	gw, ok := trainingWorkout(w, thresholds{aerobic: 150}, "")
 	if !ok {
 		t.Fatal("not a Garmin workout")
 	}
@@ -85,7 +85,7 @@ func TestStrengthWarmUpSteps(t *testing.T) {
 		{ExerciseName: "Split squat", Group: "Main", Sets: 1, Reps: 8},
 		{ExerciseName: "Hip flexor stretch", Group: "Cool-down", GroupKind: plans.GroupCoolDown, Sets: 1, HoldSeconds: 30},
 	}}
-	gw, ok := trainingWorkout(w, thresholds{})
+	gw, ok := trainingWorkout(w, thresholds{}, "")
 	if !ok {
 		t.Fatal("not a Garmin workout")
 	}
@@ -110,7 +110,7 @@ func TestStrengthHoldSteps(t *testing.T) {
 		{ExerciseName: "Side plank", ExerciseEachSide: true, Sets: 1, HoldSeconds: 30, RestSeconds: 45},
 		{ExerciseName: "Dead bug", ExerciseEachSide: true, Sets: 1, Reps: 8},
 	}}
-	gw, ok := trainingWorkout(w, thresholds{})
+	gw, ok := trainingWorkout(w, thresholds{}, "")
 	if !ok {
 		t.Fatal("not a Garmin workout")
 	}
@@ -162,7 +162,7 @@ func TestStrengthUnevenSteps(t *testing.T) {
 		{ExerciseName: "Single-leg squat", ExerciseEachSide: true, Sets: 1, Reps: 8, LeftReps: 10},
 		{ExerciseName: "Side plank", ExerciseEachSide: true, Sets: 1, HoldSeconds: 30, LeftHoldSeconds: 45},
 	}}
-	gw, ok := trainingWorkout(w, thresholds{})
+	gw, ok := trainingWorkout(w, thresholds{}, "")
 	if !ok {
 		t.Fatal("not a Garmin workout")
 	}
@@ -248,7 +248,7 @@ func TestPlainRunHeartRate(t *testing.T) {
 		{name: "zone 3 without an anaerobic threshold", workout: plans.Workout{Type: plans.WorkoutTypeIntensity, RunHeartRate: &plans.HeartRateTarget{LowZone: 2, HighZone: 3}}, thresholds: thresholds{aerobic: 149}, wantNote: "Zones 2 to 3; do a lactate test that finds your anaerobic threshold"},
 		{name: "zones without thresholds", workout: plans.Workout{Type: plans.WorkoutTypeBase, RunHeartRate: &plans.HeartRateTarget{LowZone: 1, HighZone: 2}}, wantNote: "Zones 1 to 2; do a lactate test that finds your aerobic threshold"},
 	} {
-		gw, ok := trainingWorkout(&tc.workout, tc.thresholds)
+		gw, ok := trainingWorkout(&tc.workout, tc.thresholds, "")
 		if !ok || len(gw.Segments[0].Steps) != 1 {
 			t.Fatalf("%s: got %+v, want a workout of one step", tc.name, gw)
 		}
@@ -265,14 +265,14 @@ func TestPlainRunHeartRate(t *testing.T) {
 		}
 	}
 	// The duration is kept with the target.
-	timed, _ := trainingWorkout(&plans.Workout{Type: plans.WorkoutTypeBase, TargetDurationSeconds: 3600}, thresholds{aerobic: 149})
+	timed, _ := trainingWorkout(&plans.Workout{Type: plans.WorkoutTypeBase, TargetDurationSeconds: 3600}, thresholds{aerobic: 149}, "")
 	if step := timed.Segments[0].Steps[0]; step.DurationType != "TIME" || step.DurationValue != 3600 {
 		t.Errorf("got duration %s %v, want an hour", step.DurationType, step.DurationValue)
 	}
 	// A step of a structured run takes zones too, after its own notes.
 	structured, _ := trainingWorkout(&plans.Workout{Type: plans.WorkoutTypeIntensity, RunBlocks: []plans.RunBlock{{Repeats: 1, Steps: []plans.RunStep{
 		{Kind: plans.RunStepRun, DurationSeconds: 1200, Notes: "Steady", HeartRate: &plans.HeartRateTarget{LowZone: 3, HighZone: 4}},
-	}}}}, both)
+	}}}}, both, "")
 	if step := structured.Segments[0].Steps[0]; step.TargetValueLow != 149 || step.TargetValueHigh != 220 || step.Description != "Steady. Zones 3 to 4: 149 to 220 bpm" {
 		t.Errorf("got step %+v, want zones 3 to 4 after its notes", step)
 	}
@@ -295,7 +295,7 @@ func TestLactateTestSteps(t *testing.T) {
 		// 115, 125, 135, 140, 145, 150, 155, 165 and 175.
 		{name: "around the last threshold", start: 100, threshold: 143, firstBPM: 115, lastBPM: 175, wantStages: 9},
 	} {
-		gw, ok := trainingWorkout(w, thresholds{lactateStart: tc.start, lactateThreshold: tc.threshold})
+		gw, ok := trainingWorkout(w, thresholds{lactateStart: tc.start, lactateThreshold: tc.threshold}, "")
 		if !ok {
 			t.Fatalf("%s: not a Garmin workout", tc.name)
 		}
@@ -320,5 +320,27 @@ func TestLactateTestSteps(t *testing.T) {
 		if coolDown := steps[len(steps)-1]; coolDown.Intensity != "COOLDOWN" || coolDown.DurationType != "OPEN" {
 			t.Errorf("%s: unexpected cool-down %+v", tc.name, coolDown)
 		}
+	}
+}
+
+func TestTrainingWorkoutCourse(t *testing.T) {
+	w := &plans.Workout{
+		Type: plans.WorkoutTypeBase, Title: "VK", Description: "Hike the steep climbs.",
+		TargetDurationSeconds: 3600,
+		RunFueling:            &plans.RunFueling{CarbsGramsPerHour: 60},
+	}
+	// The course comes first, then the fueling and the description.
+	gw, ok := trainingWorkout(w, thresholds{}, "VK XXIV - Rule Britannia")
+	if !ok {
+		t.Fatal("not a Garmin workout")
+	}
+	want := "Course on your watch: VK XXIV - Rule Britannia\n\nFuel: 60 g carbs\n\nHike the steep climbs."
+	if gw.Description != want {
+		t.Errorf("got description %q, want %q", gw.Description, want)
+	}
+	// Without a course or fueling, it's just the description.
+	w.RunFueling = nil
+	if gw, _ := trainingWorkout(w, thresholds{}, ""); gw.Description != "Hike the steep climbs." {
+		t.Errorf("got description %q, want only the workout's", gw.Description)
 	}
 }

@@ -490,22 +490,27 @@ func (s *Syncer) syncCalendar(ctx context.Context, conn *activities.GarminConnec
 	if err != nil {
 		return "", err
 	}
+	// Courses go first, so the workouts of routes on Garmin can name their
+	// course: Garmin's workouts can't include one, and the watch only
+	// follows both when the user loads the course with the workout.
 	var messages []string
-	if slices.Contains(conn.Permissions, garmin.PermissionWorkoutImport) {
-		message, err := s.syncWorkouts(ctx, conn, token, today, workouts)
-		if err != nil {
-			return "", err
-		}
-		messages = append(messages, message)
-	}
+	var courses map[pgtype.UUID]string
 	if slices.Contains(conn.Permissions, garmin.PermissionCourseImport) {
-		message, err := s.syncCourses(ctx, conn, token, workouts)
+		var message string
+		message, courses, err = s.syncCourses(ctx, conn, token, workouts)
 		if err != nil {
 			return "", err
 		}
 		if message != "" {
 			messages = append(messages, message)
 		}
+	}
+	if slices.Contains(conn.Permissions, garmin.PermissionWorkoutImport) {
+		message, err := s.syncWorkouts(ctx, conn, token, today, workouts, courses)
+		if err != nil {
+			return "", err
+		}
+		messages = append([]string{message}, messages...)
 	}
 	if len(messages) == 0 {
 		return "Garmin is up to date.", nil
@@ -516,8 +521,9 @@ func (s *Syncer) syncCalendar(ctx context.Context, conn *activities.GarminConnec
 // syncWorkouts puts the user's runs and strength workouts of the coming
 // days on their Garmin calendar, replacing those that changed and removing
 // those deleted, moved away or past, and returns what it did. Workouts that
-// didn't change aren't sent again.
-func (s *Syncer) syncWorkouts(ctx context.Context, conn *activities.GarminConnection, token string, today time.Time, workouts []*plans.Workout) (string, error) {
+// didn't change aren't sent again. courses are the names of the courses on
+// Garmin by route, which the workouts of those routes name.
+func (s *Syncer) syncWorkouts(ctx context.Context, conn *activities.GarminConnection, token string, today time.Time, workouts []*plans.Workout, courses map[pgtype.UUID]string) (string, error) {
 	onGarmin, err := s.plans.ListGarminWorkouts(ctx, conn.UserID)
 	if err != nil {
 		return "", err
@@ -550,7 +556,7 @@ func (s *Syncer) syncWorkouts(ctx context.Context, conn *activities.GarminConnec
 	added, removed := 0, 0
 	keep := map[pgtype.UUID]bool{}
 	for _, w := range workouts {
-		gw, ok := trainingWorkout(w, t)
+		gw, ok := trainingWorkout(w, t, courses[w.RouteID])
 		if !ok || w.Log != nil || w.CompletedActivityID.Valid {
 			continue
 		}
@@ -586,7 +592,7 @@ func (s *Syncer) syncWorkouts(ctx context.Context, conn *activities.GarminConnec
 	for id, g := range byWorkout {
 		if !keep[id] {
 			stillPlanned := slices.ContainsFunc(workouts, func(w *plans.Workout) bool {
-				_, ok := trainingWorkout(w, t)
+				_, ok := trainingWorkout(w, t, "")
 				return w.ID == id && ok && w.Log == nil && !w.CompletedActivityID.Valid
 			})
 			if !stillPlanned {

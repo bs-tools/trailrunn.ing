@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"slices"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -839,6 +840,19 @@ func TestGarminCourses(t *testing.T) {
 	}
 	if conn := resp.GetConnection(); !conn.GetCoursesAllowed() || conn.GetCourseCount() != 1 {
 		t.Errorf("unexpected connection %v", conn)
+	}
+	// The run's workout names its course first, as Garmin's workouts can't
+	// include one, so the user loads it with the workout.
+	e.garmin.mu.Lock()
+	var hills []string
+	for _, w := range e.garmin.workouts {
+		if w.WorkoutName == "Hills" {
+			hills = append(hills, w.Description)
+		}
+	}
+	e.garmin.mu.Unlock()
+	if len(hills) != 1 || !strings.HasPrefix(hills[0], "Course on your watch: Hill loop") {
+		t.Errorf("got Hills workouts with descriptions %q, want one naming its course", hills)
 	}
 	e.garmin.mu.Lock()
 	for _, c := range e.garmin.courses {

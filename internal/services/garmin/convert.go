@@ -273,11 +273,23 @@ type thresholds struct {
 // kind Garmin takes: a run, or a strength workout with exercises, of at most
 // garmin.MaxWorkoutSteps steps. Heart rate targets relative to a threshold
 // are converted with t, and a base run without structure is in the zones
-// below the aerobic threshold.
-func trainingWorkout(w *plans.Workout, t thresholds) (*garmin.Workout, bool) {
+// below the aerobic threshold. course is the name of the course of the
+// workout's route on Garmin, empty if it has none there: Garmin's workouts
+// can't include a course, so the description names it first, for the user
+// to load it on the watch with the workout.
+func trainingWorkout(w *plans.Workout, t thresholds, course string) (*garmin.Workout, bool) {
+	var lines []string
+	if course != "" {
+		lines = append(lines, "Course on your watch: "+course)
+	}
+	for _, line := range []string{fuelingLine(w), strings.TrimSpace(w.Description)} {
+		if line != "" {
+			lines = append(lines, line)
+		}
+	}
 	gw := &garmin.Workout{
 		WorkoutName:     w.Title,
-		Description:     truncate(strings.TrimSpace(fuelingLine(w)+"\n\n"+w.Description), 1024),
+		Description:     truncate(strings.Join(lines, "\n\n"), 1024),
 		WorkoutProvider: workoutProvider,
 		WorkoutSourceID: workoutProvider,
 	}
